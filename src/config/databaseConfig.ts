@@ -1,8 +1,12 @@
 import { registerAs } from '@nestjs/config';
 import { RefreshToken } from 'src/auth/entities/refreshToken.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Incident } from 'src/incidents/entities/incident.entity';
+import { IncidentComment } from 'src/incidents/entities/comment.entity';
+import { IncidentHistory } from 'src/incidents/entities/history.entity';
 import { TlsOptions } from 'tls';
 import { MixedList, EntitySchema } from 'typeorm';
+import { Permissions } from 'src/permissions/entities/permissions.entity';
 
 interface DbConnectionSchema {
   type: 'postgres' | undefined;
@@ -25,7 +29,14 @@ export default registerAs(
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME,
     ssl: process.env.DATABASE_SSL === 'true',
-    entities: [User, RefreshToken],
+    entities: [
+      User,
+      RefreshToken,
+      Incident,
+      IncidentComment,
+      IncidentHistory,
+      Permissions,
+    ],
     synchronize: true,
   }),
 );

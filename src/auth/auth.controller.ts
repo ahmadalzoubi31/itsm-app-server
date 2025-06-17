@@ -46,9 +46,9 @@ export class AuthController {
   @Patch('change-password')
   async changePassword(
     @Body() input: ChangePasswordDto,
-    @Request() req: { user: { userId: number } },
+    @Request() req: { user: { id: string } },
   ) {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     return this.authService.changePassword(input, userId);
   }
 }

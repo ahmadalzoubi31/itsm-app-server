@@ -1,27 +1,25 @@
 import { User } from 'src/users/entities/user.entity';
 import {
-  Column,
   CreateDateColumn,
+  Entity,
   JoinColumn,
-  ManyToOne,
+  OneToOne,
   UpdateDateColumn,
 } from 'typeorm';
 
+@Entity('EntityBase', { orderBy: { createdAt: 'DESC' } })
 export abstract class BaseEntity {
-  @Column({ enum: ['active', 'inactive'], default: 'active' })
-  status: string;
-  
-  @CreateDateColumn({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})  
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'createdBy' })
-  createdBy: User;
+  @OneToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'createdById' })
+  createdById: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'updatedBy' })
-  updatedBy: User;
+  @OneToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'updatedById' })
+  updatedById: string;
 }

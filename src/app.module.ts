@@ -8,6 +8,10 @@ import { AuthModule } from './auth/auth.module';
 import databaseConfig from './config/databaseConfig';
 import jwtConfig from './config/jwtConfig';
 import { SharedModule } from './shared/shared.module';
+import { CaslModule } from './casl/casl.module';
+import { IncidentsModule } from './incidents/incidents.module';
+import { SlaModule } from './sla/sla.module';
+import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
@@ -16,6 +20,10 @@ import { SharedModule } from './shared/shared.module';
     UsersModule,
     ConfigModule.forRoot({ isGlobal: true, cache: true, load: [jwtConfig] }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
+    CaslModule,
+    IncidentsModule,
+    SlaModule,
+    PermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

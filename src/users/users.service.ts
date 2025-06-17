@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { hash } from 'bcrypt'
+import { hash } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -19,10 +23,15 @@ export class UsersService {
 
     const user = this.usersRepository.create(createUserDto);
 
-    return this.usersRepository.save(user);
+    try {
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      console.log('🚀 ~ UsersService ~ create ~ error:', error);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {
@@ -32,24 +41,55 @@ export class UsersService {
     // Update the user fields
     Object.assign(user, updateUserDto);
 
-    return await this.usersRepository.save(user);
+    try {
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      console.log('🚀 ~ UsersService ~ update ~ error:', error);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+  async remove(id: string): Promise<void> {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    try {
+      await this.usersRepository.delete(id);
+    } catch (error) {
+      console.log('🚀 ~ UsersService ~ remove ~ error:', error);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  async findAll(): Promise<User[]> {
+    try {
+      return await this.usersRepository.find({
+        relations: ['permissions'],
+      });
+    } catch (error) {
+      console.log('🚀 ~ UsersService ~ findAll ~ error:', error);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  findOne(id: number): Promise<User | null> {
-    return this.usersRepository.findOneBy({ id });
+  async findOne(id: string): Promise<User | null> {
+    try {
+      return await this.usersRepository.findOneBy({ id });
+    } catch (error) {
+      console.log('🚀 ~ UsersService ~ findOne ~ error:', error);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  findByUsername(username: string): Promise<User | null> {
-    return this.usersRepository.findOneBy({ username });
+  async findByUsername(username: string): Promise<User | null> {
+    try {
+      return await this.usersRepository.findOneBy({ username });
+    } catch (error) {
+      console.log('🚀 ~ UsersService ~ findByUsername ~ error:', error);
+      throw new InternalServerErrorException(error.message);
+    }
   }
-
-
 }

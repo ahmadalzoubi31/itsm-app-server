@@ -1,26 +1,36 @@
 import { RefreshToken } from 'src/auth/entities/refreshToken.entity';
 import { BaseEntity } from 'src/shared/entities/base.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Role } from '../enums/role.enum';
+import { Permissions } from 'src/permissions/entities/permissions.entity';
 
 @Entity()
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ nullable: false })
+  @Column()
   firstName: string;
 
-  @Column({ nullable: false })
+  @Column()
   lastName: string;
 
   @Column()
   fullName: string;
 
-  @Column({ unique: true, nullable: false, update: true, })  
+  @Column({ unique: true, update: true })
   username: string;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ unique: true })
   email: string;
 
   @Column({ nullable: true })
@@ -32,7 +42,7 @@ export class User extends BaseEntity {
     default: Role.USER,
   })
   role: Role;
-  
+
   @Column({ nullable: true })
   phone: string;
 
@@ -41,6 +51,13 @@ export class User extends BaseEntity {
 
   @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshToken: RefreshToken;
+
+  @OneToMany(() => Permissions, (permissions) => permissions.user)
+  @JoinColumn({ name: 'permissionId' })
+  permissions: Permissions[];
+
+  @Column({ enum: ['active', 'inactive'], default: 'active' })
+  status: string;
 
   @BeforeInsert()
   @BeforeUpdate()

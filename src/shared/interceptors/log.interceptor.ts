@@ -16,8 +16,11 @@ export class LogInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const method = request.method;
     const url = request.url;
+    const username = request.user?.username;
 
-    this.logger.log(`Request Method: ${method}, Request URL: ${url}`);
+    this.logger.log(
+      `username: ${username} | Request Method: ${method} | Request URL: ${url} |`,
+    );
 
     return next.handle().pipe(
       tap({
