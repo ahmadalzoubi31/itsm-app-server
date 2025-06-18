@@ -6,7 +6,7 @@ import { IncidentComment } from 'src/incidents/entities/comment.entity';
 import { IncidentHistory } from 'src/incidents/entities/history.entity';
 import { TlsOptions } from 'tls';
 import { MixedList, EntitySchema } from 'typeorm';
-import { Permissions } from 'src/permissions/entities/permissions.entity';
+import { Permission } from 'src/permissions/entities/permission.entity';
 
 interface DbConnectionSchema {
   type: 'postgres' | undefined;
@@ -35,7 +35,7 @@ export default registerAs(
       Incident,
       IncidentComment,
       IncidentHistory,
-      Permissions,
+      Permission,
     ],
     synchronize: true,
   }),

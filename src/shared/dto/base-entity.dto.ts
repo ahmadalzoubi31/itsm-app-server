@@ -1,6 +1,6 @@
 import { IsDate, IsEnum, IsString, IsUUID } from 'class-validator';
 
-export class BaseIncidentDto {
+export class BaseEntityDto {
   @IsString()
   @IsEnum({ enum: ['active', 'inactive'] })
   status: string;

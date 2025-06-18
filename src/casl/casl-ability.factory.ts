@@ -10,7 +10,7 @@ import {
 } from '@casl/ability';
 import { Incident } from 'src/incidents/entities/incident.entity';
 import { Role } from 'src/users/enums/role.enum';
-import { Permission } from 'src/permissions/enums/permission.enum';
+import { PermissionEnum } from 'src/permissions/enums/permission.enum';
 
 type Subjects = InferSubjects<typeof Incident | typeof User> | 'all';
 
@@ -36,18 +36,18 @@ export class CaslAbilityFactory {
     if (user.permissions && user.permissions.length > 0) {
       user.permissions.forEach((permission) => {
         switch (permission.name) {
-          case Permission.MASTER:
+          case PermissionEnum.MASTER:
             can(Action.Create, Incident);
             can(Action.Update, Incident);
             break;
-          case Permission.USER:
+          case PermissionEnum.USER:
             can(Action.Create, Incident);
             can(Action.Update, Incident, { createdById: user.id });
             break;
-          case Permission.SUBMITTER:
+          case PermissionEnum.SUBMITTER:
             can(Action.Create, Incident);
             break;
-          case Permission.VIEWER:
+          case PermissionEnum.VIEWER:
             can(Action.Read, Incident, { createdById: user.id });
             break;
         }

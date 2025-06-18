@@ -1,4 +1,4 @@
-export enum Permission {
+export enum PermissionEnum {
   MASTER = 'master',
   USER = 'user',
   SUBMITTER = 'submitter',

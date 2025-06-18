@@ -6,12 +6,13 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from '../enums/role.enum';
-import { Permissions } from 'src/permissions/entities/permissions.entity';
+import { Permission } from 'src/permissions/entities/permission.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -52,9 +53,9 @@ export class User extends BaseEntity {
   @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshToken: RefreshToken;
 
-  @OneToMany(() => Permissions, (permissions) => permissions.user)
+  @OneToMany(() => Permission, (permission) => permission.userId)
   @JoinColumn({ name: 'permissionId' })
-  permissions: Permissions[];
+  permissions: Permission[];
 
   @Column({ enum: ['active', 'inactive'], default: 'active' })
   status: string;
@@ -69,7 +70,7 @@ export class User extends BaseEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async setSmallCaps() {
-    // Set the username and email to lowercase before saving it to the database
+    // Set the username and email to lowerincident before saving it to the database
     this.username = this.username.toLowerCase();
     this.email = this.email.toLowerCase();
   }
