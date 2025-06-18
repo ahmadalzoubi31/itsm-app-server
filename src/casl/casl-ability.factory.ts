@@ -36,14 +36,8 @@ export class CaslAbilityFactory {
     }
 
     // Permission-based abilities
-    console.log(user);
     if (user.permissions && user.permissions.length > 0) {
       user.permissions.forEach((permission) => {
-        console.log(
-          '🚀 ~ file: casl-ability.factory.ts:57 ~ permission:',
-          permission,
-        );
-
         switch (permission.name) {
           case PermissionName.INCIDENT_MASTER:
             can(Action.Create, Incident);

@@ -18,7 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: jwtConfig().secret,
-        signOptions: { expiresIn: jwtConfig().accessTokenExpire || '30m' },  
+        signOptions: { expiresIn: jwtConfig().accessTokenExpire || '5m' },
         verifyOptions: {
           algorithms: ['HS256'],
         },
