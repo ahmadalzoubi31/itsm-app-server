@@ -34,6 +34,7 @@ export class PoliciesGuard implements CanActivate {
     }
 
     const ability = this.caslAbilityFactory.createForUser(userInfo);
+    console.log('🚀 ~ file: policies.guard.ts:37 ~ ability:', ability);
 
     return policyHandlers.every((handler) =>
       this.execPolicyHandler(handler, ability),

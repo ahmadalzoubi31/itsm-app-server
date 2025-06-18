@@ -77,7 +77,10 @@ export class UsersService {
 
   async findOne(id: string): Promise<User | null> {
     try {
-      return await this.usersRepository.findOneBy({ id });
+      return await this.usersRepository.findOne({
+        where: { id },
+        relations: ['permissions'],
+      });
     } catch (error) {
       console.log('🚀 ~ UsersService ~ findOne ~ error:', error);
       throw new InternalServerErrorException(error.message);

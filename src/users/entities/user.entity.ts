@@ -53,7 +53,7 @@ export class User extends BaseEntity {
   @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshToken: RefreshToken;
 
-  @OneToMany(() => Permission, (permission) => permission.userId)
+  @OneToMany(() => Permission, (permission) => permission.user)
   @JoinColumn({ name: 'permissionId' })
   permissions: Permission[];
 

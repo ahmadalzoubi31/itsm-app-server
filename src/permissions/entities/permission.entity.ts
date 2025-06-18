@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { PermissionEnum } from '../enums/permission.enum';
+import { PermissionName } from '../enums/permission-name.enum';
 import { User } from 'src/users/entities/user.entity';
 
 @Entity()
@@ -9,10 +9,12 @@ export class Permission {
 
   @Column({
     type: 'enum',
-    enum: PermissionEnum,
+    enum: PermissionName,
   })
-  name: PermissionEnum;
+  name: PermissionName;
 
-  @ManyToOne(() => User, (user) => user.permissions)
-  userId: string;
+  @ManyToOne(() => User, (user) => user.permissions, {
+    onDelete: 'CASCADE',
+  })
+  user: User;
 }

@@ -1,5 +1,5 @@
-import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { PermissionEnum } from '../enums/permission.enum';
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { PermissionName } from '../enums/permission-name.enum';
 
 export class AssignPermissionDto {
   @IsString()
@@ -7,6 +7,6 @@ export class AssignPermissionDto {
   userId: string;
 
   @IsString()
-  @IsEnum(PermissionEnum)
-  name: PermissionEnum;
+  @IsEnum(PermissionName)
+  name: PermissionName;
 }
