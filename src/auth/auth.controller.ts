@@ -39,25 +39,20 @@ export class AuthController {
 
     // Set HTTP-only cookie for access token
     res.cookie('accessToken', accessToken, {
-      // httpOnly: true,
-      // sameSite: 'lax', // or 'strict'
-      // secure: true, // only over HTTPS
       httpOnly: true,
       secure: true,
-      sameSite: 'none', // IMPORTANT for cross-domain cookies!
-      // domain: '.yourdomain.com', // if frontend and backend are on different subdomains
+      sameSite: 'lax',      // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
+      domain: '.webpexo.com', // <-- this is the key part!
       path: '/',
-      // expires: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
     });
 
     // Set HTTP-only cookie for refresh token
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'none', // IMPORTANT for cross-domain cookies!
-      // domain: '.yourdomain.com', // if frontend and backend are on different subdomains
+      sameSite: 'lax',      // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
+      domain: '.webpexo.com', // <-- this is the key part!
       path: '/',
-      // expires: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
     });
 
     // You can return user info or just a status

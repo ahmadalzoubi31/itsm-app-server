@@ -51,8 +51,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin:
-      'https://itsm-app-79ws.vercel.app',
+    origin: 'https://itsm.webpexo.com',
       // 'http://localhost:8080',
     credentials: true, // allow cookies
   });
