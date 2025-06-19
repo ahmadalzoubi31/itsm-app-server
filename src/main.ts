@@ -52,8 +52,8 @@ async function bootstrap() {
 
   app.enableCors({
     origin:
-      // 'https://itsm-app-79ws-5ghy90i9b-ahmadalzoubi31s-projects.vercel.app', // must be the exact origin of your frontend
-      'http://localhost:8080',
+      'https://itsm-app-79ws.vercel.app',
+      // 'http://localhost:8080',
     credentials: true, // allow cookies
   });
 
