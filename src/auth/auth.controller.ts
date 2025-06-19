@@ -8,6 +8,8 @@ import {
   Response,
   Request,
   UseGuards,
+  HttpCode,
+  NotFoundException,
 } from '@nestjs/common';
 import { Response as ExpressResponse } from 'express';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -15,13 +17,18 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UsersService,
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('sign-in')
+  @HttpCode(200)
   async login(
     @Request() req,
     @Response({ passthrough: true }) res: ExpressResponse,
@@ -52,8 +59,26 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Request() req) {
-    return req.user;
+  async getProfile(@Request() req) {
+    const user = await this.userService.findByUsername(req.user.username);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const {
+      password,
+      createdAt,
+      createdById,
+      updatedAt,
+      updatedById,
+      ...result
+    } = user;
+
+    const { permissions, ...userResult } = result;
+
+    const permissionNames = permissions.map((item) => item.name);
+    return { permissionNames, ...userResult };
   }
 
   @UseGuards(LocalAuthGuard)

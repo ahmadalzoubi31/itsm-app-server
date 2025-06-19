@@ -29,11 +29,9 @@ export class CreateIncidentDto extends BaseEntityDto {
   @IsString()
   category: string;
 
-  @IsEmpty()
   @IsString()
   subcategory: string;
 
-  @IsEmpty()
   @IsString()
   resolution: string;
 
@@ -41,7 +39,6 @@ export class CreateIncidentDto extends BaseEntityDto {
   @IsString()
   businessService: string;
 
-  @IsEmpty()
   @IsString()
   location: string;
 }

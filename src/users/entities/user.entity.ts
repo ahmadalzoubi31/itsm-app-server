@@ -28,10 +28,10 @@ export class User extends BaseEntity {
   @Column()
   fullName: string;
 
-  @Column({ unique: true, update: true })
+  @Column({ unique: true, update: false })
   username: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   email: string;
 
   @Column({ nullable: true })

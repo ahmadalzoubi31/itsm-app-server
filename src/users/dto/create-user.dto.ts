@@ -1,8 +1,8 @@
 import {
   IsEmail,
-  IsEmpty,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsStrongPassword,
 } from 'class-validator';
@@ -23,19 +23,19 @@ export class CreateUserDto extends BaseEntityDto {
   @IsString()
   username: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsStrongPassword()
   password: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsEmail()
   email: string;
 
-  @IsEmpty()
+  @IsOptional()
   @IsString()
   phone: string;
 
-  @IsEmpty()
+  @IsOptional()
   @IsString()
   address: string;
 
