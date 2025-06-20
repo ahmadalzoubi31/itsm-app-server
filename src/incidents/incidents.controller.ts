@@ -31,7 +31,7 @@ export class IncidentsController {
   create(@Body() createIncidentDto: CreateIncidentDto) {
     try {
       return this.incidentsService.create(createIncidentDto);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Failed to create incident');
     }
   }

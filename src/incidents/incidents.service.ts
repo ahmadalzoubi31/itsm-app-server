@@ -31,7 +31,7 @@ export class IncidentsService {
 
     try {
       return await this.incidentRepository.save(incident);
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ IncidentsService ~ create ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -54,7 +54,7 @@ export class IncidentsService {
         ...incident,
         ...updateIncidentDto,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ IncidentsService ~ update ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -71,7 +71,7 @@ export class IncidentsService {
 
     try {
       return await this.incidentRepository.remove(incident);
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ IncidentsService ~ remove ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -82,7 +82,7 @@ export class IncidentsService {
       return await this.incidentRepository.find({
         relations: ['comments', 'histories', 'createdById', 'updatedById'],
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ IncidentsService ~ findAll ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -94,7 +94,7 @@ export class IncidentsService {
         where: { id },
         relations: ['comments', 'histories', 'createdById', 'updatedById'],
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ IncidentsService ~ findOne ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }

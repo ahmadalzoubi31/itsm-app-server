@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { SlaService } from './sla.service';
 import { CreateSlaDto } from './dto/create-sla.dto';
 import { UpdateSlaDto } from './dto/update-sla.dto';

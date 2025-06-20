@@ -41,8 +41,8 @@ export class AuthController {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',      // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
-      domain: '.webpexo.com', // <-- this is the key part!
+      sameSite: 'lax', // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
+      // domain: '.webpexo.com', // <-- this is the key part!
       path: '/',
     });
 
@@ -50,8 +50,8 @@ export class AuthController {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',      // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
-      domain: '.webpexo.com', // <-- this is the key part!
+      sameSite: 'lax', // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
+      // domain: '.webpexo.com', // <-- this is the key part!
       path: '/',
     });
 

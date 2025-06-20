@@ -25,7 +25,7 @@ export class UsersService {
 
     try {
       return await this.usersRepository.save(user);
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ UsersService ~ create ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -43,7 +43,7 @@ export class UsersService {
 
     try {
       return await this.usersRepository.save(user);
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ UsersService ~ update ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -58,7 +58,7 @@ export class UsersService {
 
     try {
       await this.usersRepository.delete(id);
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ UsersService ~ remove ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -69,7 +69,7 @@ export class UsersService {
       return await this.usersRepository.find({
         relations: ['permissions'],
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ UsersService ~ findAll ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -81,7 +81,7 @@ export class UsersService {
         where: { id },
         relations: ['permissions'],
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ UsersService ~ findOne ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -93,7 +93,7 @@ export class UsersService {
         where: { username },
         relations: ['permissions'],
       });
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ UsersService ~ findByUsername ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }

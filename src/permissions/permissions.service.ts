@@ -43,7 +43,7 @@ export class PermissionsService {
       permission.user = user;
 
       return await this.permissionsRepository.save(permission);
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ PermissionsService ~ create ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
@@ -73,7 +73,7 @@ export class PermissionsService {
       }
 
       return await this.permissionsRepository.remove(existingPermission);
-    } catch (error) {
+    } catch (error: any) {
       console.log('🚀 ~ PermissionsService ~ create ~ error:', error);
       throw new InternalServerErrorException(error.message);
     }
