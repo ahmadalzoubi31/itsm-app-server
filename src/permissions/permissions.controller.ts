@@ -2,11 +2,11 @@ import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
 import { AssignPermissionDto } from './dto/assign-permission.dto';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { PoliciesGuard } from 'src/casl/guards/policies.guard';
-import { AppAbility } from 'src/casl/casl-ability.factory';
-import { CheckPolicies } from 'src/casl/decorators/check-policies.decorator';
-import { Action } from 'src/casl/enums/action.enum';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PoliciesGuard } from '../casl/guards/policies.guard';
+import { AppAbility } from '../casl/casl-ability.factory';
+import { CheckPolicies } from '../casl/decorators/check-policies.decorator';
+import { Action } from '../casl/enums/action.enum';
 import { Permission } from './entities/permission.entity';
 
 @UseGuards(JwtAuthGuard, PoliciesGuard)

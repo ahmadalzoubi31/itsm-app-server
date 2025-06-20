@@ -7,8 +7,8 @@ import {
   IsStrongPassword,
 } from 'class-validator';
 import { Role } from '../enums/role.enum';
-import { BaseEntityDto } from 'src/shared/dto/base-entity.dto';
-import { Status } from 'src/shared/enums/status.enum';
+import { BaseEntityDto } from '../../shared/dto/base-entity.dto';
+import { Status } from '../../shared/enums/status.enum';
 
 export class CreateUserDto extends BaseEntityDto {
   @IsNotEmpty()

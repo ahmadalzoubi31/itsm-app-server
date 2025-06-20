@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { LogInterceptor } from './interceptors/log.interceptor';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [UsersModule],

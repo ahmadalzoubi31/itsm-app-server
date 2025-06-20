@@ -12,13 +12,13 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AppAbility } from 'src/casl/casl-ability.factory';
-import { CheckPolicies } from 'src/casl/decorators/check-policies.decorator';
-import { Action } from 'src/casl/enums/action.enum';
+import { AppAbility } from '../casl/casl-ability.factory';
+import { CheckPolicies } from '../casl/decorators/check-policies.decorator';
+import { Action } from '../casl/enums/action.enum';
 import { User } from './entities/user.entity';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { PoliciesGuard } from 'src/casl/guards/policies.guard';
-import { AuditFieldsInterceptor } from 'src/shared/interceptors/audit-fields.interceptor';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PoliciesGuard } from '../casl/guards/policies.guard';
+import { AuditFieldsInterceptor } from '../shared/interceptors/audit-fields.interceptor';
 
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditFieldsInterceptor)

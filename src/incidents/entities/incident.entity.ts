@@ -1,16 +1,16 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { BaseEntity } from 'src/shared/entities/base.entity';
+import { BaseEntity } from '../../shared/entities/base.entity';
 import { IncidentStatus } from '../enums/incident-status.enum';
 import { Priority } from '../enums/priority.enum';
 import { Impact } from '../enums/impact.enum';
 import { Urgency } from '../enums/urgency.enum';
-import { IncidentComment } from './comment.entity';
-import { IncidentHistory } from './history.entity';
+import { IncidentComment } from './incident-comment.entity';
+import { IncidentHistory } from './incident-history.entity';
 
-@Entity()
+@Entity('incidents')
 export class Incident extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  incidentId: string;
 
   // Virtual getter for formatted ID
   // get incNumber(): string {

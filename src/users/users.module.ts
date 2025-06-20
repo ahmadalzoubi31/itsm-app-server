@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],

@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import jwtConfig from 'src/config/jwtConfig';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshToken } from './entities/refreshToken.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -16,9 +16,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     PassportModule,
     TypeOrmModule.forFeature([RefreshToken]),
     JwtModule.registerAsync({
-      useFactory: () => ({
-        secret: jwtConfig().secret,
-        signOptions: { expiresIn: jwtConfig().accessTokenExpire || '5m' },
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn:
+            configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION_TIME') ||
+            '5m',
+        },
         verifyOptions: {
           algorithms: ['HS256'],
         },

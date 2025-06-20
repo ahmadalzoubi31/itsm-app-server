@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Action } from './enums/action.enum';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import {
   InferSubjects,
   MongoAbility,
@@ -8,10 +8,10 @@ import {
   createMongoAbility,
   ExtractSubjectType,
 } from '@casl/ability';
-import { Incident } from 'src/incidents/entities/incident.entity';
-import { Role } from 'src/users/enums/role.enum';
-import { Permission } from 'src/permissions/entities/permission.entity';
-import { PermissionName } from 'src/permissions/enums/permission-name.enum';
+import { Incident } from '../incidents/entities/incident.entity';
+import { Role } from '../users/enums/role.enum';
+import { Permission } from '../permissions/entities/permission.entity';
+import { PermissionName } from '../permissions/enums/permission-name.enum';
 
 type Subjects =
   | InferSubjects<typeof Incident | typeof Permission | typeof User>

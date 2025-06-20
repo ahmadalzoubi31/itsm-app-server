@@ -8,10 +8,10 @@ import {
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Incident } from './incident.entity';
 
-@Entity()
+@Entity('incident_comments')
 export class IncidentComment extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  incidentCommentId: number;
 
   @Column()
   comment: string;

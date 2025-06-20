@@ -5,10 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshToken } from './entities/refreshToken.entity';
 import { UnauthorizedException } from '@nestjs/common';
-import { compare, hash } from 'bcrypt';
-import jwtConfig from 'src/config/jwtConfig';
-import { User } from 'src/users/entities/user.entity';
+import { compare } from 'bcrypt';
+import { User } from '../users/entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +17,7 @@ export class AuthService {
     private refreshTokenRepository: Repository<RefreshToken>,
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -35,7 +36,10 @@ export class AuthService {
 
     const expiryDate = new Date();
     expiryDate.setDate(
-      expiryDate.getDate() + Number(jwtConfig().refreshTokenExpire),
+      expiryDate.getDate() +
+        Number(
+          this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+        ),
     );
 
     const accessToken = this.jwtService.sign(payload);
@@ -88,10 +92,7 @@ export class AuthService {
       throw new UnauthorizedException('Old password is incorrect');
     }
 
-    // Update the password
-    const hashedPassword = await hash(input.newPassword, 10);
-
-    this.usersService.update(id, { password: hashedPassword });
+    this.usersService.update(id, { password: input.newPassword });
 
     return { message: 'Password changed successfully' };
   }

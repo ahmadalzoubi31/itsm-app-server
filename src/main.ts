@@ -4,9 +4,8 @@ import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
 import { DataSource } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
+import { User } from './users/entities/user.entity';
 import { Role } from './users/enums/role.enum';
-import { hash } from 'bcrypt';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -69,7 +68,7 @@ async function bootstrap() {
       lastName: 'Admin',
       username: 'appadmin',
       email: 'appadmin@example.com',
-      password: await hash('P@ssw0rd', 10), // You should hash this!
+      password: 'P@ssw0rd',
       role: Role.ADMIN,
       status: 'active',
     });

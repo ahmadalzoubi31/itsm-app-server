@@ -5,13 +5,13 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { BaseEntity } from 'src/shared/entities/base.entity';
+import { BaseEntity } from '../../shared/entities/base.entity';
 import { Incident } from './incident.entity';
 
-@Entity()
+@Entity('incident_histories')
 export class IncidentHistory extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  incidentHistoryId: number;
 
   @Column()
   field: string;

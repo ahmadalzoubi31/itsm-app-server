@@ -12,13 +12,13 @@ import {
 import { IncidentsService } from './incidents.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { AuditFieldsInterceptor } from 'src/shared/interceptors/audit-fields.interceptor';
-import { PoliciesGuard } from 'src/casl/guards/policies.guard';
-import { AppAbility } from 'src/casl/casl-ability.factory';
-import { CheckPolicies } from 'src/casl/decorators/check-policies.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuditFieldsInterceptor } from '../shared/interceptors/audit-fields.interceptor';
+import { PoliciesGuard } from '../casl/guards/policies.guard';
+import { AppAbility } from '../casl/casl-ability.factory';
+import { CheckPolicies } from '../casl/decorators/check-policies.decorator';
 import { Incident } from './entities/incident.entity';
-import { Action } from 'src/casl/enums/action.enum';
+import { Action } from '../casl/enums/action.enum';
 
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditFieldsInterceptor)

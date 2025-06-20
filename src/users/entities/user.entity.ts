@@ -1,23 +1,23 @@
-import { RefreshToken } from 'src/auth/entities/refreshToken.entity';
-import { BaseEntity } from 'src/shared/entities/base.entity';
+import { RefreshToken } from '../../auth/entities/refreshToken.entity';
+import { BaseEntity } from '../../shared/entities/base.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
   JoinColumn,
-  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from '../enums/role.enum';
-import { Permission } from 'src/permissions/entities/permission.entity';
+import { Permission } from '../../permissions/entities/permission.entity';
+import { hash } from 'bcrypt';
 
-@Entity()
+@Entity('users')
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  userId: number;
 
   @Column()
   firstName: string;
@@ -59,6 +59,11 @@ export class User extends BaseEntity {
 
   @Column({ enum: ['active', 'inactive'], default: 'active' })
   status: string;
+
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await hash(this.password, 10);
+  }
 
   @BeforeInsert()
   @BeforeUpdate()

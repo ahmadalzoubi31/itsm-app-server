@@ -2,7 +2,7 @@ import { IsEmpty, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { IncidentStatus } from '../enums/incident-status.enum';
 import { Impact } from '../enums/impact.enum';
 import { Urgency } from '../enums/urgency.enum';
-import { BaseEntityDto } from 'src/shared/dto/base-entity.dto';
+import { BaseEntityDto } from '../../shared/dto/base-entity.dto';
 
 export class CreateIncidentDto extends BaseEntityDto {
   @IsNotEmpty()
