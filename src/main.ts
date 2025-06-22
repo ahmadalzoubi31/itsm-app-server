@@ -1,14 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RequestMethod, ValidationPipe } from '@nestjs/common';
+import { Logger, RequestMethod, ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
-import { DataSource } from 'typeorm';
-import { User } from './users/entities/user.entity';
-import { Role } from './users/enums/role.enum';
+import { initializeDataSource } from './db/data-source';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('bootstrap');
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn'],
+  });
 
   app.use(cookieParser());
 
@@ -55,28 +56,14 @@ async function bootstrap() {
     credentials: true, // allow cookies
   });
 
-  // Get TypeORM DataSource
-  const dataSource = app.get(DataSource);
-
-  // Create the user
-  const userRepo = dataSource.getRepository(User);
-
-  const exists = await userRepo.findOneBy({ username: 'appadmin' });
-  if (!exists) {
-    const user = userRepo.create({
-      firstName: 'App',
-      lastName: 'Admin',
-      username: 'appadmin',
-      email: 'appadmin@example.com',
-      password: 'P@ssw0rd',
-      role: Role.ADMIN,
-      status: 'active',
-    });
-    await userRepo.save(user);
-    console.log('Seeded admin user!');
-  } else {
-    console.log('Admin user already exists.');
-  }
+  // Initialize the DataSource and run seeders
+  (async () => {
+    try {
+      await initializeDataSource();
+    } catch (error) {
+      logger.error('Failed to initialize database:', error);
+    }
+  })();
 
   await app.listen(process.env.PORT ?? 3000);
 }

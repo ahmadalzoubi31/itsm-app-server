@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
 import { AssignPermissionDto } from './dto/assign-permission.dto';
 import { UseGuards } from '@nestjs/common';
@@ -20,19 +20,25 @@ export class PermissionsController {
     return await this.permissionsService.findAll();
   }
 
+  @Get(':id')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Permission))
+  async findOne(@Param('id') id: string) {
+    return await this.permissionsService.findAll();
+  }
+
   @Post('assign')
   @CheckPolicies((ability: AppAbility) =>
-    ability.can(Action.Create, Permission),
+    ability.can(Action.Update, Permission),
   )
   async assign(@Body() assignPermissionDto: AssignPermissionDto) {
-    return await this.permissionsService.create(assignPermissionDto);
+    return await this.permissionsService.assign(assignPermissionDto);
   }
 
   @Delete('un-assign')
   @CheckPolicies((ability: AppAbility) =>
-    ability.can(Action.Delete, Permission),
+    ability.can(Action.Update, Permission),
   )
   async unAssign(@Body() assignPermissionDto: AssignPermissionDto) {
-    return await this.permissionsService.delete(assignPermissionDto);
+    return await this.permissionsService.unAssign(assignPermissionDto);
   }
 }

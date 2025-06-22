@@ -9,16 +9,10 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('EntityBase', { orderBy: { createdAt: 'DESC' } })
+@Entity('EntityBase', { orderBy: { createdAt: 'ASC' } })
 export abstract class BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  updatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'createdById' })
@@ -27,4 +21,10 @@ export abstract class BaseEntity {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'updatedById' })
   updatedById: string;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
 }

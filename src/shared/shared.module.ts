@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, Logger, NestModule } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { LogInterceptor } from './interceptors/log.interceptor';
 import { UsersModule } from '../users/users.module';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
 
 @Module({
   imports: [UsersModule],
@@ -19,4 +20,8 @@ import { UsersModule } from '../users/users.module';
   ],
   exports: [],
 })
-export class SharedModule {}
+export class SharedModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

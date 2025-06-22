@@ -20,9 +20,8 @@ import { ConfigService } from '@nestjs/config';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn:
-            configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION_TIME') ||
-            '5m',
+          expiresIn: configService.get<string>('JWT_EXPIRATION_TIME'),
+          algorithm: 'HS256',
         },
         verifyOptions: {
           algorithms: ['HS256'],

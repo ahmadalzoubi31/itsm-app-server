@@ -35,15 +35,16 @@ export class AuthService {
     const payload = { username: user.username, sub: user.id, role: user.role };
 
     const expiryDate = new Date();
+
     expiryDate.setDate(
       expiryDate.getDate() +
-        Number(
-          this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
-        ),
+        Number(this.configService.get<string>('REFRESH_JWT_EXPIRES_IN')),
     );
 
     const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7' });
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: this.configService.get<string>('REFRESH_JWT_EXPIRES_IN'),
+    });
 
     await this.refreshTokenRepository.upsert(
       { token: refreshToken, expiry: expiryDate, user },

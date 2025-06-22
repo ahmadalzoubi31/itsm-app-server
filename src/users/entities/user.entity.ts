@@ -6,19 +6,18 @@ import {
   Column,
   Entity,
   JoinColumn,
-  OneToMany,
+  JoinTable,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from '../enums/role.enum';
 import { Permission } from '../../permissions/entities/permission.entity';
 import { hash } from 'bcrypt';
+import { PermissionName } from 'src/permissions/enums/permission-name.enum';
 
 @Entity('users')
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  userId: number;
-
   @Column()
   firstName: string;
 
@@ -53,14 +52,25 @@ export class User extends BaseEntity {
   @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshToken: RefreshToken;
 
-  @OneToMany(() => Permission, (permission) => permission.user)
-  @JoinColumn({ name: 'permissionId' })
+  @ManyToMany(() => Permission, (permission) => permission.users)
+  @JoinTable({
+    name: 'user_permissions',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'permission_id',
+      referencedColumnName: 'id',
+    },
+  })
   permissions: Permission[];
 
   @Column({ enum: ['active', 'inactive'], default: 'active' })
   status: string;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
     this.password = await hash(this.password, 10);
   }

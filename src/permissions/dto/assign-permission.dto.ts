@@ -7,6 +7,6 @@ export class AssignPermissionDto {
   userId: string;
 
   @IsString()
-  @IsEnum(PermissionName)
-  name: PermissionName;
+  @IsNotEmpty()
+  permissionId: string;
 }

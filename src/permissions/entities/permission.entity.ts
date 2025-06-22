@@ -1,16 +1,23 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PermissionName } from '../enums/permission-name.enum';
 import { User } from '../../users/entities/user.entity';
 import { PermissionCategory } from '../enums/permission-category.enum';
 
 @Entity('permissions')
 export class Permission {
-  @PrimaryGeneratedColumn()
-  permissionId: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     type: 'enum',
     enum: PermissionName,
+    unique: true,
   })
   name: PermissionName;
 
@@ -23,8 +30,6 @@ export class Permission {
   @Column()
   description: string;
 
-  @ManyToOne(() => User, (user) => user.permissions, {
-    onDelete: 'CASCADE',
-  })
-  user: User;
+  @ManyToMany(() => User, (user) => user.permissions, { onDelete: 'CASCADE' })
+  users: User[];
 }

@@ -23,7 +23,7 @@ import { UsersService } from '../users/users.service';
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private userService: UsersService,
+    private usersService: UsersService,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -58,17 +58,23 @@ export class AuthController {
     // You can return user info or just a status
     return { accessToken, refreshToken };
   }
-
+  //
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@Request() req) {
-    const user = await this.userService.findByUsername(req.user.username);
+    const user = await this.usersService.findByUsername(req.user.username);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     const {
+      firstName,
+      lastName,
+      username,
+      phone,
+      address,
+      status,
       password,
       createdAt,
       createdById,
@@ -80,7 +86,7 @@ export class AuthController {
     const { permissions, ...userResult } = result;
 
     const permissionNames = permissions.map((item) => item.name);
-    return { permissionNames, ...userResult };
+    return { ...result, permissions: permissionNames };
   }
 
   @UseGuards(LocalAuthGuard)

@@ -28,31 +28,31 @@ export class UsersController {
 
   @Post()
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, User))
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.create(createUserDto);
   }
 
   @Get()
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    return await this.usersService.findAll();
   }
 
   @Get(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.usersService.findOne(id);
   }
 
   @Patch(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return await this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, User))
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  async remove(@Param('id') id: string) {
+    return await this.usersService.remove(id);
   }
 }

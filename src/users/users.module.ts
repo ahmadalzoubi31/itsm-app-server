@@ -4,11 +4,12 @@ import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { PermissionsService } from '../permissions/permissions.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [UsersController],
   providers: [UsersService, CaslAbilityFactory],
-  exports: [UsersService], // Export the UsersService for use in other modules, e.g., AuthModule, PostsModule, etc.
+  exports: [UsersService],
 })
 export class UsersModule {}

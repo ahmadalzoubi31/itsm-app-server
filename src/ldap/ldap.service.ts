@@ -17,7 +17,7 @@ export class LdapService {
     // 3. Search
     const { searchEntries } = await client.search(baseDN, {
       scope: 'sub',
-      filter: '(objectClass=person)', // Change filter as needed
+      filter: '&(objectClass=person)(mail=*)', // Change filter as needed
       attributes: [
         'cn', // Common Name
         'mail', // Email address

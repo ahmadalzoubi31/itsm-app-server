@@ -10,25 +10,27 @@ import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class LogInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LogInterceptor.name);
+  private readonly logger = new Logger('Interceptor');
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const method = request.method;
     const url = request.url;
-    const username = request.user?.username;
+    const username = request.user?.username || 'Unauthenticated';
 
-    this.logger.log(
-      `username: ${username} | Request Method: ${method} | Request URL: ${url} |`,
-    );
+    this.logger.log(`Incoming Request: User: ${username} |  ${method} ${url}`);
 
     return next.handle().pipe(
       tap({
-        next: () => {
-          this.logger.log('Response received');
-        },
+        next: () =>
+          this.logger.log(
+            `Request Completed: User: ${username} | ${method} ${url}`,
+          ),
         error: (error) => {
-          this.logger.error(`Error occurred: ${error.message}`);
+          const statusCode = error.getStatus?.() || 500;
+          this.logger.error(
+            `Request Failed: User: ${username} | ${method} ${url} | Status: ${statusCode} | Error: ${error.message}`,
+          );
         },
       }),
     );

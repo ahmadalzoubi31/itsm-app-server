@@ -1,8 +1,20 @@
+import { Logger } from '@nestjs/common';
 import 'dotenv/config';
 
-import { DataSource } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
+import { SeederOptions } from 'typeorm-extension';
 
-export default new DataSource({
+import { User } from '../users/entities/user.entity';
+import { RefreshToken } from '../auth/entities/refreshToken.entity';
+import { Permission } from '../permissions/entities/permission.entity';
+import { Incident } from '../incidents/entities/incident.entity';
+import { IncidentComment } from '../incidents/entities/incident-comment.entity';
+import { IncidentHistory } from '../incidents/entities/incident-history.entity';
+
+import UserSeeder from './seeds/user.seeder';
+import PermissionSeeder from './seeds/permission.seeder';
+
+export const dbDataSourceOptions: DataSourceOptions & SeederOptions = {
   type: 'postgres',
   host: process.env.DATABASE_HOST,
   port: Number(process.env.DATABASE_PORT) || 5432,
@@ -10,20 +22,46 @@ export default new DataSource({
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
   ssl: process.env.DATABASE_SSL === 'true',
-  entities: [
-    './src/users/entities/user.entity.ts',
-    './src/auth/entities/refreshToken.entity.ts',
-    './src/permissions/entities/permission.entity.ts',
-    './src/incidents/entities/incident.entity.ts',
-    './src/incidents/entities/incident-comment.entity.ts',
-    './src/incidents/entities/incident-history.entity.ts',
-  ], // covers dev and prod
-  migrations: ['./db/migrations/*.ts'],
-  migrationsTableName: 'migrations',
-  migrationsRun: false,
-  synchronize: process.env.NODE_ENV !== 'production',
-  logging: process.env.NODE_ENV !== 'production',
+  synchronize: process.env.NODE_ENV !== 'prod',
+  logging: process.env.LOG_LEVEL === 'debug',
   extra: {
     connectionLimit: 10,
   },
-});
+  entities: [
+    User,
+    RefreshToken,
+    Permission,
+    Incident,
+    IncidentComment,
+    IncidentHistory,
+  ],
+  seeds: [UserSeeder, PermissionSeeder],
+};
+
+// Create and export the DataSource instance
+const AppDataSource = new DataSource(dbDataSourceOptions);
+export default AppDataSource;
+
+// Helper function to initialize the DataSource and run seeders
+export const initializeDataSource = async (runSeeds = true) => {
+  const logger = new Logger('TypeORM');
+  try {
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+      logger.log('Data Source has been initialized!');
+    }
+
+    if (runSeeds) {
+      const { runSeeders } = require('typeorm-extension');
+      await runSeeders(AppDataSource, {
+        seeds: dbDataSourceOptions.seeds,
+      });
+      logger.log('Seeders have been executed!');
+    }
+
+    return AppDataSource;
+  } catch (error) {
+    logger.error('Error during Data Source initialization:', error);
+    throw error;
+  }
+};

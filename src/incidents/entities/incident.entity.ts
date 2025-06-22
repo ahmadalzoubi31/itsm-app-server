@@ -9,9 +9,6 @@ import { IncidentHistory } from './incident-history.entity';
 
 @Entity('incidents')
 export class Incident extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  incidentId: string;
-
   // Virtual getter for formatted ID
   // get incNumber(): string {
   //   return `INC${this.id.toString().padStart(6, '0')}`;

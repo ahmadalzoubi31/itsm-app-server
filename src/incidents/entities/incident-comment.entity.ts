@@ -5,14 +5,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { BaseEntity } from 'src/shared/entities/base.entity';
+import { BaseEntity } from '../../shared/entities/base.entity';
 import { Incident } from './incident.entity';
 
 @Entity('incident_comments')
 export class IncidentComment extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  incidentCommentId: number;
-
   @Column()
   comment: string;
 

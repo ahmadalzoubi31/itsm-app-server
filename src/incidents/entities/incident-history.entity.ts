@@ -10,9 +10,6 @@ import { Incident } from './incident.entity';
 
 @Entity('incident_histories')
 export class IncidentHistory extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  incidentHistoryId: number;
-
   @Column()
   field: string;
 
