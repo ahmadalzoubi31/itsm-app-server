@@ -35,7 +35,7 @@ export const dbDataSourceOptions: DataSourceOptions & SeederOptions = {
     IncidentComment,
     IncidentHistory,
   ],
-  seeds: [UserSeeder, PermissionSeeder],
+  seeds: [PermissionSeeder, UserSeeder],
 };
 
 // Create and export the DataSource instance

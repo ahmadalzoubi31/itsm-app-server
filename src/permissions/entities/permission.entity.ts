@@ -5,9 +5,9 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PermissionName } from '../enums/permission-name.enum';
+import { PermissionNameEnum } from '../contants/permission-name.constant';
 import { User } from '../../users/entities/user.entity';
-import { PermissionCategory } from '../enums/permission-category.enum';
+import { PermissionCategoryEnum } from '../contants/permission-category.constant';
 
 @Entity('permissions')
 export class Permission {
@@ -16,16 +16,16 @@ export class Permission {
 
   @Column({
     type: 'enum',
-    enum: PermissionName,
+    enum: PermissionNameEnum,
     unique: true,
   })
-  name: PermissionName;
+  name: PermissionNameEnum;
 
   @Column({
     type: 'enum',
-    enum: PermissionCategory,
+    enum: PermissionCategoryEnum,
   })
-  category: PermissionCategory;
+  category: PermissionCategoryEnum;
 
   @Column()
   description: string;

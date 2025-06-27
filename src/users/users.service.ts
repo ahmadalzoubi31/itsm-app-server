@@ -61,6 +61,9 @@ export class UsersService {
     try {
       return await this.usersRepository.find({
         relations: ['permissions'],
+        order: {
+          createdAt: 'DESC',
+        },
       });
     } catch (error: any) {
       throw new InternalServerErrorException(error.message);

@@ -96,8 +96,32 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  async refreshToken(@Body() input: RefreshTokenDto) {
-    return this.authService.refreshToken(input);
+  @HttpCode(200)
+  async refreshToken(
+    @Body() input: RefreshTokenDto,
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ) {
+    // This should return: { accessToken, refreshToken }
+    const { accessToken, refreshToken } =
+      await this.authService.refreshToken(input);
+
+    // Set HTTP-only cookie for access token
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    // Set HTTP-only cookie for refresh token
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    return { accessToken, refreshToken };
   }
 
   @UseGuards(JwtAuthGuard)

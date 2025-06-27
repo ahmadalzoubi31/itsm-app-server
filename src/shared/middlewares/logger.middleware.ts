@@ -9,9 +9,9 @@ export class LoggerMiddleware implements NestMiddleware {
     const url = req.originalUrl;
 
     // req.user is usually undefined here unless you attach it earlier
-    const username = (req.user as any)?.username || 'Unauthenticated';
+    // const username = (req.user as any)?.username || 'Unauthenticated';
 
-    this.logger.log(`Incoming Request: User: ${username} | ${method} ${url}`);
+    this.logger.log(`Incoming Request:${method} ${url}`);
     next();
   }
 }

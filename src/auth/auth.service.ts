@@ -5,10 +5,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RefreshToken } from './entities/refreshToken.entity';
 import { UnauthorizedException } from '@nestjs/common';
-import { compare } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { User } from '../users/entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -34,20 +35,19 @@ export class AuthService {
   async login(user: User) {
     const payload = { username: user.username, sub: user.id, role: user.role };
 
-    const expiryDate = new Date();
-
+    const issuedAt = new Date();
+    const expiryDate = new Date(issuedAt);
     expiryDate.setDate(
       expiryDate.getDate() +
         Number(this.configService.get<string>('REFRESH_JWT_EXPIRES_IN')),
     );
 
     const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: this.configService.get<string>('REFRESH_JWT_EXPIRES_IN'),
-    });
+    const refreshToken = uuidv4();
 
+    // Always create a new refresh token (invalidate previous), with fixed expiry
     await this.refreshTokenRepository.upsert(
-      { token: refreshToken, expiry: expiryDate, user },
+      { token: refreshToken, expiry: expiryDate, issuedAt, user },
       ['user'],
     );
 
@@ -63,19 +63,35 @@ export class AuthService {
   }
 
   async refreshToken(input: { refreshToken: string }) {
+    console.log('🚀 ~ AuthService ~ refreshToken ~ input:', input);
     const refreshToken = await this.refreshTokenRepository.findOne({
       where: { token: input.refreshToken },
       relations: ['user'],
     });
+    console.log(
+      '🚀 ~ AuthService ~ refreshToken ~ refreshToken:',
+      refreshToken,
+    );
+
     if (!refreshToken) {
-      return new UnauthorizedException('Refresh token invalid');
+      throw new UnauthorizedException('Refresh token invalid');
     }
-
     if (refreshToken.expiry < new Date()) {
-      return new UnauthorizedException('Refresh token expired');
+      throw new UnauthorizedException('Refresh token expired');
     }
 
-    return this.login(refreshToken.user);
+    // DON'T issue a new refresh token. Just return new accessToken, same refreshToken.
+    const payload = {
+      username: refreshToken.user.username,
+      sub: refreshToken.user.id,
+      role: refreshToken.user.role,
+    };
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      accessToken,
+      refreshToken: refreshToken.token, // re-send old refreshToken, unchanged
+    };
   }
 
   async changePassword(input: ChangePasswordDto, id: string) {

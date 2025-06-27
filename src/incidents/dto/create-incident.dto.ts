@@ -1,7 +1,8 @@
 import { IsEmpty, IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { IncidentStatus } from '../enums/incident-status.enum';
-import { Impact } from '../enums/impact.enum';
-import { Urgency } from '../enums/urgency.enum';
+import { IncidentStatusEnum } from '../constants/incident-status.constant';
+import { PriorityEnum } from '../constants/priority.constant';
+import { ImpactEnum } from '../constants/impact.constant';
+import { UrgencyEnum } from '../constants/urgency.constant';
 import { BaseEntityDto } from '../../shared/dto/base-entity.dto';
 
 export class CreateIncidentDto extends BaseEntityDto {
@@ -14,16 +15,20 @@ export class CreateIncidentDto extends BaseEntityDto {
   description: string;
 
   @IsString()
-  @IsEnum(IncidentStatus)
-  status: IncidentStatus;
+  @IsEnum(IncidentStatusEnum)
+  status: IncidentStatusEnum;
 
   @IsString()
-  @IsEnum(Impact)
-  impact: Impact;
+  @IsEnum(PriorityEnum)
+  priority: PriorityEnum;
 
   @IsString()
-  @IsEnum(Urgency)
-  urgency: Urgency;
+  @IsEnum(ImpactEnum)
+  impact: ImpactEnum;
+
+  @IsString()
+  @IsEnum(UrgencyEnum)
+  urgency: UrgencyEnum;
 
   @IsNotEmpty()
   @IsString()

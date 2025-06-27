@@ -8,13 +8,9 @@ import {
   IsStrongPassword,
   ValidateNested,
 } from 'class-validator';
-import { Role } from '../enums/role.enum';
+import { RoleEnum } from '../constants/role.constant';
+import { StatusEnum } from '../../shared/constants/status.constant';
 import { BaseEntityDto } from '../../shared/dto/base-entity.dto';
-import { Status } from '../../shared/enums/status.enum';
-import { Type } from 'class-transformer';
-import { AssignPermissionDto } from 'src/permissions/dto/assign-permission.dto';
-import { Permission } from 'src/permissions/entities/permission.entity';
-import { PermissionName } from 'src/permissions/enums/permission-name.enum';
 
 export class CreateUserDto extends BaseEntityDto {
   @IsNotEmpty()
@@ -46,10 +42,10 @@ export class CreateUserDto extends BaseEntityDto {
   address: string;
 
   @IsString()
-  @IsEnum(Role)
-  role: Role;
+  @IsEnum(RoleEnum)
+  role: RoleEnum;
 
   @IsString()
-  @IsEnum(Status)
-  status: Status;
+  @IsEnum(StatusEnum)
+  status: StatusEnum;
 }

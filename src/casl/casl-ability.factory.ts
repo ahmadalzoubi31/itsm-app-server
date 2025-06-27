@@ -9,9 +9,9 @@ import {
   ExtractSubjectType,
 } from '@casl/ability';
 import { Incident } from '../incidents/entities/incident.entity';
-import { Role } from '../users/enums/role.enum';
+import { RoleEnum } from '../users/constants/role.constant';
 import { Permission } from '../permissions/entities/permission.entity';
-import { PermissionName } from '../permissions/enums/permission-name.enum';
+import { PermissionNameEnum } from '../permissions/contants/permission-name.constant';
 
 type Subjects =
   | InferSubjects<typeof Incident | typeof Permission | typeof User>
@@ -27,11 +27,11 @@ export class CaslAbilityFactory {
     );
 
     // Role-based permissions
-    if (user.role === Role.ADMIN) {
+    if (user.role === RoleEnum.ADMIN) {
       can(Action.Manage, 'all'); // Admin can manage all
-    } else if (user.role === Role.AGENT) {
+    } else if (user.role === RoleEnum.AGENT) {
       can(Action.Read, Incident, { createdById: user.id }); // Agent can see only their tickets
-    } else if (user.role === Role.USER) {
+    } else if (user.role === RoleEnum.USER) {
       // User can't see anything by default
     }
 
@@ -39,22 +39,22 @@ export class CaslAbilityFactory {
     if (user.permissions && user.permissions.length > 0) {
       user.permissions.forEach((permission) => {
         switch (permission.name) {
-          case PermissionName.INCIDENT_MASTER:
+          case PermissionNameEnum.INCIDENT_MASTER:
             can(Action.Create, Incident);
             can(Action.Update, Incident);
             break;
-          case PermissionName.INCIDENT_USER:
+          case PermissionNameEnum.INCIDENT_USER:
             can(Action.Create, Incident);
             can(Action.Update, Incident, { createdById: user.id });
             break;
-          case PermissionName.INCIDENT_SUBMITTER:
+          case PermissionNameEnum.INCIDENT_SUBMITTER:
             can(Action.Create, Incident);
             can(Action.Update, Incident, { createdById: user.id });
             break;
-          case PermissionName.INCIDENT_VIEWER:
+          case PermissionNameEnum.INCIDENT_VIEWER:
             can(Action.Read, Incident, { createdById: user.id });
             break;
-          case PermissionName.Foundation_People:
+          case PermissionNameEnum.Foundation_People:
             can(Action.Manage, User);
             can(Action.Manage, Permission);
             break;

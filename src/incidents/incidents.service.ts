@@ -5,8 +5,8 @@ import { Repository } from 'typeorm';
 import { Incident } from './entities/incident.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IncidentHelper } from './helpers/incident.helper';
-import { Impact } from './enums/impact.enum';
-import { Urgency } from './enums/urgency.enum';
+import { ImpactEnum } from './constants/impact.constant';
+import { UrgencyEnum } from './constants/urgency.constant';
 
 @Injectable()
 export class IncidentsService {
@@ -78,6 +78,9 @@ export class IncidentsService {
     try {
       return await this.incidentRepository.find({
         relations: ['comments', 'histories', 'createdById', 'updatedById'],
+        order: {
+          createdAt: 'DESC',
+        },
       });
     } catch (error: any) {
       throw new InternalServerErrorException(error.message);

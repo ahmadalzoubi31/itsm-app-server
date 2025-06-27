@@ -11,10 +11,9 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Role } from '../enums/role.enum';
+import { ROLES, RoleEnum } from '../constants/role.constant';
 import { Permission } from '../../permissions/entities/permission.entity';
 import { hash } from 'bcrypt';
-import { PermissionName } from 'src/permissions/enums/permission-name.enum';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -38,10 +37,9 @@ export class User extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: Role,
-    default: Role.USER,
+    enum: RoleEnum,
   })
-  role: Role;
+  role: RoleEnum;
 
   @Column({ nullable: true })
   phone: string;

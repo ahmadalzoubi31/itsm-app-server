@@ -1,9 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../shared/entities/base.entity';
-import { IncidentStatus } from '../enums/incident-status.enum';
-import { Priority } from '../enums/priority.enum';
-import { Impact } from '../enums/impact.enum';
-import { Urgency } from '../enums/urgency.enum';
+import { IncidentStatusEnum } from '../constants/incident-status.constant';
+import { PriorityEnum } from '../constants/priority.constant';
+import { ImpactEnum } from '../constants/impact.constant';
+import { UrgencyEnum } from '../constants/urgency.constant';
 import { IncidentComment } from './incident-comment.entity';
 import { IncidentHistory } from './incident-history.entity';
 
@@ -22,28 +22,27 @@ export class Incident extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: IncidentStatus,
-    default: IncidentStatus.NEW,
+    enum: IncidentStatusEnum,
   })
-  status: IncidentStatus;
+  status: IncidentStatusEnum;
 
   @Column({
     type: 'enum',
-    enum: Priority,
+    enum: PriorityEnum,
   })
-  priority: Priority;
+  priority: PriorityEnum;
 
   @Column({
     type: 'enum',
-    enum: Impact,
+    enum: ImpactEnum,
   })
-  impact: Impact;
+  impact: ImpactEnum;
 
   @Column({
     type: 'enum',
-    enum: Urgency,
+    enum: UrgencyEnum,
   })
-  urgency: Urgency;
+  urgency: UrgencyEnum;
 
   @Column()
   category: string;

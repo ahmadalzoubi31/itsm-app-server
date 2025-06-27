@@ -21,4 +21,7 @@ export class RefreshToken {
   @OneToOne(() => User, (user) => user.refreshToken, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @Column({ nullable: true })
+  issuedAt: Date;
 }
