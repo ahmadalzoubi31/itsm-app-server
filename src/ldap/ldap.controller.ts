@@ -1,5 +1,7 @@
 import { Controller, Get, Post } from '@nestjs/common';
 import { LdapService } from './ldap.service';
+import { LdapSettingDto } from './dto/ldap-settings.dto';
+import { Body } from '@nestjs/common';
 
 @Controller('ldap')
 export class LdapController {
@@ -11,8 +13,8 @@ export class LdapController {
   }
 
   @Post('test')
-  async testConnection() {
-    return this.ldapService.testConnection();
+  async testConnection(@Body() body: LdapSettingDto) {
+    return this.ldapService.testConnection(body);
   }
 
   @Post('sync')

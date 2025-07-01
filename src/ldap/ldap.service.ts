@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Client } from 'ldapts';
 import { SettingsService } from '../settings/settings.service';
 import { SettingTypeEnum } from '../settings/constants/type.constant';
+import { LdapSettingDto } from './dto/ldap-settings.dto';
 
 @Injectable()
 export class LdapService {
@@ -31,18 +32,19 @@ export class LdapService {
     return searchEntries;
   }
 
-  async testConnection() {
-    const ldapSettings = await this.settingsService.getByType(
-      SettingTypeEnum.LDAP,
-    );
+  async testConnection(body: LdapSettingDto) {
     const url =
-      ldapSettings.protocol === 'ldaps'
-        ? `ldaps://${ldapSettings.server}:${ldapSettings.port}`
-        : `ldap://${ldapSettings.server}:${ldapSettings.port}`;
-    const client = new Client({ url });
-    await client.bind(ldapSettings.bindDn, ldapSettings.bindPassword);
-    await client.unbind();
-    return { success: true };
+      body.protocol === 'ldaps'
+        ? `ldaps://${body.server}:${body.port}`
+        : `ldap://${body.server}:${body.port}`;
+    try {
+      const client = new Client({ url });
+      await client.bind(body.bindDn, body.bindPassword);
+      await client.unbind();
+      return { success: true };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async syncUsers() {
