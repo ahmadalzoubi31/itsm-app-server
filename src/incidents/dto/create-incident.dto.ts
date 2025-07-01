@@ -14,19 +14,15 @@ export class CreateIncidentDto extends BaseEntityDto {
   @IsString()
   description: string;
 
-  @IsString()
   @IsEnum(IncidentStatusEnum)
   status: IncidentStatusEnum;
 
-  @IsString()
   @IsEnum(PriorityEnum)
   priority: PriorityEnum;
 
-  @IsString()
   @IsEnum(ImpactEnum)
   impact: ImpactEnum;
 
-  @IsString()
   @IsEnum(UrgencyEnum)
   urgency: UrgencyEnum;
 

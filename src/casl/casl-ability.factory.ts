@@ -11,7 +11,7 @@ import {
 import { Incident } from '../incidents/entities/incident.entity';
 import { RoleEnum } from '../users/constants/role.constant';
 import { Permission } from '../permissions/entities/permission.entity';
-import { PermissionNameEnum } from '../permissions/contants/permission-name.constant';
+import { PermissionNameEnum } from '../permissions/constants/permission-name.constant';
 
 type Subjects =
   | InferSubjects<typeof Incident | typeof Permission | typeof User>

@@ -3,8 +3,7 @@ import { Seeder } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { RoleEnum } from '../../users/constants/role.constant';
-import { hash } from 'bcrypt';
-import { StatusEnum } from 'src/shared/constants/status.constant';
+import { StatusEnum } from '../../shared/constants/status.constant';
 
 export default class UserSeeder implements Seeder {
   public async run(dataSource: DataSource): Promise<void> {
@@ -22,7 +21,7 @@ export default class UserSeeder implements Seeder {
       fullName: 'App Admin',
       username: 'appadmin',
       email: 'appadmin@example.com',
-      password: await hash('P@ssw0rd', 10),
+      password: '$2b$10$RUtdApx.W3fYY5QpGRHIZeVny.YUTCYXkEGdIxhWgprkxp22lV.fa',
       role: RoleEnum.ADMIN,
       status: StatusEnum.ACTIVE,
     });

@@ -2,8 +2,8 @@
 import { Seeder } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
 import { Permission } from '../../permissions/entities/permission.entity';
-import { PermissionNameEnum } from '../../permissions/contants/permission-name.constant';
-import { PermissionCategoryEnum } from '../../permissions/contants/permission-category.constant';
+import { PermissionNameEnum } from '../../permissions/constants/permission-name.constant';
+import { PermissionCategoryEnum } from '../../permissions/constants/permission-category.constant';
 
 export default class PermissionSeeder implements Seeder {
   public async run(dataSource: DataSource): Promise<void> {

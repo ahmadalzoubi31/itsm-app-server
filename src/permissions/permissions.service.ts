@@ -4,8 +4,8 @@ import { Permission } from './entities/permission.entity';
 import { In, Repository } from 'typeorm';
 import { AssignPermissionDto } from './dto/assign-permission.dto';
 import { UsersService } from '../users/users.service';
-import { PermissionNameEnum } from './contants/permission-name.constant';
-import { User } from 'src/users/entities/user.entity';
+import { PermissionNameEnum } from './constants/permission-name.constant';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class PermissionsService {

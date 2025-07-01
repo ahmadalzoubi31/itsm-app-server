@@ -1,5 +1,5 @@
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
-import { PermissionNameEnum } from '../contants/permission-name.constant';
+import { PermissionNameEnum } from '../constants/permission-name.constant';
 
 export class AssignPermissionDto {
   @IsString()

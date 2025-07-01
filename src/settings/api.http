@@ -1,0 +1,22 @@
+POST http://localhost:3000/api/settings/ldap
+Content-Type: application/json
+
+{
+  "ldapSettings": {
+    "server": "ldap.forumsys.com",
+    "port": "389",
+    "protocol": "ldap",
+    "baseDn": "dc=forumsys,dc=com",
+    "bindDn": "cn=ldapbind,dc=forumsys,dc=com",
+    "bindPassword": "password",
+    "searchFilter": "(objectClass=user)",
+    "attributes": "cn,mail,sAMAccountName,displayName,department",
+    "useSSL": false,
+    "validateCert": false
+  }
+}
+
+
+###
+GET http://localhost:3000/api/settings/ldap
+

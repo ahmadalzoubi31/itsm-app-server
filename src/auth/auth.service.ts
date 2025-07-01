@@ -63,15 +63,10 @@ export class AuthService {
   }
 
   async refreshToken(input: { refreshToken: string }) {
-    console.log('🚀 ~ AuthService ~ refreshToken ~ input:', input);
     const refreshToken = await this.refreshTokenRepository.findOne({
       where: { token: input.refreshToken },
       relations: ['user'],
     });
-    console.log(
-      '🚀 ~ AuthService ~ refreshToken ~ refreshToken:',
-      refreshToken,
-    );
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token invalid');

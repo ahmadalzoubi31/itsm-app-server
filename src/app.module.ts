@@ -18,6 +18,10 @@ import { Incident } from './incidents/entities/incident.entity';
 import { IncidentComment } from './incidents/entities/incident-comment.entity';
 import { IncidentHistory } from './incidents/entities/incident-history.entity';
 import { LdapModule } from './ldap/ldap.module';
+import { SerivceCardsModule } from './serivce-cards/serivce-cards.module';
+import { SerivceRequestsModule } from './serivce-requests/serivce-requests.module';
+import { WorkflowsModule } from './workflows/workflows.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -29,20 +33,15 @@ import { LdapModule } from './ldap/ldap.module';
     IncidentsModule,
     SlaModule,
     LdapModule,
+    SerivceCardsModule,
+    SerivceRequestsModule,
+    WorkflowsModule,
+    SettingsModule,
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         return {
           ...dbDataSource.options,
-          entities: [
-            User,
-            RefreshToken,
-            Permission,
-            Incident,
-            IncidentComment,
-            IncidentHistory,
-          ],
-          migrations: ['./db/migrations/*.ts'],
         };
       },
     }),

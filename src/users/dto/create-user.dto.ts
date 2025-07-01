@@ -41,11 +41,9 @@ export class CreateUserDto extends BaseEntityDto {
   @IsString()
   address: string;
 
-  @IsString()
   @IsEnum(RoleEnum)
   role: RoleEnum;
 
-  @IsString()
   @IsEnum(StatusEnum)
   status: StatusEnum;
 }
