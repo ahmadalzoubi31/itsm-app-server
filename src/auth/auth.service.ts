@@ -25,6 +25,7 @@ export class AuthService {
     const user = await this.usersService.findByUsername(username);
 
     if (!user) return null;
+    if (user.status.toLowerCase() === 'inactive') return null;
 
     const isPasswordMatch = await compare(pass, user.password);
     if (!isPasswordMatch) return null;

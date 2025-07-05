@@ -7,6 +7,11 @@ import { Body } from '@nestjs/common';
 export class LdapController {
   constructor(private readonly ldapService: LdapService) {}
 
+  @Get('preview')
+  async previewUsers() {
+    return this.ldapService.previewUsers();
+  }
+
   @Get('users')
   async getAdUsers() {
     return this.ldapService.searchUsers();
@@ -20,5 +25,15 @@ export class LdapController {
   @Post('sync')
   async sync() {
     return this.ldapService.syncUsers();
+  }
+
+  @Get('sync-history')
+  async getSyncHistory() {
+    return this.ldapService.getSyncHistory();
+  }
+
+  @Get('staged-users')
+  async getStagedUsers() {
+    return this.ldapService.getStagedUsers();
   }
 }

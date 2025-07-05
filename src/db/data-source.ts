@@ -11,9 +11,12 @@ import { Incident } from '../incidents/entities/incident.entity';
 import { IncidentComment } from '../incidents/entities/incident-comment.entity';
 import { IncidentHistory } from '../incidents/entities/incident-history.entity';
 import { Settings } from '../settings/entities/settings.entity';
+import { SyncHistory } from '../ldap/entities/sync-history.entity';
+import { StagedUser } from '../ldap/entities/staged-user.entity';
 
 import UserSeeder from './seeds/user.seeder';
 import PermissionSeeder from './seeds/permission.seeder';
+import SettingsSeeder from './seeds/settings.seeder';
 
 export const dbDataSourceOptions: DataSourceOptions & SeederOptions = {
   type: 'postgres',
@@ -36,8 +39,10 @@ export const dbDataSourceOptions: DataSourceOptions & SeederOptions = {
     IncidentComment,
     IncidentHistory,
     Settings,
+    SyncHistory,
+    StagedUser,
   ],
-  seeds: [PermissionSeeder, UserSeeder],
+  seeds: [PermissionSeeder, UserSeeder, SettingsSeeder],
 };
 
 // Create and export the DataSource instance

@@ -14,6 +14,19 @@ export default class UserSeeder implements Seeder {
     if (user) return;
 
     // Insert the user
+
+    const sysUser = repository.create({
+      id: '0745bd13-92f2-474e-8544-5018383c7b75',
+      firstName: 'System',
+      lastName: 'Admin',
+      fullName: 'System Admin',
+      username: 'system',
+      email: 'system@example.com',
+      password: '$2b$10$RUtdApx.W3fYY5QpGRHIZeVny.YUTCYXkEGdIxhWgprkxp22lV.fa',
+      role: RoleEnum.ADMIN,
+      status: StatusEnum.INACTIVE,
+    });
+    await repository.save(sysUser);
     const newUser = repository.create({
       id: '0745bd13-92f2-474e-8544-5018383c7b74',
       firstName: 'App',
@@ -24,6 +37,8 @@ export default class UserSeeder implements Seeder {
       password: '$2b$10$RUtdApx.W3fYY5QpGRHIZeVny.YUTCYXkEGdIxhWgprkxp22lV.fa',
       role: RoleEnum.ADMIN,
       status: StatusEnum.ACTIVE,
+      createdById: '0745bd13-92f2-474e-8544-5018383c7b75',
+      updatedById: '0745bd13-92f2-474e-8544-5018383c7b75',
     });
     await repository.save(newUser);
 

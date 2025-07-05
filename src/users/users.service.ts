@@ -8,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -63,6 +64,18 @@ export class UsersService {
         relations: ['permissions'],
         order: {
           createdAt: 'DESC',
+        },
+      });
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async findByIds(ids: string[]): Promise<User[]> {
+    try {
+      return await this.usersRepository.find({
+        where: {
+          id: In(ids),
         },
       });
     } catch (error: any) {

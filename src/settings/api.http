@@ -6,7 +6,7 @@ Content-Type: application/json
     "server": "ldap.forumsys.com",
     "port": "389",
     "protocol": "ldap",
-    "baseDn": "dc=forumsys,dc=com",
+    "searchBase": "dc=forumsys,dc=com",
     "bindDn": "cn=ldapbind,dc=forumsys,dc=com",
     "bindPassword": "password",
     "searchFilter": "(objectClass=user)",

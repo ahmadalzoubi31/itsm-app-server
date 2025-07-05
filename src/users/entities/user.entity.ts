@@ -8,10 +8,11 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ROLES, RoleEnum } from '../constants/role.constant';
+import { RoleEnum } from '../constants/role.constant';
 import { Permission } from '../../permissions/entities/permission.entity';
 import { hash } from 'bcrypt';
 
@@ -63,6 +64,13 @@ export class User extends BaseEntity {
     },
   })
   permissions: Permission[];
+
+  @Column({ nullable: true, unique: true })
+  objectGUID: string;
+
+  @ManyToOne(() => User, (user) => user.manager, { nullable: true })
+  @JoinColumn({ name: 'manager_id', referencedColumnName: 'id' })
+  manager: User;
 
   @Column({ enum: ['active', 'inactive'], default: 'active' })
   status: string;

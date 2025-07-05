@@ -1,1 +1,19 @@
+POST http://localhost:3000/api/ldap/test
+Content-Type: application/json
+
+{
+  "server": "192.168.1.106",
+  "port": "389",
+  "protocol": "ldap",
+  "searchBase": "dc=test,dc=local",
+  "bindDn": "administrator@test.local",
+  "bindPassword": "P@ssw0rd",
+  "searchFilter": "(sAMAccountName={0})",
+  "searchScope": "sub",
+  "attributes": "sAMAccountName,sn,mail",
+  "useSSL": false,
+  "validateCert": false
+}
+
+###
 GET http://localhost:3000/api/ldap/users

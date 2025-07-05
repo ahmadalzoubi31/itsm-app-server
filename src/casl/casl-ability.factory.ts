@@ -12,9 +12,12 @@ import { Incident } from '../incidents/entities/incident.entity';
 import { RoleEnum } from '../users/constants/role.constant';
 import { Permission } from '../permissions/entities/permission.entity';
 import { PermissionNameEnum } from '../permissions/constants/permission-name.constant';
+import { Settings } from '../settings/entities/settings.entity';
 
 type Subjects =
-  | InferSubjects<typeof Incident | typeof Permission | typeof User>
+  | InferSubjects<
+      typeof Incident | typeof Permission | typeof User | typeof Settings
+    >
   | 'all';
 
 export type AppAbility = MongoAbility<[Action, Subjects]>;
@@ -57,6 +60,9 @@ export class CaslAbilityFactory {
           case PermissionNameEnum.Foundation_People:
             can(Action.Manage, User);
             can(Action.Manage, Permission);
+            break;
+          case PermissionNameEnum.System_Settings:
+            can(Action.Manage, Settings);
             break;
         }
       });

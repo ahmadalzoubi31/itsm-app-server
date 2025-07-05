@@ -1,3 +1,7 @@
+import { ProtocolEnum } from 'src/ldap/constants/protocol.constant';
+import { SearchScopeEnum } from 'src/ldap/constants/search-scope.constant';
+import { FrequencyEnum } from 'src/ldap/constants/frequency.constant';
+
 export enum SettingTypeEnum {
   SYSTEM = 'SYSTEM',
   LDAP = 'LDAP',
@@ -17,3 +21,28 @@ export const SETTING_TYPES = [
   { value: SettingTypeEnum.NOTIFICATION, label: 'Notification' },
   { value: SettingTypeEnum.APPEARANCE, label: 'Appearance' },
 ] as const;
+
+export const DEFAULT_LDAP_SETTINGS = {
+  server: '',
+  port: 389,
+  protocol: ProtocolEnum.LDAP,
+  searchBase: '',
+  bindDn: '',
+  bindPassword: '',
+  searchScope: SearchScopeEnum.SUB,
+  searchFilter: '(objectClass=user)',
+  attributes:
+    'cn,mail,displayName,givenName,sn,userPrincipalName,department,title,mobile,sAMAccountName,distinguishedName',
+  useSSL: false,
+  validateCert: true,
+};
+
+export const DEFAULT_SYNC_SETTINGS = {
+  enabled: false,
+  frequency: FrequencyEnum.DAILY,
+  syncTime: '02:00',
+  timezone: 'UTC',
+  retryAttempts: 3,
+  retryInterval: 30,
+  fullSyncInterval: 7,
+};

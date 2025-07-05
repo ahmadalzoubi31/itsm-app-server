@@ -59,7 +59,7 @@ async function bootstrap() {
   // Initialize the DataSource and run seeders
   (async () => {
     try {
-      await initializeDataSource(false);
+      await initializeDataSource(true);
     } catch (error) {
       logger.error('Failed to initialize database:', error);
     }
