@@ -212,14 +212,14 @@
 // }
 
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class LdapSchedulerService {
   private readonly logger = new Logger(LdapSchedulerService.name);
 
-  @Cron('45 * * * * *')
+  @Cron(CronExpression.EVERY_30_SECONDS)
   handleCron() {
-    this.logger.debug('Called when the current second is 45');
+    this.logger.debug('Called every 30 seconds');
   }
 }
