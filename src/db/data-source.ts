@@ -59,7 +59,7 @@ export const initializeDataSource = async (runSeeds = true) => {
     }
 
     if (runSeeds) {
-      const { runSeeders } = require('typeorm-extension');
+      const { runSeeders } = await import('typeorm-extension');
       await runSeeders(AppDataSource, {
         seeds: dbDataSourceOptions.seeds,
       });

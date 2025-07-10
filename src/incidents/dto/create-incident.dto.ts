@@ -5,7 +5,7 @@ import { ImpactEnum } from '../constants/impact.constant';
 import { UrgencyEnum } from '../constants/urgency.constant';
 import { BaseEntityDto } from '../../shared/dto/base-entity.dto';
 
-export class CreateIncidentDto extends BaseEntityDto {
+export class CreateIncidentDto {
   @IsNotEmpty()
   @IsString()
   title: string;

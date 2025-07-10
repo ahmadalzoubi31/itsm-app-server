@@ -8,8 +8,9 @@ import {
 } from 'class-validator';
 import { RoleEnum } from '../constants/role.constant';
 import { StatusEnum } from '../../shared/constants/status.constant';
+import { BaseEntityDto } from '../../shared/dto/base-entity.dto';
 
-export class CreateUserDto {
+export class CreateUserDto extends BaseEntityDto {
   @IsNotEmpty()
   @IsString()
   firstName: string;

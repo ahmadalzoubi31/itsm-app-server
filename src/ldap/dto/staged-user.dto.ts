@@ -5,7 +5,6 @@ import {
   IsEnum,
   IsObject,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { StagedUserStatusEnum } from '../constants/staged-user-status.constant';
 import { BaseEntityDto } from '../../shared/dto/base-entity.dto';
 

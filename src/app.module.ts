@@ -22,6 +22,7 @@ import { SerivceCardsModule } from './serivce-cards/serivce-cards.module';
 import { SerivceRequestsModule } from './serivce-requests/serivce-requests.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { SettingsModule } from './settings/settings.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { SettingsModule } from './settings/settings.module';
     SerivceRequestsModule,
     WorkflowsModule,
     SettingsModule,
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {

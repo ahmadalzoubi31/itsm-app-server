@@ -16,6 +16,7 @@ export class LogInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const method = request.method;
     const url = request.url;
+    const body = request.body;
     const username = request.user?.username || 'Unauthenticated';
 
     this.logger.log(`Incoming Request: User: ${username} |  ${method} ${url}`);
@@ -24,7 +25,7 @@ export class LogInterceptor implements NestInterceptor {
       tap({
         next: () =>
           this.logger.log(
-            `Request Completed: User: ${username} | ${method} ${url}`,
+            `Request Completed: User: ${username} | ${method} ${url} `,
           ),
         error: (error) => {
           const statusCode = error.getStatus?.() || 500;

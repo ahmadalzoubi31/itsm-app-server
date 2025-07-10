@@ -4,9 +4,9 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Column,
 } from 'typeorm';
 
 @Entity('EntityBase', { orderBy: { createdAt: 'ASC' } })
@@ -14,13 +14,19 @@ export abstract class BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'createdById' })
+  @Column({ nullable: true })
   createdById: string;
 
-  @ManyToOne(() => User, (user) => user.id)
-  @JoinColumn({ name: 'updatedById' })
+  @Column({ nullable: true })
   updatedById: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'createdById' })
+  createdBy: User;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'updatedById' })
+  updatedBy: User;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

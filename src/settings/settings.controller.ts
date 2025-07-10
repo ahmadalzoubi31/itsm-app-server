@@ -10,15 +10,15 @@ import {
 import { SettingsService } from './settings.service';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { SettingTypeEnum } from './constants/type.constant';
-import { AuthGuard } from '@nestjs/passport';
 import { AuditFieldsInterceptor } from '../shared/interceptors/audit-fields.interceptor';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { AppAbility } from '../casl/casl-ability.factory';
 import { CheckPolicies } from '../casl/decorators/check-policies.decorator';
 import { Action } from '../casl/enums/action.enum';
 import { Settings } from './entities/settings.entity';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@UseGuards(AuthGuard('jwt'), PoliciesGuard)
+@UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditFieldsInterceptor)
 @Controller('settings')
 export class SettingsController {

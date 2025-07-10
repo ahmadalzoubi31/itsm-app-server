@@ -41,4 +41,13 @@ export class PermissionsController {
   async unAssign(@Body() assignPermissionDto: AssignPermissionDto) {
     return await this.permissionsService.unAssign(assignPermissionDto);
   }
+
+  // In your permissions controller
+  @Delete('clear-all/:userId')
+  @CheckPolicies((ability: AppAbility) =>
+    ability.can(Action.Update, Permission),
+  )
+  async clearAllPermissions(@Param('userId') userId: string) {
+    return await this.permissionsService.clearAllPermissions(userId);
+  }
 }

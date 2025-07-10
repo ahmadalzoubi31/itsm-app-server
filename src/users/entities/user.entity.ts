@@ -65,7 +65,7 @@ export class User extends BaseEntity {
   })
   permissions: Permission[];
 
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true })
   objectGUID: string;
 
   @ManyToOne(() => User, (user) => user.manager, { nullable: true })
@@ -78,7 +78,16 @@ export class User extends BaseEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
-    this.password = await hash(this.password, 10);
+    // Only hash password if it's provided as a non-empty string and not already hashed
+    if (
+      this.password &&
+      typeof this.password === 'string' &&
+      this.password.length > 0 &&
+      !this.password.startsWith('$2b$')
+    ) {
+      console.log('🚀 ~ User ~ hashPassword ~ this.password:', this.password);
+      this.password = await hash(this.password, 10);
+    }
   }
 
   @BeforeInsert()
@@ -91,7 +100,7 @@ export class User extends BaseEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async setSmallCaps() {
-    // Set the username and email to lowerincident before saving it to the database
+    // Set the username and email to lower case before saving it to the database
     this.username = this.username.toLowerCase();
     this.email = this.email.toLowerCase();
   }

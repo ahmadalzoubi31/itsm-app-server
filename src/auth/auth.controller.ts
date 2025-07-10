@@ -89,10 +89,28 @@ export class AuthController {
     return { ...result, permissions: permissionNames };
   }
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete('sign-out')
-  async logout(@Request() req) {
-    return this.authService.logout(req.user.id);
+  async logout(
+    @Request() req: { user: { userId: string } },
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ) {
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    console.log('logout');
+    console.log(req.user.userId);
+    return await this.authService.logout(req.user.userId);
   }
 
   @Post('refresh-token')

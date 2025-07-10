@@ -144,4 +144,11 @@ export class PermissionsService {
       throw new InternalServerErrorException(error.message);
     }
   }
+
+  async clearAllPermissions(userId: string) {
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new InternalServerErrorException('User not found');
+
+    await this.permissionsRepository.delete({ users: { id: userId } });
+  }
 }

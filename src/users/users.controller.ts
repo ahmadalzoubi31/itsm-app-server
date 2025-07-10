@@ -47,6 +47,10 @@ export class UsersController {
   @Patch(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    console.log(
+      '🚀 ~ UsersController ~ update ~ updateUserDto:',
+      updateUserDto,
+    );
     return await this.usersService.update(id, updateUserDto);
   }
 

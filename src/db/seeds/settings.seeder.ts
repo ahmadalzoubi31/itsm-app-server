@@ -25,6 +25,8 @@ export default class SettingsSeeder implements Seeder {
           useSSL: false,
           validateCert: true,
         },
+        createdById: '0745bd13-92f2-474e-8544-5018383c7b75',
+        updatedById: '0745bd13-92f2-474e-8544-5018383c7b75',
       },
       {
         id: '56237d9a-cad8-4a4c-b1d4-2c890c17dfeb',
@@ -38,16 +40,32 @@ export default class SettingsSeeder implements Seeder {
           retryInterval: 30,
           fullSyncInterval: 7,
         },
+        createdById: '0745bd13-92f2-474e-8544-5018383c7b75',
+        updatedById: '0745bd13-92f2-474e-8544-5018383c7b75',
       },
     ];
 
     try {
-      await repository.upsert(defaultSettings, {
-        conflictPaths: ['type', 'id'],
+      // Check which settings already exist
+      const existingSettings = await repository.find({
+        where: defaultSettings.map((setting) => ({ id: setting.id })),
       });
-      console.log('✅ Default settings have been successfully seeded.');
+
+      const existingIds = existingSettings.map((setting) => setting.id);
+      const settingsToInsert = defaultSettings.filter(
+        (setting) => !existingIds.includes(setting.id),
+      );
+
+      if (settingsToInsert.length > 0) {
+        await repository.insert(settingsToInsert as any);
+        console.log(
+          `Settings seeded successfully: ${settingsToInsert.length} new settings added`,
+        );
+      } else {
+        console.log('All settings already exist, skipping seeding');
+      }
     } catch (error) {
-      console.error('❌ Failed to seed default settings:', error);
+      console.error('Error seeding settings:', error);
       throw error;
     }
   }

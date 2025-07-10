@@ -1,6 +1,6 @@
-import { ProtocolEnum } from 'src/ldap/constants/protocol.constant';
-import { SearchScopeEnum } from 'src/ldap/constants/search-scope.constant';
-import { FrequencyEnum } from 'src/ldap/constants/frequency.constant';
+import { ProtocolEnum } from '../../ldap/constants/protocol.constant';
+import { SearchScopeEnum } from '../../ldap/constants/search-scope.constant';
+import { FrequencyEnum } from '../../ldap/constants/frequency.constant';
 
 export enum SettingTypeEnum {
   SYSTEM = 'SYSTEM',

@@ -7,7 +7,8 @@ export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const method = req.method;
     const url = req.originalUrl;
-
+    const body = req.body;
+    // console.log('🚀 ~ LoggerMiddleware ~ body:', body);
     // req.user is usually undefined here unless you attach it earlier
     // const username = (req.user as any)?.username || 'Unauthenticated';
 

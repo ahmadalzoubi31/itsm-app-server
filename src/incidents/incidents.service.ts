@@ -77,7 +77,7 @@ export class IncidentsService {
   async findAll() {
     try {
       return await this.incidentRepository.find({
-        relations: ['comments', 'histories', 'createdById', 'updatedById'],
+        relations: ['comments', 'histories', 'createdBy', 'updatedBy'],
         order: {
           createdAt: 'DESC',
         },
@@ -91,7 +91,7 @@ export class IncidentsService {
     try {
       return await this.incidentRepository.findOne({
         where: { id },
-        relations: ['comments', 'histories', 'createdById', 'updatedById'],
+        relations: ['comments', 'histories', 'createdBy', 'updatedBy'],
       });
     } catch (error: any) {
       throw new InternalServerErrorException(error.message);
