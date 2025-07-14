@@ -1,4 +1,4 @@
-import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
 import { FrequencyEnum } from '../constants/frequency.constant';
 
 export class SyncSettingsDto {
@@ -22,4 +22,13 @@ export class SyncSettingsDto {
 
   @IsNumber()
   fullSyncInterval: number;
+
+  @IsNumber()
+  syncMinute: number;
+
+  @IsArray()
+  daysOfWeek: number[];
+
+  @IsArray()
+  daysOfMonth: number[];
 }

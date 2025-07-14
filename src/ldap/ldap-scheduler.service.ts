@@ -1,225 +1,123 @@
-// import { Injectable, Logger } from '@nestjs/common';
-// import { LdapService } from './ldap.service';
-// import { SettingsService } from '../settings/settings.service';
-// import { SettingTypeEnum } from '../settings/constants/type.constant';
-// import { FrequencyEnum } from './constants/frequency.constant';
-// import { SchedulerRegistry } from '@nestjs/schedule';
-
-// @Injectable()
-// export class LdapSchedulerService {
-//   private readonly logger = new Logger(LdapSchedulerService.name);
-//   private isInitialized = false;
-//   private readonly JOB_NAME = 'ldap-sync';
-
-//   constructor(
-//     private readonly ldapService: LdapService,
-//     private readonly settingsService: SettingsService,
-//     private readonly schedulerRegistry: SchedulerRegistry,
-//   ) {}
-
-//   async initializeScheduler() {
-//     if (this.isInitialized) {
-//       return;
-//     }
-
-//     try {
-//       const syncSettings = await this.settingsService.getByType(
-//         SettingTypeEnum.SYNC,
-//       );
-
-//       this.logger.log('Initializing LDAP scheduler with settings:', {
-//         enabled: syncSettings.enabled,
-//         frequency: syncSettings.frequency,
-//         syncTime: syncSettings.syncTime,
-//         timezone: syncSettings.timezone,
-//       });
-
-//       if (syncSettings.enabled) {
-//         await this.startScheduler(syncSettings);
-//       } else {
-//         this.logger.log('LDAP sync is disabled, scheduler not started');
-//       }
-
-//       this.isInitialized = true;
-//       this.logger.log('LDAP scheduler initialized successfully');
-//     } catch (error) {
-//       this.logger.warn('Failed to initialize LDAP scheduler:', error.message);
-//       // Still mark as initialized to prevent repeated attempts
-//       this.isInitialized = true;
-//     }
-//   }
-
-//   async startScheduler(syncSettings: any) {
-//     // Stop existing job if running
-//     await this.stopScheduler();
-
-//     if (!syncSettings.enabled) {
-//       this.logger.log('LDAP sync is disabled, scheduler not started');
-//       return;
-//     }
-
-//     const cronExpression = this.buildCronExpression(syncSettings);
-
-//     const job = new CronJob(
-//       cronExpression,
-//       async () => {
-//         await this.executeSync();
-//       },
-//       null,
-//       false,
-//       syncSettings.timezone || 'UTC',
-//     );
-
-//     this.schedulerRegistry.addCronJob(this.JOB_NAME, job);
-//     job.start();
-
-//     this.logger.log(`LDAP sync scheduler started with cron: ${cronExpression}`);
-//   }
-
-//   async stopScheduler() {
-//     try {
-//       if (this.schedulerRegistry.doesExist('cron', this.JOB_NAME)) {
-//         const job = this.schedulerRegistry.getCronJob(this.JOB_NAME);
-//         job.stop();
-//         this.schedulerRegistry.deleteCronJob(this.JOB_NAME);
-//         this.logger.log('LDAP sync scheduler stopped');
-//       }
-//     } catch (error) {
-//       this.logger.warn('Error stopping scheduler:', error.message);
-//     }
-//   }
-
-//   private buildCronExpression(syncSettings: any): string {
-//     const [hour, minute] = syncSettings.syncTime.split(':').map(Number);
-
-//     switch (syncSettings.frequency) {
-//       case FrequencyEnum.HOURLY:
-//         return `${minute} * * * *`; // Every hour at the specified minute
-
-//       case FrequencyEnum.DAILY:
-//         return `${minute} ${hour} * * *`; // Daily at specified time
-
-//       case FrequencyEnum.WEEKLY:
-//         return `${minute} ${hour} * * 0`; // Weekly on Sunday at specified time
-
-//       case FrequencyEnum.MONTHLY:
-//         return `${minute} ${hour} 1 * *`; // Monthly on the 1st at specified time
-
-//       default:
-//         return `${minute} ${hour} * * *`; // Default to daily
-//     }
-//   }
-
-//   private async executeSync() {
-//     try {
-//       this.logger.log('Starting scheduled LDAP sync...');
-
-//       // Check if sync is still enabled before executing
-//       const currentSettings = await this.settingsService.getByType(
-//         SettingTypeEnum.SYNC,
-//       );
-
-//       if (!currentSettings.enabled) {
-//         this.logger.log('LDAP sync is disabled, skipping scheduled execution');
-//         await this.stopScheduler();
-//         return;
-//       }
-
-//       // Execute the sync with retry logic
-//       await this.executeSyncWithRetry(currentSettings);
-//     } catch (error) {
-//       this.logger.error('Scheduled LDAP sync failed:', error.message);
-//     }
-//   }
-
-//   private async executeSyncWithRetry(syncSettings: any) {
-//     let attempts = 0;
-//     const maxAttempts = syncSettings.retryAttempts || 3;
-//     const retryInterval = syncSettings.retryInterval || 30; // seconds
-
-//     while (attempts < maxAttempts) {
-//       try {
-//         attempts++;
-//         this.logger.log(`LDAP sync attempt ${attempts}/${maxAttempts}`);
-
-//         await this.ldapService.syncUsers(false); // false = not manual sync
-
-//         this.logger.log('Scheduled LDAP sync completed successfully');
-//         return;
-//       } catch (error) {
-//         this.logger.error(
-//           `LDAP sync attempt ${attempts} failed:`,
-//           error.message,
-//         );
-
-//         if (attempts < maxAttempts) {
-//           this.logger.log(`Retrying in ${retryInterval} seconds...`);
-//           await this.sleep(retryInterval * 1000);
-//         } else {
-//           this.logger.error('All LDAP sync attempts failed');
-//           throw error;
-//         }
-//       }
-//     }
-//   }
-
-//   private sleep(ms: number): Promise<void> {
-//     return new Promise((resolve) => setTimeout(resolve, ms));
-//   }
-
-//   async updateScheduler() {
-//     try {
-//       const syncSettings = await this.settingsService.getByType(
-//         SettingTypeEnum.SYNC,
-//       );
-
-//       if (syncSettings.enabled) {
-//         await this.startScheduler(syncSettings);
-//       } else {
-//         await this.stopScheduler();
-//       }
-
-//       this.logger.log('LDAP scheduler updated');
-//     } catch (error) {
-//       this.logger.error('Failed to update LDAP scheduler:', error.message);
-//     }
-//   }
-
-//   getSchedulerStatus() {
-//     try {
-//       const isRunning = this.schedulerRegistry.doesExist('cron', this.JOB_NAME);
-//       let nextExecution = null;
-
-//       if (isRunning) {
-//         const job = this.schedulerRegistry.getCronJob(this.JOB_NAME);
-//         nextExecution = job.nextDate().toString();
-//       }
-
-//       return {
-//         isRunning,
-//         nextExecution: nextExecution || null,
-//         isInitialized: this.isInitialized,
-//       };
-//     } catch (error) {
-//       this.logger.warn('Error getting scheduler status:', error.message);
-//       return {
-//         isRunning: false,
-//         nextExecution: null,
-//         isInitialized: this.isInitialized,
-//       };
-//     }
-//   }
-// }
-
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { OnEvent } from '@nestjs/event-emitter';
+import { CronJob } from 'cron';
+import { SettingsService } from 'src/settings/settings.service';
+import { SettingTypeEnum } from 'src/settings/constants/type.constant';
+import { SyncSettingsDto } from './dto/sync-settings.dto';
+import { LdapService } from './ldap.service';
 
 @Injectable()
-export class LdapSchedulerService {
+export class LdapSchedulerService implements OnModuleInit {
   private readonly logger = new Logger(LdapSchedulerService.name);
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
-  handleCron() {
-    this.logger.debug('Called every 30 seconds');
+  constructor(
+    private schedulerRegistry: SchedulerRegistry,
+    private settingsService: SettingsService,
+    private ldapService: LdapService,
+  ) {}
+
+  async onModuleInit() {
+    const settings = await this.getSyncSettingsFromDb();
+    await this.updateSchedule(settings);
+  }
+
+  @OnEvent('sync.settings.updated')
+  async handleSyncSettingsUpdatedEvent(payload: any) {
+    this.logger.log('Sync settings updated, rescheduling...');
+    if (payload.type === SettingTypeEnum.SYNC) {
+      await this.updateSchedule(payload.jsonValue);
+    }
+  }
+
+  private async updateSchedule(settings: SyncSettingsDto) {
+    if (!settings.enabled) {
+      this.removeAllSyncJobs();
+      this.logger.log('Sync disabled, removed all scheduled jobs');
+      return;
+    }
+
+    const cronExpressions = this.buildCronExpressions(settings);
+    this.removeAllSyncJobs();
+    
+    cronExpressions.forEach((cronExpr, index) => {
+      this.scheduleSync(cronExpr, settings.timezone, `user-sync-${index}`);
+    });
+  }
+
+  private buildCronExpressions(settings: SyncSettingsDto): string[] {
+    const { syncTime, frequency, daysOfWeek, daysOfMonth } = settings;
+    const [hours, minutes] = syncTime.split(':').map(Number);
+
+    switch (frequency.toLowerCase()) {
+      case 'hourly':
+        return [`${minutes} * * * *`]; // Every hour at specified minute
+      
+      case 'daily':
+        return [`${minutes} ${hours} * * *`]; // Every day at specified time
+      
+      case 'weekly':
+        if (daysOfWeek && daysOfWeek.length > 0) {
+          // Multiple cron jobs for different days of the week
+          return daysOfWeek.map(day => `${minutes} ${hours} * * ${day}`);
+        }
+        return [`${minutes} ${hours} * * 0`]; // Default to Sunday
+      
+      case 'monthly':
+        if (daysOfMonth && daysOfMonth.length > 0) {
+          // Multiple cron jobs for different days of the month
+          return daysOfMonth.map(day => `${minutes} ${hours} ${day} * *`);
+        }
+        return [`${minutes} ${hours} 1 * *`]; // Default to 1st day of month
+    
+      
+      default:
+        throw new Error(`Unsupported frequency: ${frequency}`);
+    }
+  }
+
+  private scheduleSync(cronTime: string, timezone: string, jobName = 'user-sync') {
+    if (this.schedulerRegistry.doesExist('cron', jobName)) {
+      this.schedulerRegistry.deleteCronJob(jobName);
+    }
+
+    const job = new CronJob(
+      cronTime,
+      async () => {
+        this.logger.log(`[${new Date().toISOString()}] Running user sync job: ${jobName}...`);
+        await this.performSync();
+      },
+      null,
+      false,
+      timezone
+    );
+
+    this.schedulerRegistry.addCronJob(jobName, job as any);
+    job.start();
+    this.logger.log(`Scheduled '${jobName}' with cron '${cronTime}' [${timezone}]`);
+  }
+
+  private removeAllSyncJobs() {
+    const cronJobs = this.schedulerRegistry.getCronJobs();
+    cronJobs.forEach((job, name) => {
+      if (name.startsWith('user-sync')) {
+        this.schedulerRegistry.deleteCronJob(name);
+        this.logger.log(`Removed scheduled job: ${name}`);
+      }
+    });
+  }
+
+  private async performSync() {    
+    try {
+      await this.ldapService.syncUsers(false); // false means not manual sync
+      this.logger.log('User sync executed successfully.');
+    } catch (error) {
+      this.logger.error('User sync failed:', error.message);
+    }
+  }
+
+  private async getSyncSettingsFromDb(): Promise<SyncSettingsDto> {
+    const settings = await this.settingsService.getByType(SettingTypeEnum.SYNC);
+    return settings;
   }
 }

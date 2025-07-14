@@ -7,9 +7,7 @@ import { initializeDataSource } from './db/data-source';
 
 async function bootstrap() {
   const logger = new Logger('bootstrap');
-  const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'error', 'warn'],
-  });
+  const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
 

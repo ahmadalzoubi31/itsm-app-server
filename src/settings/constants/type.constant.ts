@@ -8,6 +8,9 @@ export enum SettingTypeEnum {
   SYNC = 'SYNC',
   SECURITY = 'SECURITY',
   EMAIL = 'EMAIL',
+  EMAIL_PROVIDER = 'EMAIL_PROVIDER',
+  EMAIL_NOTIFICATIONS = 'EMAIL_NOTIFICATIONS',
+  EMAIL_INCOMING = 'EMAIL_INCOMING',
   NOTIFICATION = 'NOTIFICATION',
   APPEARANCE = 'APPEARANCE',
 }
@@ -18,6 +21,9 @@ export const SETTING_TYPES = [
   { value: SettingTypeEnum.SYNC, label: 'Sync' },
   { value: SettingTypeEnum.SECURITY, label: 'Security' },
   { value: SettingTypeEnum.EMAIL, label: 'Email' },
+  { value: SettingTypeEnum.EMAIL_PROVIDER, label: 'Email Provider' },
+  { value: SettingTypeEnum.EMAIL_NOTIFICATIONS, label: 'Email Notifications' },
+  { value: SettingTypeEnum.EMAIL_INCOMING, label: 'Email Incoming' },
   { value: SettingTypeEnum.NOTIFICATION, label: 'Notification' },
   { value: SettingTypeEnum.APPEARANCE, label: 'Appearance' },
 ] as const;

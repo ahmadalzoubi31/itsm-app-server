@@ -27,7 +27,7 @@ export default class PermissionSeeder implements Seeder {
         },
         {
           id: '56237d9a-cad8-4a4c-b1d4-2c890c17dfeb',
-          name: PermissionNameEnum.Foundation_SupportGroup,
+          name: PermissionNameEnum.Foundation_SupportGroups,
           category: PermissionCategoryEnum.FOUNDATION,
           description: 'Create and modify support groups',
         },

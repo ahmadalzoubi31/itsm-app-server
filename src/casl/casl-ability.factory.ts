@@ -13,10 +13,11 @@ import { RoleEnum } from '../users/constants/role.constant';
 import { Permission } from '../permissions/entities/permission.entity';
 import { PermissionNameEnum } from '../permissions/constants/permission-name.constant';
 import { Settings } from '../settings/entities/settings.entity';
+import { Group } from '../groups/entities/group.entity';
 
 type Subjects =
   | InferSubjects<
-      typeof Incident | typeof Permission | typeof User | typeof Settings
+      typeof Incident | typeof Permission | typeof User | typeof Settings | typeof Group
     >
   | 'all';
 
@@ -60,6 +61,9 @@ export class CaslAbilityFactory {
           case PermissionNameEnum.Foundation_People:
             can(Action.Manage, User);
             can(Action.Manage, Permission);
+            break;
+          case PermissionNameEnum.Foundation_SupportGroups:
+            can(Action.Manage, Group);
             break;
           case PermissionNameEnum.System_Settings:
             can(Action.Manage, Settings);

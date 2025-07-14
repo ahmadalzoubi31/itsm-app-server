@@ -16,10 +16,23 @@ import { SerivceCardsModule } from './serivce-cards/serivce-cards.module';
 import { SerivceRequestsModule } from './serivce-requests/serivce-requests.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { SettingsModule } from './settings/settings.module';
+import { EmailModule } from './email/email.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { GroupsModule } from './groups/groups.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(), 
+    ConfigModule.forRoot({ isGlobal: true, cache: true }),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        return {
+          ...dbDataSource.options,
+        };
+      },
+    }),
     AuthModule,
     SharedModule,
     CaslModule,
@@ -32,15 +45,9 @@ import { ScheduleModule } from '@nestjs/schedule';
     SerivceRequestsModule,
     WorkflowsModule,
     SettingsModule,
-    ScheduleModule.forRoot(),
-    ConfigModule.forRoot({ isGlobal: true, cache: true }),
-    TypeOrmModule.forRootAsync({
-      useFactory: () => {
-        return {
-          ...dbDataSource.options,
-        };
-      },
-    }),
+    EmailModule,
+    GroupsModule,
+
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -13,6 +13,11 @@ import { IncidentHistory } from '../incidents/entities/incident-history.entity';
 import { Settings } from '../settings/entities/settings.entity';
 import { SyncHistory } from '../ldap/entities/sync-history.entity';
 import { StagedUser } from '../ldap/entities/staged-user.entity';
+import { EmailTemplate } from '../email/entities/email-template.entity';
+import { EmailQueue } from '../email/entities/email-queue.entity';
+import { EmailStatistics } from '../email/entities/email-statistics.entity';
+import { Group } from '../groups/entities/group.entity';
+import { GroupMember } from '../groups/entities/group-member.entity';
 
 import UserSeeder from './seeds/user.seeder';
 import PermissionSeeder from './seeds/permission.seeder';
@@ -41,6 +46,11 @@ export const dbDataSourceOptions: DataSourceOptions & SeederOptions = {
     Settings,
     SyncHistory,
     StagedUser,
+    EmailTemplate,
+    EmailQueue,
+    EmailStatistics,
+    Group,
+    GroupMember,
   ],
   seeds: [PermissionSeeder, UserSeeder, SettingsSeeder],
 };

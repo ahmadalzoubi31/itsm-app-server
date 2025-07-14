@@ -6,7 +6,7 @@ export enum PermissionNameEnum {
   INCIDENT_VIEWER = 'INCIDENT_VIEWER',
 
   // Foundation
-  Foundation_SupportGroup = 'FOUNDATION_SUPPORT_GROUP',
+  Foundation_SupportGroups = 'FOUNDATION_SUPPORT_GROUP',
   Foundation_People = 'FOUNDATION_PEOPLE',
   Foundation_Category = 'FOUNDATION_CATEGORY',
 
@@ -20,7 +20,7 @@ export const PERMISSION_NAMES = [
   { value: PermissionNameEnum.INCIDENT_SUBMITTER, label: 'Incident Submitter' },
   { value: PermissionNameEnum.INCIDENT_VIEWER, label: 'Incident Viewer' },
   {
-    value: PermissionNameEnum.Foundation_SupportGroup,
+    value: PermissionNameEnum.Foundation_SupportGroups,
     label: 'Foundation Support Group',
   },
   { value: PermissionNameEnum.Foundation_People, label: 'Foundation People' },

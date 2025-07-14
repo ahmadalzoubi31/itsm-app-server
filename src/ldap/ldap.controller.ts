@@ -7,7 +7,6 @@ import {
   Body,
 } from '@nestjs/common';
 import { LdapService } from './ldap.service';
-import { LdapSchedulerService } from './ldap-scheduler.service';
 import { LdapSettingDto } from './dto/ldap-settings.dto';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -22,7 +21,6 @@ import { CheckPolicies } from 'src/casl/decorators/check-policies.decorator';
 export class LdapController {
   constructor(
     private readonly ldapService: LdapService,
-    private readonly ldapSchedulerService: LdapSchedulerService,
   ) {}
 
   @Get('preview')
@@ -85,9 +83,9 @@ export class LdapController {
     return this.ldapService.rejectStagedUsers(body);
   }
 
-  @Get('scheduler-status')
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Settings))
-  async getSchedulerStatus() {
-    return this.ldapSchedulerService.handleCron();
-  }
+  // @Get('scheduler-status')
+  // @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Settings))
+  // async getSchedulerStatus() {
+  //   return this.ldapSchedulerService.handleCron();
+  // }
 }

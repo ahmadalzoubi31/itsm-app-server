@@ -20,9 +20,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PoliciesGuard } from '../casl/guards/policies.guard';
 import { AuditFieldsInterceptor } from '../shared/interceptors/audit-fields.interceptor';
 
+@Controller('users')
 @UseGuards(JwtAuthGuard, PoliciesGuard)
 @UseInterceptors(AuditFieldsInterceptor)
-@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
