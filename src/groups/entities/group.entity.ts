@@ -1,20 +1,20 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
 import { BaseEntity } from '../../shared/entities/base.entity';
+import { User } from '../../users/entities/user.entity';
 
 export enum GroupTypeEnum {
-  SUPPORT = "SUPPORT",
-  TECHNICAL = "TECHNICAL",
-  MANAGEMENT = "MANAGEMENT",
-  ESCALATION = "ESCALATION",
-  SPECIALIST = "SPECIALIST",
-  GENERAL = "GENERAL",
+  SUPPORT = 'SUPPORT',
+  TECHNICAL = 'TECHNICAL',
+  MANAGEMENT = 'MANAGEMENT',
+  ESCALATION = 'ESCALATION',
+  SPECIALIST = 'SPECIALIST',
+  GENERAL = 'GENERAL',
 }
 
 export enum GroupStatusEnum {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-  SUSPENDED = "SUSPENDED",
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  SUSPENDED = 'SUSPENDED',
 }
 
 @Entity('groups')

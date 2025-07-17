@@ -49,7 +49,6 @@ export class EmailService {
   async initializeTransporter() {
     try {
       const settings = await this.getEmailSettings();
-      console.log("🚀 ~ initializeTransporter ~ settings:", settings)
       if (settings?.outgoing?.enabled) {
         this.transporter = await this.createTransporter(settings.outgoing);
         this.logger.log('Email transporter initialized successfully');

@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Request, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  Request,
+  UseInterceptors,
+} from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
@@ -10,6 +22,9 @@ import { Action } from 'src/casl/enums/action.enum';
 import { AppAbility } from 'src/casl/casl-ability.factory';
 import { CheckPolicies } from 'src/casl/decorators/check-policies.decorator';
 import { Group } from './entities/group.entity';
+import { AddMemberDto } from './dto/add-member.dto';
+import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
+import { AddMembersBatchDto } from './dto/add-members-batch.dto';
 
 @Controller('groups')
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -45,5 +60,43 @@ export class GroupsController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Group))
   remove(@Param('id') id: string) {
     return this.groupsService.remove(id);
+  }
+
+  // Group Members endpoints
+  @Get(':id/members')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Group))
+  getGroupMembers(@Param('id') id: string) {
+    return this.groupsService.getGroupMembers(id);
+  }
+
+  @Post(':id/members')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Group))
+  addMember(@Param('id') id: string, @Body() addMemberDto: AddMemberDto) {
+    return this.groupsService.addMember(id, addMemberDto);
+  }
+
+  @Post(':id/members/batch')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Group))
+  addMembersBatch(
+    @Param('id') id: string,
+    @Body() addMembersBatchDto: AddMembersBatchDto,
+  ) {
+    return this.groupsService.addMembersBatch(id, addMembersBatchDto);
+  }
+
+  @Patch(':id/members/:userId')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Group))
+  updateMemberRole(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Body() updateMemberRoleDto: UpdateMemberRoleDto,
+  ) {
+    return this.groupsService.updateMemberRole(id, userId, updateMemberRoleDto);
+  }
+
+  @Delete(':id/members/:userId')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Group))
+  removeMember(@Param('id') id: string, @Param('userId') userId: string) {
+    return this.groupsService.removeMember(id, userId);
   }
 }
