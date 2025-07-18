@@ -12,6 +12,7 @@ import {
 import { AddMemberDto } from './dto/add-member.dto';
 import { AddMembersBatchDto } from './dto/add-members-batch.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
+import { Permission } from '../permissions/entities/permission.entity';
 
 @Injectable()
 export class GroupsService {
@@ -20,6 +21,8 @@ export class GroupsService {
     private groupRepository: Repository<Group>,
     @InjectRepository(GroupMember)
     private groupMemberRepository: Repository<GroupMember>,
+    @InjectRepository(Permission)
+    private permissionRepository: Repository<Permission>,
   ) {}
 
   async create(createGroupDto: CreateGroupDto): Promise<Group> {
@@ -45,6 +48,7 @@ export class GroupsService {
       .leftJoinAndSelect('group.leader', 'leader')
       .leftJoinAndSelect('group.members', 'members')
       .leftJoinAndSelect('members.user', 'memberUser')
+      .leftJoinAndSelect('group.permissions', 'permissions')
       .leftJoinAndSelect('group.createdBy', 'createdBy')
       .leftJoinAndSelect('group.updatedBy', 'updatedBy');
 
@@ -87,6 +91,7 @@ export class GroupsService {
         'leader',
         'members',
         'members.user',
+        'permissions',
         'createdBy',
         'updatedBy',
       ],
@@ -243,6 +248,113 @@ export class GroupsService {
 
     await this.groupMemberRepository.remove(member);
     return { success: true };
+  }
+
+  // Group Permissions methods
+  async getGroupPermissions(groupId: string): Promise<Permission[]> {
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+      relations: ['permissions'],
+    });
+
+    if (!group) {
+      throw new Error('Group not found');
+    }
+
+    return group.permissions || [];
+  }
+
+  async addPermissionToGroup(
+    groupId: string,
+    permissionId: string,
+  ): Promise<Group> {
+    const group = await this.findOne(groupId);
+    const permission = await this.permissionRepository.findOne({
+      where: { id: permissionId },
+    });
+
+    if (!permission) {
+      throw new Error('Permission not found');
+    }
+
+    // Check if permission already exists in group
+    const existingPermission = group.permissions?.find(
+      (p) => p.id === permissionId,
+    );
+    if (existingPermission) {
+      throw new Error('Permission already exists in this group');
+    }
+
+    if (!group.permissions) {
+      group.permissions = [];
+    }
+    group.permissions.push(permission);
+
+    await this.groupRepository.save(group);
+    return this.findOne(groupId);
+  }
+
+  async removePermissionFromGroup(
+    groupId: string,
+    permissionId: string,
+  ): Promise<Group> {
+    const group = await this.findOne(groupId);
+
+    if (!group.permissions) {
+      throw new Error('Permission not found in this group');
+    }
+
+    const permissionIndex = group.permissions.findIndex(
+      (p) => p.id === permissionId,
+    );
+    if (permissionIndex === -1) {
+      throw new Error('Permission not found in this group');
+    }
+
+    group.permissions.splice(permissionIndex, 1);
+    await this.groupRepository.save(group);
+    return this.findOne(groupId);
+  }
+
+  async setGroupPermissions(
+    groupId: string,
+    permissionIds: string[],
+  ): Promise<Group> {
+    const group = await this.findOne(groupId);
+    const permissions = await this.permissionRepository.find({
+      where: { id: In(permissionIds) },
+    });
+
+    if (permissions.length !== permissionIds.length) {
+      throw new Error('One or more permissions not found');
+    }
+
+    group.permissions = permissions;
+    await this.groupRepository.save(group);
+    return this.findOne(groupId);
+  }
+
+  async getUserGroupPermissions(userId: string): Promise<Permission[]> {
+    const userGroups = await this.groupMemberRepository.find({
+      where: { userId, isActive: true },
+      relations: ['group', 'group.permissions'],
+    });
+
+    const allPermissions: Permission[] = [];
+    const seenPermissionIds = new Set<string>();
+
+    for (const membership of userGroups) {
+      if (membership.group?.permissions) {
+        for (const permission of membership.group.permissions) {
+          if (!seenPermissionIds.has(permission.id)) {
+            seenPermissionIds.add(permission.id);
+            allPermissions.push(permission);
+          }
+        }
+      }
+    }
+
+    return allPermissions;
   }
 
   private async addMembersToGroup(

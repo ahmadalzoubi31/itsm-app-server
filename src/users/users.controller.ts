@@ -44,6 +44,18 @@ export class UsersController {
     return await this.usersService.findOne(id);
   }
 
+  @Get(':id/effective-permissions')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
+  async getEffectivePermissions(@Param('id') id: string) {
+    return await this.usersService.getEffectiveUserPermissions(id);
+  }
+
+  @Get(':id/group-permissions')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
+  async getGroupPermissions(@Param('id') id: string) {
+    return await this.usersService.getUserGroupPermissions(id);
+  }
+
   @Patch(':id')
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

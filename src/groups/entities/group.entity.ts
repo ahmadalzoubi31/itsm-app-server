@@ -1,6 +1,15 @@
-import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { BaseEntity } from '../../shared/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
+import { Permission } from '../../permissions/entities/permission.entity';
 
 export enum GroupTypeEnum {
   SUPPORT = 'SUPPORT',
@@ -63,4 +72,18 @@ export class Group extends BaseEntity {
 
   @OneToMany('GroupMember', 'group')
   members: any[];
+
+  @ManyToMany(() => Permission, (permission) => permission.groups)
+  @JoinTable({
+    name: 'group_permissions',
+    joinColumn: {
+      name: 'group_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'permission_id',
+      referencedColumnName: 'id',
+    },
+  })
+  permissions: Permission[];
 }

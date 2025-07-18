@@ -9,12 +9,16 @@ import { Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { In } from 'typeorm';
+import { GroupMember } from '../groups/entities/group-member.entity';
+import { Permission } from '../permissions/entities/permission.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(GroupMember)
+    private groupMemberRepository: Repository<GroupMember>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -115,5 +119,119 @@ export class UsersService {
     } catch (error: any) {
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  async findOneWithGroupPermissions(id: string): Promise<User | null> {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { id, username: Not('system') },
+        relations: ['permissions', 'createdBy', 'updatedBy'],
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      // Get group permissions
+      const groupPermissions = await this.getUserGroupPermissions(id);
+
+      // Combine user permissions with group permissions
+      const allPermissions = this.combinePermissions(
+        user.permissions || [],
+        groupPermissions,
+      );
+      user.permissions = allPermissions;
+
+      return user;
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async findByUsernameWithGroupPermissions(
+    username: string,
+  ): Promise<User | null> {
+    try {
+      const user = await this.usersRepository.findOne({
+        where: { username, id: Not('0745bd13-92f2-474e-8544-5018383c7b75') },
+        relations: ['permissions', 'createdBy', 'updatedBy'],
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      // Get group permissions
+      const groupPermissions = await this.getUserGroupPermissions(user.id);
+
+      // Combine user permissions with group permissions
+      const allPermissions = this.combinePermissions(
+        user.permissions || [],
+        groupPermissions,
+      );
+      user.permissions = allPermissions;
+
+      return user;
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async getUserGroupPermissions(userId: string): Promise<Permission[]> {
+    try {
+      const userGroups = await this.groupMemberRepository.find({
+        where: { userId, isActive: true },
+        relations: ['group', 'group.permissions'],
+      });
+
+      const allPermissions: Permission[] = [];
+      const seenPermissionIds = new Set<string>();
+
+      for (const membership of userGroups) {
+        if (membership.group?.permissions) {
+          for (const permission of membership.group.permissions) {
+            if (!seenPermissionIds.has(permission.id)) {
+              seenPermissionIds.add(permission.id);
+              allPermissions.push(permission);
+            }
+          }
+        }
+      }
+
+      return allPermissions;
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async getEffectiveUserPermissions(userId: string): Promise<Permission[]> {
+    try {
+      const user = await this.findOne(userId);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const groupPermissions = await this.getUserGroupPermissions(userId);
+      return this.combinePermissions(user.permissions || [], groupPermissions);
+    } catch (error: any) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  private combinePermissions(
+    userPermissions: Permission[],
+    groupPermissions: Permission[],
+  ): Permission[] {
+    const allPermissions: Permission[] = [...userPermissions];
+    const seenPermissionIds = new Set<string>(userPermissions.map((p) => p.id));
+
+    for (const permission of groupPermissions) {
+      if (!seenPermissionIds.has(permission.id)) {
+        seenPermissionIds.add(permission.id);
+        allPermissions.push(permission);
+      }
+    }
+
+    return allPermissions;
   }
 }

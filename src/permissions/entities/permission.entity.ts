@@ -32,4 +32,7 @@ export class Permission {
 
   @ManyToMany(() => User, (user) => user.permissions, { onDelete: 'CASCADE' })
   users: User[];
+
+  @ManyToMany('Group', 'permissions', { onDelete: 'CASCADE' })
+  groups: any[];
 }

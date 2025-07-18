@@ -24,7 +24,7 @@ import { GroupsModule } from './groups/groups.module';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    EventEmitterModule.forRoot(), 
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true, cache: true }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {
@@ -47,7 +47,6 @@ import { GroupsModule } from './groups/groups.module';
     SettingsModule,
     EmailModule,
     GroupsModule,
-
   ],
   controllers: [AppController],
   providers: [AppService],

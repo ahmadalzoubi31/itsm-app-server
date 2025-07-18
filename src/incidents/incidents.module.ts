@@ -6,15 +6,16 @@ import { IncidentComment } from './entities/incident-comment.entity';
 import { IncidentHistory } from './entities/incident-history.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { IncidentHelper } from './helpers/incident.helper';
-import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { CaslModule } from '../casl/casl.module';
 import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    UsersModule,
     TypeOrmModule.forFeature([Incident, IncidentComment, IncidentHistory]),
+    CaslModule,
+    UsersModule,
   ],
   controllers: [IncidentsController],
-  providers: [IncidentsService, IncidentHelper, CaslAbilityFactory],
+  providers: [IncidentsService, IncidentHelper],
 })
 export class IncidentsModule {}

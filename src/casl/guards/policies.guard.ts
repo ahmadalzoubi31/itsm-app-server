@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { CaslAbilityFactory, AppAbility } from '../casl-ability.factory';
-import { PolicyHandler } from '../intefaces/ipolicy-handler.interface';
+import { PolicyHandler } from '../interfaces/ipolicy-handler.interface';
 import { CHECK_POLICIES_KEY } from '../decorators/check-policies.decorator';
 import { UsersService } from '../../users/users.service';
 
@@ -33,7 +33,7 @@ export class PoliciesGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    const ability = this.caslAbilityFactory.createForUser(userInfo);
+    const ability = await this.caslAbilityFactory.createForUser(userInfo);
     return policyHandlers.every((handler) =>
       this.execPolicyHandler(handler, ability),
     );

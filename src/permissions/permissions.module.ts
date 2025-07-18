@@ -3,14 +3,13 @@ import { PermissionsController } from './permissions.controller';
 import { PermissionsService } from './permissions.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Permission } from './entities/permission.entity';
-import { CaslAbilityFactory } from '../casl/casl-ability.factory';
-import { UsersService } from '../users/users.service';
-import { User } from '../users/entities/user.entity';
+import { CaslModule } from '../casl/casl.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Permission, User])],
+  imports: [TypeOrmModule.forFeature([Permission]), CaslModule, UsersModule],
   controllers: [PermissionsController],
-  providers: [PermissionsService, CaslAbilityFactory, UsersService],
+  providers: [PermissionsService],
   exports: [PermissionsService],
 })
 export class PermissionsModule {}

@@ -3,14 +3,13 @@ import { SettingsService } from './settings.service';
 import { SettingsController } from './settings.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Settings } from './entities/settings.entity';
-import { CaslAbilityFactory } from '../casl/casl-ability.factory';
-import { UsersService } from '../users/users.service';
-import { User } from '../users/entities/user.entity';
+import { CaslModule } from '../casl/casl.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Settings, User])],
+  imports: [TypeOrmModule.forFeature([Settings]), CaslModule, UsersModule],
   controllers: [SettingsController],
-  providers: [SettingsService, CaslAbilityFactory, UsersService],
+  providers: [SettingsService],
   exports: [SettingsService],
 })
 export class SettingsModule {}

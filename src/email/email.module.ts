@@ -9,32 +9,19 @@ import { EmailQueue } from './entities/email-queue.entity';
 import { EmailTemplate } from './entities/email-template.entity';
 import { EmailStatistics } from './entities/email-statistics.entity';
 import { SettingsModule } from '../settings/settings.module';
-import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { CaslModule } from '../casl/casl.module';
 import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([
-      EmailQueue,
-      EmailTemplate,
-      EmailStatistics,
-    ]),
+    TypeOrmModule.forFeature([EmailQueue, EmailTemplate, EmailStatistics]),
     SettingsModule,
+    CaslModule,
     UsersModule,
   ],
-  controllers: [
-    EmailController,
-    EmailTemplateController,
-  ],
-  providers: [
-    EmailService,
-    EmailTemplateService,
-    CaslAbilityFactory,
-  ],
-  exports: [
-    EmailService,
-    EmailTemplateService,
-  ],
+  controllers: [EmailController, EmailTemplateController],
+  providers: [EmailService, EmailTemplateService],
+  exports: [EmailService, EmailTemplateService],
 })
-export class EmailModule {} 
+export class EmailModule {}

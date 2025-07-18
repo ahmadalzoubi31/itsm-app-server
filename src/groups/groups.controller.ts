@@ -25,6 +25,11 @@ import { Group } from './entities/group.entity';
 import { AddMemberDto } from './dto/add-member.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { AddMembersBatchDto } from './dto/add-members-batch.dto';
+import {
+  AddPermissionToGroupDto,
+  RemovePermissionFromGroupDto,
+  SetGroupPermissionsDto,
+} from './dto/group-permission.dto';
 
 @Controller('groups')
 @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -98,5 +103,45 @@ export class GroupsController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Group))
   removeMember(@Param('id') id: string, @Param('userId') userId: string) {
     return this.groupsService.removeMember(id, userId);
+  }
+
+  // Group Permissions endpoints
+  @Get(':id/permissions')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Group))
+  getGroupPermissions(@Param('id') id: string) {
+    return this.groupsService.getGroupPermissions(id);
+  }
+
+  @Post(':id/permissions')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Group))
+  addPermissionToGroup(
+    @Param('id') id: string,
+    @Body() addPermissionDto: AddPermissionToGroupDto,
+  ) {
+    return this.groupsService.addPermissionToGroup(
+      id,
+      addPermissionDto.permissionId,
+    );
+  }
+
+  @Delete(':id/permissions/:permissionId')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Group))
+  removePermissionFromGroup(
+    @Param('id') id: string,
+    @Param('permissionId') permissionId: string,
+  ) {
+    return this.groupsService.removePermissionFromGroup(id, permissionId);
+  }
+
+  @Patch(':id/permissions')
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Group))
+  setGroupPermissions(
+    @Param('id') id: string,
+    @Body() setPermissionsDto: SetGroupPermissionsDto,
+  ) {
+    return this.groupsService.setGroupPermissions(
+      id,
+      setPermissionsDto.permissionIds,
+    );
   }
 }
