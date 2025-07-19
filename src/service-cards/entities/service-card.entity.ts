@@ -2,8 +2,8 @@ import { BaseEntity } from '../../shared/entities/base.entity';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ServiceCardCategoryEnum } from '../constants/categort.constant';
 
-@Entity('serivce_card')
-export class SerivceCard extends BaseEntity {
+@Entity('service_card')
+export class ServiceCard extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
 

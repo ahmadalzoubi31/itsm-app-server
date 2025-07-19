@@ -12,8 +12,8 @@ import { SlaModule } from './sla/sla.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import dbDataSource from './db/data-source';
 import { LdapModule } from './ldap/ldap.module';
-import { SerivceCardsModule } from './serivce-cards/serivce-cards.module';
-import { SerivceRequestsModule } from './serivce-requests/serivce-requests.module';
+import { ServiceCardsModule } from './service-cards/service-cards.module';
+import { ServiceRequestsModule } from './service-requests/service-requests.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { SettingsModule } from './settings/settings.module';
 import { EmailModule } from './email/email.module';
@@ -41,8 +41,8 @@ import { GroupsModule } from './groups/groups.module';
     IncidentsModule,
     SlaModule,
     LdapModule,
-    SerivceCardsModule,
-    SerivceRequestsModule,
+    ServiceCardsModule,
+    ServiceRequestsModule,
     WorkflowsModule,
     SettingsModule,
     EmailModule,

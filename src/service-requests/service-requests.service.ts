@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSerivceRequestDto } from './dto/create-serivce-request.dto';
-import { UpdateSerivceRequestDto } from './dto/update-serivce-request.dto';
+import { CreateServiceRequestDto } from './dto/create-service-request.dto';
+import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 
 @Injectable()
-export class SerivceRequestsService {
-  create(createSerivceRequestDto: CreateSerivceRequestDto) {
+export class ServiceRequestsService {
+  create(createServiceRequestDto: CreateServiceRequestDto) {
     return 'This action adds a new serivceRequest';
   }
 
@@ -12,15 +12,15 @@ export class SerivceRequestsService {
     return `This action returns all serivceRequests`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} serivceRequest`;
   }
 
-  update(id: number, updateSerivceRequestDto: UpdateSerivceRequestDto) {
+  update(id: string, updateServiceRequestDto: UpdateServiceRequestDto) {
     return `This action updates a #${id} serivceRequest`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} serivceRequest`;
   }
 }
