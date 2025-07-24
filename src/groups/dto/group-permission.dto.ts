@@ -1,6 +1,7 @@
 import { IsUUID, IsArray, ArrayNotEmpty, ArrayUnique } from 'class-validator';
+import { BaseEntityDto } from '../../shared/dto/base-entity.dto';
 
-export class AddPermissionToGroupDto {
+export class AddPermissionToGroupDto extends BaseEntityDto {
   @IsUUID()
   permissionId: string;
 }

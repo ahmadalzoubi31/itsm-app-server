@@ -42,7 +42,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'lax', // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
-      domain: '.webpexo.com', // <-- this is the key part!
+      // domain: '.webpexo.com', // <-- this is the key part!
       path: '/',
     });
 
@@ -51,7 +51,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'lax', // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
-      domain: '.webpexo.com', // <-- this is the key part!
+      // domain: '.webpexo.com', // <-- this is the key part!
       path: '/',
     });
 

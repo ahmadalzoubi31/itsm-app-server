@@ -49,8 +49,10 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'https://itsm.webpexo.com',
-    // origin: 'http://localhost:8080',
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? 'https://itsm.webpexo.com'
+        : 'http://localhost:8080',
     credentials: true, // allow cookies
   });
 
