@@ -26,6 +26,23 @@ export class AuthController {
     private usersService: UsersService,
   ) {}
 
+  private cookieOptions =
+    process.env.NODE_ENV === 'production'
+      ? {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax' as const, // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
+          domain: '.webpexo.com', // <-- this is the key part!
+          path: '/',
+        }
+      : {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax' as const, // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
+          domain: 'localhost', // <-- this is the key part!
+          path: '/',
+        };
+
   @UseGuards(LocalAuthGuard)
   @Post('sign-in')
   @HttpCode(200)
@@ -38,22 +55,10 @@ export class AuthController {
     );
 
     // Set HTTP-only cookie for access token
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax', // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
-      // domain: '.webpexo.com', // <-- this is the key part!
-      path: '/',
-    });
+    res.cookie('accessToken', accessToken, this.cookieOptions);
 
     // Set HTTP-only cookie for refresh token
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax', // 'lax' is good for most use-cases, 'none' only if you ever need cross-site requests
-      // domain: '.webpexo.com', // <-- this is the key part!
-      path: '/',
-    });
+    res.cookie('refreshToken', refreshToken, this.cookieOptions);
 
     // You can return user info or just a status
     return { accessToken, refreshToken };
@@ -95,18 +100,8 @@ export class AuthController {
     @Request() req: { user: { userId: string } },
     @Response({ passthrough: true }) res: ExpressResponse,
   ) {
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-    });
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-    });
+    res.clearCookie('accessToken', this.cookieOptions);
+    res.clearCookie('refreshToken');
 
     console.log('logout');
     console.log(req.user.userId);
@@ -124,20 +119,10 @@ export class AuthController {
       await this.authService.refreshToken(input);
 
     // Set HTTP-only cookie for access token
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-    });
+    res.cookie('accessToken', accessToken, this.cookieOptions);
 
     // Set HTTP-only cookie for refresh token
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-    });
+    res.cookie('refreshToken', refreshToken, this.cookieOptions);
 
     return { accessToken, refreshToken };
   }
