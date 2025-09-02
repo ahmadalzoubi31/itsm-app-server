@@ -1,26 +1,44 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
+import { ServiceRequest } from './entities/service-request.entity';
 
 @Injectable()
 export class ServiceRequestsService {
-  create(createServiceRequestDto: CreateServiceRequestDto) {
-    return 'This action adds a new serivceRequest';
+  constructor(
+    @InjectRepository(ServiceRequest)
+    private serviceRequestRepository: Repository<ServiceRequest>,
+  ) {}
+
+  async create(createServiceRequestDto: CreateServiceRequestDto) {
+    const serviceRequest = this.serviceRequestRepository.create(
+      createServiceRequestDto,
+    );
+    return await this.serviceRequestRepository.save(serviceRequest);
   }
 
-  findAll() {
-    return `This action returns all serivceRequests`;
+  async findAll() {
+    return await this.serviceRequestRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} serivceRequest`;
+  async findOne(id: string) {
+    return await this.serviceRequestRepository.findOne({
+      where: { id },
+    });
   }
 
-  update(id: string, updateServiceRequestDto: UpdateServiceRequestDto) {
-    return `This action updates a #${id} serivceRequest`;
+  async update(id: string, updateServiceRequestDto: UpdateServiceRequestDto) {
+    await this.serviceRequestRepository.update(id, updateServiceRequestDto);
+    return await this.findOne(id);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} serivceRequest`;
+  async remove(id: string) {
+    return await this.serviceRequestRepository.delete(id);
   }
 }

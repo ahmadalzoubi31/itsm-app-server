@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ServiceCardsService } from './service-cards.service';
 import { CreateServiceCardDto } from './dto/create-service-card.dto';
@@ -17,17 +18,25 @@ export class ServiceCardsController {
 
   @Post()
   create(@Body() createServiceCardDto: CreateServiceCardDto) {
-      return this.serviceCardsService.create(createServiceCardDto);
+    return this.serviceCardsService.create(createServiceCardDto);
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('active') active?: string) {
+    if (active === 'true') {
+      return this.serviceCardsService.findActive();
+    }
     return this.serviceCardsService.findAll();
+  }
+
+  @Get('category/:category')
+  findByCategory(@Param('category') category: string) {
+    return this.serviceCardsService.findByCategory(category);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.serviceCardsService.findOne(+id);
+    return this.serviceCardsService.findOne(id);
   }
 
   @Patch(':id')
@@ -35,11 +44,11 @@ export class ServiceCardsController {
     @Param('id') id: string,
     @Body() updateServiceCardDto: UpdateServiceCardDto,
   ) {
-    return this.serviceCardsService.update(+id, updateServiceCardDto);
+    return this.serviceCardsService.update(id, updateServiceCardDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.serviceCardsService.remove(+id);
+    return this.serviceCardsService.remove(id);
   }
 }

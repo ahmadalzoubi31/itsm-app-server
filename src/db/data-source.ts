@@ -18,6 +18,7 @@ import { EmailQueue } from '../email/entities/email-queue.entity';
 import { EmailStatistics } from '../email/entities/email-statistics.entity';
 import { Group } from '../groups/entities/group.entity';
 import { GroupMember } from '../groups/entities/group-member.entity';
+import { ServiceCard } from '../service-cards/entities/service-card.entity';
 
 import UserSeeder from './seeds/user.seeder';
 import PermissionSeeder from './seeds/permission.seeder';
@@ -51,6 +52,7 @@ export const dbDataSourceOptions: DataSourceOptions & SeederOptions = {
     EmailStatistics,
     Group,
     GroupMember,
+    ServiceCard,
   ],
   seeds: [PermissionSeeder, UserSeeder, SettingsSeeder],
 };

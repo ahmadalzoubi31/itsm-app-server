@@ -6,7 +6,7 @@ import { ServiceRequest } from './entities/service-request.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ServiceRequest])],
-    controllers: [ServiceRequestsController],
+  controllers: [ServiceRequestsController],
   providers: [ServiceRequestsService],
 })
 export class ServiceRequestsModule {}

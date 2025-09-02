@@ -1,12 +1,9 @@
 import { BaseEntity } from '../../shared/entities/base.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { ServiceCardCategoryEnum } from '../constants/categort.constant';
+import { Column, Entity } from 'typeorm';
+import { ServiceCardCategoryEnum } from '../constants/category.constant';
 
 @Entity('service_card')
 export class ServiceCard extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: string;
-
   @Column({ unique: true })
   name: string;
 
@@ -26,9 +23,12 @@ export class ServiceCard extends BaseEntity {
   @Column()
   price: string;
 
-  @Column()
-  icon: any;
+  @Column({ nullable: true })
+  icon: string;
 
   @Column({ default: true })
   isActive: boolean;
+
+  // @Column({ type: 'json', nullable: true })
+  // config: any;
 }

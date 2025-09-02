@@ -19,13 +19,29 @@ export class ServiceRequest extends BaseEntity {
   priority: string;
 
   @Column({ nullable: true })
-  category: string;             
+  category: string;
 
   @Column({ nullable: true })
   serviceCardId: string;
 
-  
+  @Column({ nullable: true })
+  serviceName: string;
+
+  @Column({ nullable: true })
+  title: string;
+
+  @Column({ nullable: true })
+  requestedBy: string;
+
+  @Column({ nullable: true })
+  requestedDate: string;
+
+  @Column({ nullable: true })
+  estimatedCompletion: string;
 
   @Column({ nullable: true })
   groupId: string;
-}   
+
+  @Column({ type: 'json', nullable: true })
+  customFieldValues: any;
+}
