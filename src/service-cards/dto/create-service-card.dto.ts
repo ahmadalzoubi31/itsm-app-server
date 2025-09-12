@@ -1,32 +1,77 @@
-import { IsString, IsOptional, IsEnum, IsBoolean } from 'class-validator';
-import { ServiceCardCategoryEnum } from '../constants/category.constant';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  IsArray,
+  IsObject,
+  IsUUID,
+} from 'class-validator';
+import {
+  ServiceCardStatus,
+  ServiceCardVisibility,
+} from '../entities/service-card.entity';
 
 export class CreateServiceCardDto {
   @IsString()
   name: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   description?: string;
 
-  @IsEnum(ServiceCardCategoryEnum)
-  category: ServiceCardCategoryEnum;
-
+  @IsUUID()
   @IsOptional()
+  categoryId?: string; // reference to ServiceCategory
+
+  @IsEnum(ServiceCardStatus)
+  @IsOptional()
+  status?: ServiceCardStatus = ServiceCardStatus.DRAFT;
+
+  @IsEnum(ServiceCardVisibility)
+  @IsOptional()
+  visibility?: ServiceCardVisibility = ServiceCardVisibility.INTERNAL;
+
   @IsString()
+  @IsOptional()
   estimatedTime?: string;
 
   @IsString()
-  price: string;
+  @IsOptional()
+  price?: string;
 
+  @IsString()
   @IsOptional()
   icon?: string;
 
   @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  isActive?: boolean = true;
 
-  // @IsOptional()
-  // @IsObject()
-  // config?: Record<string, any>;
+  @IsNumber()
+  @IsOptional()
+  displayOrder?: number;
+
+  @IsArray()
+  @IsOptional()
+  tags?: string[];
+
+  @IsObject()
+  @IsOptional()
+  requestFormSchema?: Record<string, any>;
+
+  @IsUUID()
+  @IsOptional()
+  approvalWorkflowId?: string; // reference to ApprovalWorkflow
+
+  @IsUUID()
+  @IsOptional()
+  slaId?: string; // reference to SLA
+
+  @IsUUID()
+  @IsOptional()
+  assignedGroupId?: string; // reference to Group
+
+  @IsString()
+  @IsOptional()
+  supportContact?: string;
 }

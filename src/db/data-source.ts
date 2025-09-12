@@ -19,6 +19,10 @@ import { EmailStatistics } from '../email/entities/email-statistics.entity';
 import { Group } from '../groups/entities/group.entity';
 import { GroupMember } from '../groups/entities/group-member.entity';
 import { ServiceCard } from '../service-cards/entities/service-card.entity';
+import { ServiceCategory } from '../service-cards/entities/service_category.entity';
+import { ApprovalWorkflow } from '../service-cards/entities/approval_workflow.entity';
+import { SLA } from '../service-cards/entities/sla.entity';
+import { ServiceRequest } from '../service-requests/entities/service-request.entity';
 
 import UserSeeder from './seeds/user.seeder';
 import PermissionSeeder from './seeds/permission.seeder';
@@ -53,6 +57,10 @@ export const dbDataSourceOptions: DataSourceOptions & SeederOptions = {
     Group,
     GroupMember,
     ServiceCard,
+    ServiceCategory,
+    ApprovalWorkflow,
+    SLA,
+    ServiceRequest,
   ],
   seeds: [PermissionSeeder, UserSeeder, SettingsSeeder],
 };

@@ -32,7 +32,14 @@ export class ServiceCardsService {
   async findAll(): Promise<ServiceCard[]> {
     try {
       return await this.serviceCardsRepository.find({
-        relations: ['createdBy', 'updatedBy'],
+        relations: [
+          'createdBy',
+          'updatedBy',
+          'serviceCategory',
+          'approvalWorkflow',
+          'sla',
+          'serviceRequest',
+        ],
         order: {
           createdAt: 'DESC',
         },
@@ -46,7 +53,14 @@ export class ServiceCardsService {
     try {
       return await this.serviceCardsRepository.find({
         where: { isActive: true },
-        relations: ['createdBy', 'updatedBy'],
+        relations: [
+          'createdBy',
+          'updatedBy',
+          'serviceCategory',
+          'approvalWorkflow',
+          'sla',
+          'serviceRequest',
+        ],
         order: {
           createdAt: 'DESC',
         },
@@ -60,7 +74,14 @@ export class ServiceCardsService {
     try {
       const serviceCard = await this.serviceCardsRepository.findOne({
         where: { id },
-        relations: ['createdBy', 'updatedBy'],
+        relations: [
+          'createdBy',
+          'updatedBy',
+          'serviceCategory',
+          'approvalWorkflow',
+          'sla',
+          'serviceRequest',
+        ],
       });
 
       if (!serviceCard) {
@@ -113,7 +134,14 @@ export class ServiceCardsService {
     try {
       return await this.serviceCardsRepository.find({
         where: { category: category as any, isActive: true },
-        relations: ['createdBy', 'updatedBy'],
+        relations: [
+          'createdBy',
+          'updatedBy',
+          'serviceCategory',
+          'approvalWorkflow',
+          'sla',
+          'serviceRequest',
+        ],
         order: {
           createdAt: 'DESC',
         },
