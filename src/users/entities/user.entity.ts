@@ -10,7 +10,6 @@ import {
   ManyToMany,
   ManyToOne,
   OneToOne,
-  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { RoleEnum } from '../constants/role.constant';
 import { Permission } from '../../permissions/entities/permission.entity';

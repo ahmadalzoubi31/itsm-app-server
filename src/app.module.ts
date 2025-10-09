@@ -7,14 +7,9 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { SharedModule } from './shared/shared.module';
 import { CaslModule } from './casl/casl.module';
-import { IncidentsModule } from './incidents/incidents.module';
-import { SlaModule } from './sla/sla.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import dbDataSource from './db/data-source';
 import { LdapModule } from './ldap/ldap.module';
-import { ServiceCardsModule } from './service-cards/service-cards.module';
-import { ServiceRequestsModule } from './service-requests/service-requests.module';
-import { WorkflowsModule } from './workflows/workflows.module';
 import { SettingsModule } from './settings/settings.module';
 import { EmailModule } from './email/email.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -38,12 +33,7 @@ import { GroupsModule } from './groups/groups.module';
     CaslModule,
     UsersModule,
     PermissionsModule,
-    IncidentsModule,
-    SlaModule,
     LdapModule,
-    ServiceCardsModule,
-    ServiceRequestsModule,
-    WorkflowsModule,
     SettingsModule,
     EmailModule,
     GroupsModule,
