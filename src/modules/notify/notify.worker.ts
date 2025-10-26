@@ -6,7 +6,13 @@ import { CaseService } from '@modules/case/case.service';
 import { TemplateService } from '@modules/email/core/template/template.service';
 import { EmailSenderService } from '@modules/email/core/senders/email-sender.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CaseCreatedEvent, SlaBreachedEvent } from '@shared/contracts/events';
+import {
+  CaseCreatedEvent,
+  CaseAssignedEvent,
+  CaseGroupAssignedEvent,
+  CaseStatusChangedEvent,
+  SlaBreachedEvent,
+} from '@shared/contracts/events';
 
 @Injectable()
 export class NotifyWorker {
@@ -77,16 +83,10 @@ export class NotifyWorker {
     }
   }
 
-  async handleCaseAssigned(event: { type: 'case.assigned'; payload: any }) {
+  async handleCaseAssigned(payload: CaseAssignedEvent) {
     try {
-      const { assigneeId, prevAssigneeId, id: caseId } = event.payload;
-
-      if (!assigneeId || assigneeId === prevAssigneeId) {
-        this.logger.debug(
-          `Skipping case assignment notification - no valid assignee change`,
-        );
-        return;
-      }
+      const { caseId } = payload;
+      const { assigneeId } = payload.payload;
 
       const c = await this.casesService.getCase(caseId);
       const assignee = await this.usersService.getUser(assigneeId);
@@ -101,7 +101,7 @@ export class NotifyWorker {
       const { subject, html } = await this.templateService.render(
         (c as any).businessLineId,
         'case.assigned',
-        { case: c, payload: event.payload },
+        { case: c, payload: payload.payload },
       );
 
       await this.emailService.sendForBL(
@@ -118,22 +118,26 @@ export class NotifyWorker {
     }
   }
 
-  async handleCaseGroupAssigned(event: {
-    type: 'case.group.assigned';
-    payload: any;
-  }) {
-    this.logger.debug(
-      'case.group.assigned event received - no group mailbox yet',
-    );
-    // TODO: Implement group mailbox functionality
+  async handleCaseGroupAssigned(payload: CaseGroupAssignedEvent) {
+    try {
+      const { caseId } = payload;
+      const c = await this.casesService.getCase(caseId);
+
+      this.logger.debug(
+        'case.group.assigned event received - no group mailbox yet',
+      );
+      // TODO: Implement group mailbox functionality
+    } catch (error) {
+      this.logger.error(
+        `Failed to send case.group.assigned notification: ${error}`,
+      );
+      throw error; // Re-throw to fail outbox processing
+    }
   }
 
-  async handleCaseStatusChanged(event: {
-    type: 'case.status.changed';
-    payload: any;
-  }) {
+  async handleCaseStatusChanged(payload: CaseStatusChangedEvent) {
     try {
-      const { id: caseId } = event.payload;
+      const { caseId } = payload;
       const c = await this.casesService.getCase(caseId);
 
       const requester = await this.usersService.getUser(c.requesterId!);
@@ -148,7 +152,7 @@ export class NotifyWorker {
       const { subject, html } = await this.templateService.render(
         (c as any).businessLineId,
         'case.status.changed',
-        { case: c, payload: event.payload },
+        { case: c, payload: payload.payload },
       );
 
       await this.emailService.sendForBL(
@@ -169,51 +173,48 @@ export class NotifyWorker {
     }
   }
 
-  async handleCaseCommentAdded(event: {
-    type: 'case.comment.added';
-    payload: any;
-  }) {
-    try {
-      const { caseId } = event.payload;
-      const c = await this.casesService.getCase(caseId);
+  // async handleCaseCommentAdded(payload: CaseCommentAddedEvent) {
+  //   try {
+  //     const { caseId } = payload;
+  //     const c = await this.casesService.getCase(caseId);
 
-      const requester = await this.usersService.getUser(c.requesterId!);
-      const assignee = await this.usersService.getUser(c.assigneeId!);
+  //     const requester = await this.usersService.getUser(c.requesterId!);
+  //     const assignee = await this.usersService.getUser(c.assigneeId!);
 
-      const targets = [requester?.email, assignee?.email].filter(
-        Boolean,
-      ) as string[];
+  //     const targets = [requester?.email, assignee?.email].filter(
+  //       Boolean,
+  //     ) as string[];
 
-      if (targets.length === 0) {
-        this.logger.warn(`No email targets found for case ${c.id}`);
-        return;
-      }
+  //     if (targets.length === 0) {
+  //       this.logger.warn(`No email targets found for case ${c.id}`);
+  //       return;
+  //     }
 
-      const { subject, html } = await this.templateService.render(
-        (c as any).businessLineId,
-        'case.comment.added',
-        { case: c, payload: event.payload },
-      );
+  //     const { subject, html } = await this.templateService.render(
+  //       (c as any).businessLineId,
+  //       'case.comment.added',
+  //       { case: c, payload: event.payload },
+  //     );
 
-      for (const to of [...new Set(targets)]) {
-        await this.emailService.sendForBL(
-          (c as any).businessLineId,
-          to,
-          subject,
-          html,
-        );
-      }
+  //     for (const to of [...new Set(targets)]) {
+  //       await this.emailService.sendForBL(
+  //         (c as any).businessLineId,
+  //         to,
+  //         subject,
+  //         html,
+  //       );
+  //     }
 
-      this.logger.log(
-        `Case comment notification sent to ${targets.join(', ')}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Failed to send case.comment.added notification: ${error}`,
-      );
-      throw error; // Re-throw to fail outbox processing
-    }
-  }
+  //     this.logger.log(
+  //       `Case comment notification sent to ${targets.join(', ')}`,
+  //     );
+  //   } catch (error) {
+  //     this.logger.error(
+  //       `Failed to send case.comment.added notification: ${error}`,
+  //     );
+  //     throw error; // Re-throw to fail outbox processing
+  //   }
+  // }
 
   async handleSlaBreached(payload: SlaBreachedEvent) {
     try {

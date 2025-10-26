@@ -19,7 +19,9 @@ import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
 import { CreateUserNotifyPrefDto } from './dto/create-user-notify-pref.dto';
 import { UpdateUserNotifyPrefDto } from './dto/update-user-notify-pref.dto';
 import {
+  CaseAssignedEvent,
   CaseCreatedEvent,
+  CaseGroupAssignedEvent,
   CaseStatusChangedEvent,
   SlaBreachedEvent,
 } from '@shared/contracts/events';
@@ -61,20 +63,20 @@ export class NotifyController {
     return this.notifyWorker.handleCaseCreated(payload);
   }
 
-  // @OnEvent('case.status.changed')
-  // handleCaseStatusChangedEvent(payload: CaseStatusChangedEvent) {
-  //   return this.notifyWorker.handleCaseStatusChanged(payload);
-  // }
+  @OnEvent('case.status.changed')
+  handleCaseStatusChangedEvent(payload: CaseStatusChangedEvent) {
+    return this.notifyWorker.handleCaseStatusChanged(payload);
+  }
 
-  // @OnEvent('case.assigned')
-  // handleCaseAssignedEvent(payload: CaseAssignedEvent) {
-  //   return this.notifyWorker.handleCaseAssigned(payload);
-  // }
+  @OnEvent('case.assigned')
+  handleCaseAssignedEvent(payload: CaseAssignedEvent) {
+    return this.notifyWorker.handleCaseAssigned(payload);
+  }
 
-  // @OnEvent('case.group.assigned')
-  // handleCaseGroupAssignedEvent(payload: CaseGroupAssignedEvent) {
-  //   return this.notifyWorker.handleCaseGroupAssigned(payload);
-  // }
+  @OnEvent('case.group.assigned')
+  handleCaseGroupAssignedEvent(payload: CaseGroupAssignedEvent) {
+    return this.notifyWorker.handleCaseGroupAssigned(payload);
+  }
 
   @OnEvent('sla.breached')
   handleSlaBreachedEvent(payload: SlaBreachedEvent) {
