@@ -26,10 +26,20 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/**/*.ts'],
     rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            // allow @modules/<name> but block deep paths into other modules
+            '@modules/*/*/*',
+          ],
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn'
+      '@typescript-eslint/no-unsafe-argument': 'warn',
     },
   },
 );

@@ -1,42 +1,28 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
-import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
-import { SharedModule } from './shared/shared.module';
-import { CaslModule } from './casl/casl.module';
-import { PermissionsModule } from './permissions/permissions.module';
-import dbDataSource from './db/data-source';
-import { LdapModule } from './ldap/ldap.module';
-import { SettingsModule } from './settings/settings.module';
-import { EmailModule } from './email/email.module';
-import { ScheduleModule } from '@nestjs/schedule';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { GroupsModule } from './groups/groups.module';
+import { AppController } from './app.controller';
+import { Module } from '@nestjs/common';
+
+// Modules
+import { InfraModule } from './shared/infra/infra.module';
+import { IamModule } from '@modules/iam/iam.module';
+import { CaseModule } from '@modules/case/case.module';
+import { SlaModule } from '@modules/sla/sla.module';
+import { BusinessLineModule } from '@modules/business-line/business-line.module';
+import { CatalogModule } from '@modules/catalog/catalog.module';
+import { EmailModule } from '@modules/email/email.module';
+import { NotifyModule } from '@modules/notify/notify.module';
 
 @Module({
   imports: [
-    ScheduleModule.forRoot(),
-    EventEmitterModule.forRoot(),
-    ConfigModule.forRoot({ isGlobal: true, cache: true }),
-    TypeOrmModule.forRootAsync({
-      useFactory: () => {
-        return {
-          ...dbDataSource.options,
-        };
-      },
-    }),
-    AuthModule,
-    SharedModule,
-    CaslModule,
-    UsersModule,
-    PermissionsModule,
-    LdapModule,
-    SettingsModule,
+    InfraModule,
+    IamModule,
+    // AuditModule,
     EmailModule,
-    GroupsModule,
+    NotifyModule,
+    BusinessLineModule,
+    CaseModule,
+    CatalogModule,
+    SlaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

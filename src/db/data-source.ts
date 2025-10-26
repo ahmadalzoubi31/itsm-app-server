@@ -1,77 +1,80 @@
-import { Logger } from '@nestjs/common';
-import 'dotenv/config';
-
+// src/db/data-source.ts
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
+import * as dotenv from 'dotenv';
+import { User } from '@modules/iam/users/entities/user.entity';
+import { Group } from '@modules/iam/groups/entities/group.entity';
+import { Membership } from '@modules/iam/users/entities/membership.entity';
+import { Role } from '@modules/iam/permissions/entities/role.entity';
+import { UserRole } from '@modules/iam/users/entities/user-role.entity';
+import { GroupRole } from '@modules/iam/groups/entities/group-role.entity';
+import { Permission } from '@modules/iam/permissions/entities/permission.entity';
+import { RolePermission } from '@modules/iam/permissions/entities/role-permission.entity';
+import { UserPermission } from '@modules/iam/users/entities/user-permission.entity';
+import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
+import { Case } from '@modules/case/entities/case.entity';
+import { CaseComment } from '@modules/case/entities/case-comment.entity';
+import { CaseLink } from '@modules/case/entities/case-link.entity';
+import { CaseAttachment } from '@modules/case/entities/case-attachment.entity';
+import { RefreshToken } from '@modules/iam/auth/entities/refresh-token.entity';
+import { TokenBlacklist } from '@modules/iam/auth/entities/token-blacklist.entity';
+import { SlaTarget } from '@modules/sla/entities/sla-target.entity';
+import { SlaTimer } from '@modules/sla/entities/sla-timer.entity';
+import { EmailChannel } from '@modules/email/entities/email-channel.entity';
+import { EmailInboundState } from '@modules/email/entities/email-inbound-state.entity';
+import { EmailMessage } from '@modules/email/entities/email-message.entity';
+import { EmailRoutingRule } from '@modules/email/entities/email-routing-rule.entity';
+// import { UserNotifyPref } from '@modules/notify/entities/user-notify-pref.entity';
+import { NotificationTemplate } from '@modules/email/entities/notification-template.entity';
+import { AuditEvent } from '@modules/audit/entities/audit-event.entity';
+import { Service } from '@modules/catalog/entities/service.entity';
+import { RequestTemplate } from '@modules/catalog/entities/request-template.entity';
 
-import { User } from '../users/entities/user.entity';
-import { RefreshToken } from '../auth/entities/refreshToken.entity';
-import { Permission } from '../permissions/entities/permission.entity';
-import { Settings } from '../settings/entities/settings.entity';
-import { SyncHistory } from '../ldap/entities/sync-history.entity';
-import { StagedUser } from '../ldap/entities/staged-user.entity';
-import { EmailTemplate } from '../email/entities/email-template.entity';
-import { EmailQueue } from '../email/entities/email-queue.entity';
-import { EmailStatistics } from '../email/entities/email-statistics.entity';
-import { Group } from '../groups/entities/group.entity';
-import { GroupMember } from '../groups/entities/group-member.entity';
-import UserSeeder from './seeds/user.seeder';
-import PermissionSeeder from './seeds/permission.seeder';
-import SettingsSeeder from './seeds/settings.seeder';
+// Load environment variables
+dotenv.config();
 
-export const dbDataSourceOptions: DataSourceOptions & SeederOptions = {
+export const dataSourceOptions: DataSourceOptions & SeederOptions = {
   type: 'postgres',
-  host: process.env.DATABASE_HOST,
-  port: Number(process.env.DATABASE_PORT) || 5432,
-  username: process.env.DATABASE_USERNAME,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
-  ssl: process.env.DATABASE_SSL === 'true',
-  synchronize: process.env.NODE_ENV !== 'prod',
-  logging: process.env.LOG_LEVEL === 'debug',
-  extra: {
-    connectionLimit: 10,
-  },
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432'),
+  username: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASS || 'postgres',
+  database: process.env.DB_NAME || 'itsm',
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   entities: [
     User,
-    RefreshToken,
-    Permission,
-    Settings,
-    SyncHistory,
-    StagedUser,
-    EmailTemplate,
-    EmailQueue,
-    EmailStatistics,
     Group,
-    GroupMember,
+    Membership,
+    Role,
+    Case,
+    Permission,
+    RefreshToken,
+    TokenBlacklist,
+    UserRole,
+    GroupRole,
+    RolePermission,
+    UserPermission,
+    BusinessLine,
+    CaseComment,
+    CaseLink,
+    CaseAttachment,
+    SlaTarget,
+    SlaTimer,
+    EmailChannel,
+    EmailInboundState,
+    EmailMessage,
+    EmailRoutingRule,
+    NotificationTemplate,
+    // UserNotifyPref,
+    AuditEvent,
+    Service,
+    RequestTemplate,
   ],
-  seeds: [PermissionSeeder, UserSeeder, SettingsSeeder],
+  migrations: [__dirname + '/migrations/*.{ts,js}'],
+  seeds: [__dirname + '/seeds/**/*.{ts,js}'],
+  logging: process.env.DB_LOGGING === 'true',
 };
 
-// Create and export the DataSource instance
-const AppDataSource = new DataSource(dbDataSourceOptions);
-export default AppDataSource;
+const dataSource = new DataSource(dataSourceOptions);
 
-// Helper function to initialize the DataSource and run seeders
-export const initializeDataSource = async (runSeeds = true) => {
-  const logger = new Logger('TypeORM');
-  try {
-    if (!AppDataSource.isInitialized) {
-      await AppDataSource.initialize();
-      logger.log('Data Source has been initialized!');
-    }
-
-    if (runSeeds) {
-      const { runSeeders } = await import('typeorm-extension');
-      await runSeeders(AppDataSource, {
-        seeds: dbDataSourceOptions.seeds,
-      });
-      logger.log('Seeders have been executed!');
-    }
-
-    return AppDataSource;
-  } catch (error) {
-    logger.error('Error during Data Source initialization:', error);
-    throw error;
-  }
-};
+export default dataSource;
