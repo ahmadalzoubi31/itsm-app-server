@@ -9,6 +9,9 @@ import {
 } from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
+import { Group } from '@modules/iam/groups/entities/group.entity';
+
+import { Workflow } from '@modules/workflow/entities/workflow.entity';
 
 @Entity('request_template')
 @Index(['key'], { unique: true })
@@ -26,13 +29,26 @@ export class RequestTemplate extends AuditableEntity {
   @Column({ default: true }) active!: boolean;
 
   // Optional: default assignment group (enforces ITIL rule at creation)
-  @Column({ type: 'uuid', nullable: true }) defaultAssignmentGroupId?: string;
+  @Column({ type: 'uuid' })
+  defaultAssignmentGroupId!: string;
+  @ManyToOne(() => Group, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'defaultAssignmentGroupId', referencedColumnName: 'id' })
+  defaultAssignmentGroup!: Group;
 
   // Business Line (ITIL organizational context) - REQUIRED
   @Index()
   @Column({ type: 'uuid' })
   businessLineId!: string;
   @ManyToOne(() => BusinessLine, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'businessLineId' })
+  @JoinColumn({ name: 'businessLineId', referencedColumnName: 'id' })
   businessLine!: BusinessLine;
+
+  // Workflow - determines routing (Case, Incident, etc.)
+  @Index()
+  @Column({ type: 'uuid', nullable: true })
+  workflowId?: string;
+
+  @ManyToOne(() => Workflow, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'workflowId', referencedColumnName: 'id' })
+  workflow?: Workflow | null;
 }

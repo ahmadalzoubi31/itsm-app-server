@@ -1,3 +1,5 @@
+// ===== CASE EVENTS =====
+
 export class CaseCreatedEvent {
   constructor(
     public readonly caseId: string,
@@ -28,9 +30,51 @@ export class CaseGroupAssignedEvent {
     },
   ) {}
 }
+
 export class CaseStatusChangedEvent {
   constructor(
     public readonly caseId: string,
+    public readonly payload: {
+      before: {
+        status?: string;
+      };
+      after: {
+        status?: string;
+      };
+      actor: { actorId: string; actorName: string };
+      updatedAt: string;
+    },
+  ) {}
+}
+
+// ===== REQUEST EVENTS =====
+
+export class RequestCreatedEvent {
+  constructor(
+    public readonly requestId: string,
+    public readonly payload: {
+      businessLineId: string;
+      type: string;
+      priority: string;
+      requesterId: string;
+      createdAt: string;
+    },
+  ) {}
+}
+
+export class RequestAssignedEvent {
+  constructor(
+    public readonly requestId: string,
+    public readonly payload: {
+      assigneeId: string;
+      assigneeName: string;
+    },
+  ) {}
+}
+
+export class RequestStatusChangedEvent {
+  constructor(
+    public readonly requestId: string,
     public readonly payload: {
       before: {
         status?: string;
@@ -64,7 +108,7 @@ export class UserCreatedEvent {
     public readonly payload: {
       username: string;
       email?: string;
-      authSource: 'local' | 'ldap' | 'sso';
+      authSource: 'local' | 'ldap';
       createdBy?: string;
       createdAt: string;
     },

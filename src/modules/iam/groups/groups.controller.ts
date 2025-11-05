@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
+  Put,
   Delete,
   Param,
   Body,
@@ -12,7 +12,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto, UpdateGroupDto } from './dto/create-group.dto';
-import { CurrentUser } from '../decorators/current-user.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { AbilityGuard } from '../casl/guards/ability.guard';
 import { CheckAbility } from '../casl/decorators/check-ability.decorator';
@@ -56,7 +56,7 @@ export class GroupsController {
     return this.groupsService.getGroup(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(ResourcePoliciesGuard, AbilityGuard)
   @CheckResource(IAM_ACTIONS.Manage, GroupsService, 'getGroup', 'id')
   @CheckAbility(IAM_ACTIONS.Manage, Group)

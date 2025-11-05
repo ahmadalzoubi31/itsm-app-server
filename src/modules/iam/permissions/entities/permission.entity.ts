@@ -15,5 +15,8 @@ export class Permission extends AuditableEntity {
   conditions?: Record<string, any>;
 
   @Column({ nullable: true })
+  category?: string;
+
+  @Column({ nullable: true })
   description?: string;
 }

@@ -1,14 +1,14 @@
-// src/modules/iam/admin/dto/create-role.dto.ts
+// src/modules/iam/roles/dto/create-role.dto.ts
 import { IsOptional, IsString, Length, Matches } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateRoleDto {
   @ApiProperty({
     example: 'agent',
-    description: 'Stable key (lowercase, digits, dash).',
+    description: 'Stable key (lowercase, digits, dash, underscore).',
   })
   @IsString()
-  @Matches(/^[a-z0-9-]+$/)
+  @Matches(/^[a-z0-9-_]+$/)
   @Length(2, 50)
   key!: string;
 
@@ -23,6 +23,7 @@ export class CreateRoleDto {
   })
   @IsOptional()
   @IsString()
-  @Length(0, 300)
+  @Length(0, 500)
   description?: string;
 }
+

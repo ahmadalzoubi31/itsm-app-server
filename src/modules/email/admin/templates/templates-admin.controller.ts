@@ -5,7 +5,7 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
+  Put,
   Post,
   UseGuards,
   Logger,
@@ -16,7 +16,7 @@ import { AbilityGuard } from '@modules/iam/casl/guards/ability.guard';
 import { CheckAbility } from '@modules/iam/casl/decorators/check-ability.decorator';
 import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
 import { TemplatesAdminService } from './templates-admin.service';
-import { CurrentUser } from '@modules/iam/decorators/current-user.decorator';
+import { CurrentUser } from '@modules/iam/auth/decorators/current-user.decorator';
 import { JwtUser } from '@shared/types/jwt-user.type';
 import { CreateNotificationTemplateDto } from '../../dto/create-notification-template.dto';
 import { UpdateNotificationTemplateDto } from '../../dto/update-notification-template.dto';
@@ -51,7 +51,7 @@ export class TemplatesAdminController {
   }
 
   @ApiOperation({ summary: 'Update notification template' })
-  @Patch(':id')
+  @Put(':id')
   updateTemplate(
     @CurrentUser() user: JwtUser,
     @Param('id') id: string,

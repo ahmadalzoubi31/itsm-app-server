@@ -12,8 +12,8 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '../users/entities/user.entity';
 import { LoginDto, RefreshTokenDto } from './dto/auth.dto';
 import { UserRole } from '../users/entities/user-role.entity';
-import { Membership } from '../users/entities/membership.entity';
-import { Role } from '../permissions/entities/role.entity';
+import { Membership } from '../membership/entities/membership.entity';
+import { Role } from '../roles/entities/role.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { TokenBlacklist } from './entities/token-blacklist.entity';
 import { randomBytes } from 'crypto';
@@ -161,7 +161,7 @@ export class AuthService {
     if (user.authSource !== 'local') {
       this.logger.warn(`Login failed - non-local auth source: ${username}`);
       throw new ForbiddenException(
-        'This account uses enterprise sign-in (SSO/LDAP).',
+        'This account uses enterprise sign-in (LDAP).',
       );
     }
 
@@ -378,7 +378,21 @@ export class AuthService {
   async me(userId: string) {
     this.logger.debug(`Getting user profile for: ${userId}`);
 
-    const user = await this.users.findOne({ where: { id: userId } });
+    if (!userId) {
+      this.logger.warn(
+        `User profile request failed - invalid user ID: ${userId}`,
+      );
+      throw new UnauthorizedException('Invalid user ID');
+    }
+
+    const user = await this.users.findOne({
+      where: { id: userId },
+      relations: [
+        'userRoles.role', // Add this to load the role relation
+        'userPermissions.permission', // Add this to load the permission relation
+      ],
+    });
+
     if (!user || !user.isActive) {
       this.logger.warn(
         `User profile request failed - user not found or inactive: ${userId}`,
@@ -386,16 +400,19 @@ export class AuthService {
       throw new UnauthorizedException('User not found or inactive');
     }
 
-    this.logger.debug(`User profile retrieved successfully: ${user.username}`);
-    return {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      email: user.email ?? null,
-      authSource: user.authSource,
-      isActive: user.isActive,
-      lastLoginAt: user.lastLoginAt ?? null,
+    // Transform the response to include role keys (for programmatic access) and exclude userRoles/userPermissions
+    const { userRoles, userPermissions, ...userData } = user;
+    const result = {
+      ...userData,
+      roles: user.userRoles?.map((ur) => ur.role?.key).filter(Boolean) || [],
+      permissions:
+        user.userPermissions?.map((up) => up.permission?.key).filter(Boolean) ||
+        [],
     };
+
+    this.logger.debug(`User profile retrieved successfully: ${user.username}`);
+
+    return result;
   }
 
   async resetPassword(userId: string, newPassword: string) {
@@ -417,7 +434,7 @@ export class AuthService {
         },
       );
       throw new ForbiddenException(
-        'Cannot reset password for non-local accounts (SSO/LDAP users)',
+        'Cannot reset password for non-local accounts (LDAP users)',
       );
     }
 

@@ -13,7 +13,6 @@ import { User } from './user.entity';
 
 @Entity('user_permission')
 @Index(['userId', 'permissionId'], { unique: true })
-@Index(['userId'])
 @Index(['permissionId'])
 export class UserPermission extends AuditableEntity {
   @PrimaryGeneratedColumn('uuid') id!: string;
@@ -27,4 +26,7 @@ export class UserPermission extends AuditableEntity {
   @ManyToOne(() => Permission, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'permissionId' })
   permission!: Permission;
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata?: Record<string, any>;
 }

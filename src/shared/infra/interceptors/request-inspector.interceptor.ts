@@ -61,7 +61,7 @@ export class RequestInspectorInterceptor implements NestInterceptor {
       tap({
         next: (data) => {
           const duration = Date.now() - startTime;
-          const responseSize = JSON.stringify(data).length;
+          const responseSize = this.safeStringifyLength(data);
 
           const responseData = {
             ...inspectionData,
@@ -150,7 +150,14 @@ export class RequestInspectorInterceptor implements NestInterceptor {
 
     // Log response data for debugging (be careful with sensitive data)
     if (process.env.NODE_ENV === 'development') {
-      this.logger.debug(`Response Data: ${JSON.stringify(responseData)}`);
+      try {
+        const safeJson = this.safeStringify(responseData);
+        this.logger.debug(`Response Data: ${safeJson}`);
+      } catch (err) {
+        this.logger.debug(
+          `Response Data: [Unable to stringify - may contain circular references]`,
+        );
+      }
     }
   }
 
@@ -214,5 +221,62 @@ export class RequestInspectorInterceptor implements NestInterceptor {
     }
 
     return sanitized;
+  }
+
+  /**
+   * Safely stringify objects that may contain circular references
+   */
+  private safeStringify(obj: any, space?: number): string {
+    const seen = new WeakSet();
+    return JSON.stringify(
+      obj,
+      (key, value) => {
+        // Handle circular references
+        if (typeof value === 'object' && value !== null) {
+          if (seen.has(value)) {
+            return '[Circular]';
+          }
+          seen.add(value);
+        }
+        // Handle common non-serializable types
+        if (value instanceof Error) {
+          return {
+            name: value.name,
+            message: value.message,
+            stack: value.stack,
+          };
+        }
+        if (value instanceof Date) {
+          return value.toISOString();
+        }
+        if (typeof value === 'function') {
+          return '[Function]';
+        }
+        if (typeof value === 'symbol') {
+          return '[Symbol]';
+        }
+        return value;
+      },
+      space,
+    );
+  }
+
+  /**
+   * Safely calculate the string length of an object that may contain circular references
+   */
+  private safeStringifyLength(obj: any): number {
+    try {
+      return this.safeStringify(obj).length;
+    } catch (err) {
+      // Fallback: estimate size based on type
+      if (typeof obj === 'string') {
+        return obj.length;
+      }
+      if (typeof obj === 'object' && obj !== null) {
+        return JSON.stringify({ type: typeof obj, keys: Object.keys(obj) })
+          .length;
+      }
+      return 0;
+    }
   }
 }

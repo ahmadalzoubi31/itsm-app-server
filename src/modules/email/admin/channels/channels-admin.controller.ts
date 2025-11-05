@@ -5,7 +5,7 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
+  Put,
   Post,
   UseGuards,
   Logger,
@@ -42,7 +42,7 @@ export class ChannelsAdminController {
   }
 
   @ApiOperation({ summary: 'Update email channel' })
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateEmailChannelDto) {
     return this.svc.update(id, dto);
   }

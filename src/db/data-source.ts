@@ -1,15 +1,14 @@
-// src/db/data-source.ts
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 import * as dotenv from 'dotenv';
 import { User } from '@modules/iam/users/entities/user.entity';
 import { Group } from '@modules/iam/groups/entities/group.entity';
-import { Membership } from '@modules/iam/users/entities/membership.entity';
-import { Role } from '@modules/iam/permissions/entities/role.entity';
+import { Membership } from '@modules/iam/membership/entities/membership.entity';
+import { Role } from '@modules/iam/roles/entities/role.entity';
 import { UserRole } from '@modules/iam/users/entities/user-role.entity';
 import { GroupRole } from '@modules/iam/groups/entities/group-role.entity';
 import { Permission } from '@modules/iam/permissions/entities/permission.entity';
-import { RolePermission } from '@modules/iam/permissions/entities/role-permission.entity';
+import { RolePermission } from '@modules/iam/roles/entities/role-permission.entity';
 import { UserPermission } from '@modules/iam/users/entities/user-permission.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 import { Case } from '@modules/case/entities/case.entity';
@@ -29,6 +28,8 @@ import { NotificationTemplate } from '@modules/email/entities/notification-templ
 import { AuditEvent } from '@modules/audit/entities/audit-event.entity';
 import { Service } from '@modules/catalog/entities/service.entity';
 import { RequestTemplate } from '@modules/catalog/entities/request-template.entity';
+import { Request } from '@modules/request/entities/request.entity';
+import { Workflow } from '@modules/workflow/entities/workflow.entity';
 
 // Load environment variables
 dotenv.config();
@@ -69,6 +70,8 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
     AuditEvent,
     Service,
     RequestTemplate,
+    Request,
+    Workflow,
   ],
   migrations: [__dirname + '/migrations/*.{ts,js}'],
   seeds: [__dirname + '/seeds/**/*.{ts,js}'],

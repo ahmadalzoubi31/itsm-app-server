@@ -128,30 +128,22 @@ export class CaseService {
     return c;
   }
 
-  async updateCase(
-    id: string,
-    dto: UpdateCaseDto & { updatedById?: string; updatedByName?: string },
-  ) {
-    const before = await this.getCase(id);
+  async updateCase(id: string, dto: UpdateCaseDto) {
+    const caseEntity = await this.getCase(id);
 
-    // Patch for TypeORM partial update: status may need to be { status: value }
-    // If status is being changed (exists in dto), ensure correct format
-    let updateDto = { ...dto } as any;
+    // Apply updates to entity
+    Object.assign(caseEntity, dto);
+
+    // Ensure status is properly set if provided
     if (dto.status !== undefined) {
-      // Only set if status is being patched
-      updateDto.status = dto.status;
+      caseEntity.status = dto.status;
     }
 
-    await this.cases.update(id, updateDto);
-    const updated = await this.getCase(id);
-
-    return updated;
+    // Save entity (triggers audit subscriber)
+    return this.cases.save(caseEntity);
   }
 
-  async addComment(
-    caseId: string,
-    dto: CreateCommentDto & { createdById?: string; createdByName?: string },
-  ) {
+  async addComment(caseId: string, dto: CreateCommentDto) {
     const c = this.comments.create({ ...dto, caseId });
     const saved = await this.comments.save(c);
 
@@ -165,11 +157,7 @@ export class CaseService {
     });
   }
 
-  async assignCase(
-    id: string,
-    dto: AssignCaseDto,
-    actor: { actorId: string; actorName: string },
-  ) {
+  async assignCase(id: string, dto: AssignCaseDto) {
     const entity = await this.getCase(id);
     const prev = {
       assigneeId: entity.assigneeId,
@@ -193,7 +181,7 @@ export class CaseService {
         'case.assigned',
         new CaseAssignedEvent(saved.id, {
           assigneeId: dto.assigneeId,
-          assigneeName: actor.actorName,
+          assigneeName: dto.assigneeId,
         }),
       );
     }
@@ -201,11 +189,7 @@ export class CaseService {
     return saved;
   }
 
-  async changeStatus(
-    id: string,
-    to: CaseStatus,
-    actor: { actorId: string; actorName: string },
-  ) {
+  async changeStatus(id: string, to: CaseStatus) {
     const entity = await this.getCase(id);
     const from = entity.status as any;
 
@@ -237,17 +221,16 @@ export class CaseService {
       new CaseStatusChangedEvent(saved.id, {
         before: { status: from },
         after: { status: to },
-        actor: { actorId: actor.actorId, actorName: actor.actorName },
+        actor: {
+          actorId: entity.assigneeId as string,
+          actorName: entity.assigneeId as string,
+        },
         updatedAt: saved.updatedAt.toISOString(),
       }),
     );
   }
 
-  async addAttachment(
-    caseId: string,
-    file: Express.Multer.File,
-    actor: { actorId: string; actorName: string },
-  ) {
+  async addAttachment(caseId: string, file: Express.Multer.File) {
     const c = await this.getCase(caseId);
     const dir = join(process.cwd(), 'var', 'uploads', c.id);
     await fs.mkdir(dir, { recursive: true });
@@ -260,8 +243,6 @@ export class CaseService {
       mimeType: file.mimetype,
       size: file.size,
       storagePath,
-      createdById: actor.actorId,
-      createdByName: actor.actorName,
     });
     const saved = await this.attachments.save(row);
 

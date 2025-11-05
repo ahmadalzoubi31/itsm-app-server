@@ -47,4 +47,22 @@ export class CreateCaseDto {
   })
   @IsUUID()
   businessLineId!: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Affected service ID (for cases)',
+    example: '550e8400-e29b-41d4-a716-446655440010',
+  })
+  @IsOptional()
+  @IsUUID()
+  affectedServiceId?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Request template ID (for catalog requests)',
+    example: '550e8400-e29b-41d4-a716-446655440020',
+  })
+  @IsOptional()
+  @IsUUID()
+  requestTemplateId?: string;
 }

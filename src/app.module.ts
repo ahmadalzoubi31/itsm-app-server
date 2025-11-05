@@ -11,6 +11,8 @@ import { BusinessLineModule } from '@modules/business-line/business-line.module'
 import { CatalogModule } from '@modules/catalog/catalog.module';
 import { EmailModule } from '@modules/email/email.module';
 import { NotifyModule } from '@modules/notify/notify.module';
+import { RequestModule } from '@modules/request/request.module';
+import { WorkflowModule } from '@modules/workflow/workflow.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { NotifyModule } from '@modules/notify/notify.module';
     CaseModule,
     CatalogModule,
     SlaModule,
+    WorkflowModule,
+    RequestModule,
   ],
   controllers: [AppController],
   providers: [AppService],

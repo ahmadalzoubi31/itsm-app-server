@@ -12,6 +12,8 @@ import {
 import { CaseStatus } from '@shared/constants';
 import { CasePriority } from '@shared/constants';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
+import { Service } from '@modules/catalog/entities/service.entity';
+import { RequestTemplate } from '@modules/catalog/entities/request-template.entity';
 
 @Entity('case')
 @Index(['number'], { unique: true })
@@ -66,4 +68,22 @@ export class Case extends AuditableEntity {
   @JoinColumn({ name: 'businessLineId' })
   @ManyToOne(() => BusinessLine, { onDelete: 'CASCADE' })
   businessLine!: BusinessLine;
+
+  // Affected Service (for incidents) - ITIL standard
+  @Index()
+  @Column({ type: 'uuid', nullable: true })
+  affectedServiceId?: string;
+
+  @ManyToOne(() => Service, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'affectedServiceId' })
+  affectedService?: Service | null;
+
+  // Request Template Origin (for service requests from catalog)
+  @Index()
+  @Column({ type: 'uuid', nullable: true })
+  requestTemplateId?: string;
+
+  @ManyToOne(() => RequestTemplate, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'requestTemplateId' })
+  requestTemplate?: RequestTemplate | null;
 }

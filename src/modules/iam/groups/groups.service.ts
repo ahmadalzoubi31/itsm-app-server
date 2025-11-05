@@ -63,14 +63,15 @@ export class GroupsService {
   /**
    * Updates a group with validation
    */
-  async updateGroup(id: string, patch: GroupUpdateWithAudit): Promise<Group> {
-    // Validate group exists
-    const before = await this.getGroup(id);
+  async updateGroup(id: string, put: GroupUpdateWithAudit): Promise<Group> {
+    // Validate group exists and get entity
+    const group = await this.getGroup(id);
 
-    await this.groups.update({ id }, patch);
-    const updated = await this.getGroup(id);
+    // Apply updates to entity
+    Object.assign(group, put);
 
-    return updated;
+    // Save entity (triggers audit subscriber)
+    return this.groups.save(group);
   }
 
   /**

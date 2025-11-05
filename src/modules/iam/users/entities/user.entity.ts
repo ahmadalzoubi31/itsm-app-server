@@ -4,13 +4,13 @@ import {
   PrimaryGeneratedColumn,
   Column,
   Index,
-  UpdateDateColumn,
-  CreateDateColumn,
   OneToMany,
 } from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
+import { UserRole } from './user-role.entity';
+import { UserPermission } from './user-permission.entity';
 
-export type AuthSource = 'local' | 'ldap' | 'sso';
+export type AuthSource = 'local' | 'ldap';
 
 @Entity('user')
 @Index(['username'], { unique: true })
@@ -24,7 +24,7 @@ export class User extends AuditableEntity {
   @Column({ type: 'varchar', length: 10, default: 'local' })
   authSource!: AuthSource; // 'local' | 'ldap'
 
-  @Column({ nullable: true }) externalId?: string; // AD GUID / SSO subject
+  @Column({ nullable: true }) externalId?: string; // AD GUID
 
   @Column({ nullable: true, select: false })
   passwordHash?: string; // only for 'local' users
@@ -36,4 +36,10 @@ export class User extends AuditableEntity {
 
   @OneToMany('Membership', 'user')
   memberships!: any[];
+
+  @OneToMany(() => UserRole, (ur) => ur.user)
+  userRoles!: UserRole[];
+
+  @OneToMany(() => UserPermission, (up) => up.user)
+  userPermissions!: UserPermission[];
 }

@@ -8,6 +8,7 @@ import { CatalogService } from './catalog.service';
 import { CaseModule } from '@modules/case/case.module';
 import { CaslModule } from '@modules/iam/casl/casl.module';
 import { BusinessLineModule } from '@modules/business-line/business-line.module';
+import { RequestModule } from '@modules/request/request.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { BusinessLineModule } from '@modules/business-line/business-line.module'
     BusinessLineModule,
     CaslModule,
     CaseModule,
+    RequestModule,
   ],
   controllers: [CatalogController],
   providers: [CatalogService],

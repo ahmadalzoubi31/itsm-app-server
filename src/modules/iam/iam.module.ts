@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { GroupsModule } from './groups/groups.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { RolesModule } from './roles/roles.module';
 import { MembershipModule } from './membership/membership.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { MembershipModule } from './membership/membership.module';
     UsersModule,
     GroupsModule,
     PermissionsModule,
+    RolesModule,
     MembershipModule,
   ],
   controllers: [],

@@ -1,4 +1,4 @@
-// src/modules/iam/entities/role-permission.entity.ts
+// src/modules/iam/roles/entities/role-permission.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
 import { Role } from './role.entity';
-import { Permission } from './permission.entity';
+import { Permission } from '../../permissions/entities/permission.entity';
 
 @Entity('role_permission')
 @Index(['roleId', 'permissionId'], { unique: true })
@@ -28,3 +28,4 @@ export class RolePermission extends AuditableEntity {
   @JoinColumn({ name: 'permissionId' })
   permission!: Permission;
 }
+

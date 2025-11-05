@@ -7,6 +7,7 @@ import {
   IsString,
   MaxLength,
   IsIn,
+  IsBoolean,
 } from 'class-validator';
 import { IsStrongPassword } from '@shared/utils/password.validator';
 
@@ -44,14 +45,14 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Authentication source',
     example: 'local',
-    enum: ['local', 'ldap', 'sso'],
+    enum: ['local', 'ldap'],
   })
   @IsNotEmpty()
-  @IsIn(['local', 'ldap', 'sso'])
-  authSource!: 'local' | 'ldap' | 'sso';
+  @IsIn(['local', 'ldap'])
+  authSource!: 'local' | 'ldap';
 
   @ApiPropertyOptional({
-    description: 'External ID (for LDAP/SSO users)',
+    description: 'External ID (for LDAP users)',
     example: 'ad-guid-12345',
   })
   @IsOptional()
@@ -71,6 +72,14 @@ export class CreateUserDto {
       'Password must be at least 8 characters long and contain uppercase letters, lowercase letters, and at least one number or special character',
   })
   password?: string;
+
+  @ApiProperty({
+    description: 'Whether the user account is active',
+    example: true,
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  isActive!: boolean;
 }
 
 export class UpdateUserDto {
@@ -95,13 +104,6 @@ export class UpdateUserDto {
   displayName?: string;
 
   @ApiPropertyOptional({
-    description: 'Whether the user account is active',
-    example: true,
-  })
-  @IsOptional()
-  isActive?: boolean;
-
-  @ApiPropertyOptional({
     description:
       'New password - must be at least 8 characters with uppercase, lowercase, and number/special character',
     example: 'SecurePass123!',
@@ -114,4 +116,12 @@ export class UpdateUserDto {
       'Password must be at least 8 characters long and contain uppercase letters, lowercase letters, and at least one number or special character',
   })
   password?: string;
+
+  @ApiPropertyOptional({
+    description: 'Whether the user account is active',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }

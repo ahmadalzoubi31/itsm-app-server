@@ -4,14 +4,12 @@ import {
   PrimaryGeneratedColumn,
   Column,
   Index,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToMany,
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
-import { Membership } from '../../users/entities/membership.entity';
+import { Membership } from '../../membership/entities/membership.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 
 @Entity('group')

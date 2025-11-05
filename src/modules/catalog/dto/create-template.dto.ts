@@ -1,6 +1,13 @@
 // src/modules/catalog/dto/create-template.dto.ts
-import { IsUUID, IsString, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsUUID,
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsObject,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateTemplateDto {
   @ApiProperty({ example: 'service-uuid' })
@@ -22,20 +29,34 @@ export class CreateTemplateDto {
       required: ['model'],
     },
   })
+  @IsObject()
+  @Type(() => Object)
   jsonSchema!: any;
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsObject()
+  @Type(() => Object)
   uiSchema?: any;
 
   @ApiProperty({ required: false })
   @IsOptional()
+  @IsObject()
+  @Type(() => Object)
   defaults?: any;
+
+  @ApiProperty()
+  @IsUUID()
+  defaultAssignmentGroupId!: string;
+
+  @ApiProperty()
+  @IsUUID()
+  businessLineId!: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsUUID()
-  defaultAssignmentGroupId?: string;
+  workflowId?: string;
 
   @ApiProperty({ required: false, example: true })
   @IsOptional()

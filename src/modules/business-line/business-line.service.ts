@@ -48,16 +48,8 @@ export class BusinessLineService {
   /**
    * Create a new business line
    */
-  async create(
-    dto: CreateBusinessLineDto,
-    userId: string,
-    username: string,
-  ): Promise<BusinessLine> {
-    const businessLine = this.businessLineRepo.create({
-      ...dto,
-      createdById: userId,
-      createdByName: username,
-    });
+  async create(dto: CreateBusinessLineDto): Promise<BusinessLine> {
+    const businessLine = this.businessLineRepo.create(dto);
 
     return this.businessLineRepo.save(businessLine);
   }
@@ -65,19 +57,10 @@ export class BusinessLineService {
   /**
    * Update an existing business line
    */
-  async update(
-    id: string,
-    dto: UpdateBusinessLineDto,
-    userId: string,
-    username: string,
-  ): Promise<BusinessLine> {
+  async update(id: string, dto: UpdateBusinessLineDto): Promise<BusinessLine> {
     const businessLine = await this.findOne(id);
 
-    Object.assign(businessLine, {
-      ...dto,
-      updatedById: userId,
-      updatedByName: username,
-    });
+    Object.assign(businessLine, dto);
 
     return this.businessLineRepo.save(businessLine);
   }
@@ -85,11 +68,7 @@ export class BusinessLineService {
   /**
    * Soft delete (deactivate) a business line
    */
-  async deactivate(
-    id: string,
-    userId: string,
-    username: string,
-  ): Promise<BusinessLine> {
-    return this.update(id, { active: false }, userId, username);
+  async deactivate(id: string): Promise<BusinessLine> {
+    return this.update(id, { active: false });
   }
 }

@@ -26,7 +26,22 @@ ON CONFLICT (username) DO NOTHING;
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relkind='S' AND relname='case_number_seq') THEN
-    CREATE SEQUENCE case_number_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 20;
+    CREATE SEQUENCE case_number_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+  ELSE
+    ALTER SEQUENCE case_number_seq CACHE 1;
+  END IF;
+END$$;
+
+-- ====================
+-- 2.1. REQUEST NUMBER SEQUENCE
+-- ====================
+-- Idempotent sequence creation
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_class WHERE relkind='S' AND relname='request_number_seq') THEN
+    CREATE SEQUENCE request_number_seq START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+  ELSE
+    ALTER SEQUENCE request_number_seq CACHE 1;
   END IF;
 END$$;
 
@@ -41,6 +56,11 @@ VALUES
   (gen_random_uuid(),'case:read:assigned','Case','read','{"field":"assigneeId","op":"eq","value":"$user.id"}','Read assigned cases', now(), now()),
   (gen_random_uuid(),'case:read:group','Case','read','{"field":"assignmentGroupId","op":"in","value":"$user.groupIds"}','Read cases in my groups', now(), now()),
   (gen_random_uuid(),'case:update:assigned','Case','update','{"field":"assigneeId","op":"eq","value":"$user.id"}','Update assigned cases', now(), now()),
+  (gen_random_uuid(),'request:create','Request','create',NULL,'Create requests', now(), now()),
+  (gen_random_uuid(),'request:read:any','Request','read',NULL,'Read any request', now(), now()),
+  (gen_random_uuid(),'request:read:own','Request','read','{"field":"requesterId","op":"eq","value":"$user.id"}','Read own requests', now(), now()),
+  (gen_random_uuid(),'request:read:assigned','Request','read','{"field":"assigneeId","op":"eq","value":"$user.id"}','Read assigned requests', now(), now()),
+  (gen_random_uuid(),'request:update:assigned','Request','update','{"field":"assigneeId","op":"eq","value":"$user.id"}','Update assigned requests', now(), now()),
   (gen_random_uuid(),'case:manage:any','all','manage',NULL,'Admin manage all', now(), now()),
   (gen_random_uuid(),'group:manage','Group','manage',NULL,'Manage support groups', now(), now()),
   (gen_random_uuid(),'user:manage','User','manage',NULL,'Manage users', now(), now())
@@ -52,8 +72,7 @@ ON CONFLICT (key) DO NOTHING;
 INSERT INTO role (id,key,name,description,"createdAt", "updatedAt")
 VALUES
   (gen_random_uuid(),'admin','Administrator','All permissions', now(), now()),
-  (gen_random_uuid(),'agent','Agent','Work cases', now(), now()),
-  (gen_random_uuid(),'requester','Requester','Submitter', now(), now())
+  (gen_random_uuid(),'agent','Agent','Work cases', now(), now())
 ON CONFLICT (key) DO NOTHING;
 
 -- ====================
@@ -65,9 +84,8 @@ p AS (SELECT id,key FROM permission)
 INSERT INTO role_permission (id, "roleId", "permissionId", "createdAt", "updatedAt")
 SELECT gen_random_uuid(), r.id, p.id, now(), now()
 FROM r JOIN p ON TRUE
-WHERE (r.key='admin'     AND p.key IN ('case:manage:any','case:read:any','group:manage','user:manage'))
-   OR (r.key='agent'     AND p.key IN ('case:read:assigned','case:read:group','case:update:assigned'))
-   OR (r.key='requester' AND p.key IN ('case:create','case:read:own'))
+WHERE (r.key='admin'     AND p.key IN ('case:manage:any','case:read:any','request:read:any','request:update:assigned','group:manage','user:manage'))
+   OR (r.key='agent'     AND p.key IN ('case:read:assigned','case:read:group','case:update:assigned','request:read:assigned','request:update:assigned'))
 ON CONFLICT ("roleId", "permissionId") DO NOTHING;
 
 -- ====================

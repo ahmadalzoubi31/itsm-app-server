@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
+  Put,
   Delete,
   Param,
   Body,
@@ -13,7 +13,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
-import { CurrentUser } from '../decorators/current-user.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { CheckAbility } from '../casl/decorators/check-ability.decorator';
 import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
@@ -37,13 +37,8 @@ export class UsersController {
   @UseGuards(AbilityGuard)
   @CheckAbility(IAM_ACTIONS.Manage, User)
   @ApiOperation({ summary: 'Create a user' })
-  createUser(@CurrentUser() user, @Body() dto: CreateUserDto) {
-    this.logger.log(`Creating user by ${user.username} (${user.userId})`);
-    return this.usersService.createUser({
-      ...dto,
-      createdById: user.userId,
-      createdByName: user.username,
-    });
+  createUser(@Body() dto: CreateUserDto) {
+    return this.usersService.createUser(dto);
   }
 
   @Get()
@@ -64,21 +59,13 @@ export class UsersController {
     return this.usersService.getUser(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(ResourcePoliciesGuard, AbilityGuard)
   @CheckResource(IAM_ACTIONS.Manage, UsersService, 'getUser', 'id')
   @CheckAbility(IAM_ACTIONS.Manage, User)
   @ApiOperation({ summary: 'Update user' })
-  updateUser(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateUserDto,
-  ) {
-    return this.usersService.updateUser(id, {
-      ...dto,
-      updatedById: user.userId,
-      updatedByName: user.username,
-    });
+  updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.updateUser(id, dto);
   }
 
   @Delete(':id')

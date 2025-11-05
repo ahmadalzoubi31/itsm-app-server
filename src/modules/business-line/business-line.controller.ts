@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
+  Put,
   Delete,
   Body,
   Param,
@@ -13,7 +13,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@modules/iam/auth/jwt.guard';
 import { AbilityGuard } from '@modules/iam/casl/guards/ability.guard';
 import { CheckAbility } from '@modules/iam/casl/decorators/check-ability.decorator';
-import { CurrentUser } from '@modules/iam/decorators/current-user.decorator';
+import { CurrentUser } from '@modules/iam/auth/decorators/current-user.decorator';
 import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
 import { BusinessLineService } from './business-line.service';
 import { CreateBusinessLineDto } from './dto/create-business-line.dto';
@@ -50,8 +50,8 @@ export class BusinessLineController {
     description: 'Admin: Create a new business line',
   })
   @Post()
-  create(@CurrentUser() user, @Body() dto: CreateBusinessLineDto) {
-    return this.businessLineService.create(dto, user.userId, user.username);
+  create(@Body() dto: CreateBusinessLineDto) {
+    return this.businessLineService.create(dto);
   }
 
   @CheckAbility(IAM_ACTIONS.Manage, 'all')
@@ -59,13 +59,9 @@ export class BusinessLineController {
     summary: 'Update business line',
     description: 'Admin: Update an existing business line',
   })
-  @Patch(':id')
-  update(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateBusinessLineDto,
-  ) {
-    return this.businessLineService.update(id, dto, user.userId, user.username);
+  @Put(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateBusinessLineDto) {
+    return this.businessLineService.update(id, dto);
   }
 
   @CheckAbility(IAM_ACTIONS.Manage, 'all')
@@ -74,7 +70,7 @@ export class BusinessLineController {
     description: 'Admin: Soft delete a business line',
   })
   @Delete(':id')
-  deactivate(@CurrentUser() user, @Param('id') id: string) {
-    return this.businessLineService.deactivate(id, user.userId, user.username);
+  deactivate(@Param('id') id: string) {
+    return this.businessLineService.deactivate(id);
   }
 }

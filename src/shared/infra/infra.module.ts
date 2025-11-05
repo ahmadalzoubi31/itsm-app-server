@@ -1,5 +1,5 @@
 // src/shared/infra/infra.module.ts
-import { Module, Logger } from '@nestjs/common';
+import { Module, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
@@ -7,9 +7,22 @@ import { HealthModule } from './health/health.module';
 import { dataSourceOptions } from '../../db/data-source';
 import { LoggerModule } from './logger/logger.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { RequestInspectorInterceptor } from './interceptors/request-inspector.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ClsModule } from 'nestjs-cls';
+import { ClsUserInterceptor } from './interceptors/cls-user.interceptor';
+import { AuditSubscriber } from './subscribers/audit.subscriber';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: true,
+        generateId: true,
+      },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig],
@@ -44,5 +57,31 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     LoggerModule,
     HealthModule,
   ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestInspectorInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClsUserInterceptor,
+    },
+    AuditSubscriber,
+  ],
 })
-export class InfraModule {}
+export class InfraModule implements OnModuleInit {
+  private readonly logger = new Logger(InfraModule.name);
+
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly auditSubscriber: AuditSubscriber,
+  ) {}
+
+  onModuleInit() {
+    // Register the audit subscriber with TypeORM connection
+    if (this.dataSource.subscribers) {
+      this.dataSource.subscribers.push(this.auditSubscriber);
+      this.logger.log('AuditSubscriber registered with TypeORM DataSource');
+    }
+  }
+}

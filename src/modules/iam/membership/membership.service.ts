@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Group } from '../groups/entities/group.entity';
-import { Membership } from '../users/entities/membership.entity';
+import { Membership } from './entities/membership.entity';
 import { UsersService } from '../users/users.service';
 import { GroupsService } from '../groups/groups.service';
 

@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
+  Put,
   Post,
   Query,
   UploadedFile,
@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../iam/auth/jwt.guard';
-import { CurrentUser } from '../iam/decorators/current-user.decorator';
+import { CurrentUser } from '../iam/auth/decorators/current-user.decorator';
 import { CaseService } from './case.service';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
@@ -75,35 +75,19 @@ export class CaseController {
   }
 
   // Resource-level check: Can user update THIS specific case?
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(ResourcePoliciesGuard)
   @CheckResource(IAM_ACTIONS.Update, CaseService, 'getCase', 'id')
-  update(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateCaseDto,
-  ) {
-    return this.svc.updateCase(id, {
-      ...dto,
-      updatedById: user.userId,
-      updatedByName: user.username,
-    });
+  update(@Param('id') id: string, @Body() dto: UpdateCaseDto) {
+    return this.svc.updateCase(id, dto);
   }
 
   // Resource-level check: Can user add comment to THIS specific case?
   @Post(':id/comments')
   @UseGuards(ResourcePoliciesGuard)
   @CheckResource(IAM_ACTIONS.Update, CaseService, 'getCase', 'id')
-  addComment(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: CreateCommentDto,
-  ) {
-    return this.svc.addComment(id, {
-      ...dto,
-      createdById: user.userId,
-      createdByName: user.username,
-    });
+  addComment(@Param('id') id: string, @Body() dto: CreateCommentDto) {
+    return this.svc.addComment(id, dto);
   }
 
   // Resource-level check: Can user read comments for THIS specific case?
@@ -121,15 +105,8 @@ export class CaseController {
   @Post(':id/assign')
   @UseGuards(ResourcePoliciesGuard)
   @CheckResource(IAM_ACTIONS.Update, CaseService, 'getCase', 'id')
-  assign(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: AssignCaseDto,
-  ) {
-    return this.svc.assignCase(id, dto, {
-      actorId: user.userId,
-      actorName: user.username,
-    });
+  assign(@Param('id') id: string, @Body() dto: AssignCaseDto) {
+    return this.svc.assignCase(id, dto);
   }
 
   @ApiOperation({
@@ -139,15 +116,8 @@ export class CaseController {
   @Post(':id/status')
   @UseGuards(ResourcePoliciesGuard)
   @CheckResource(IAM_ACTIONS.Update, CaseService, 'getCase', 'id')
-  changeStatus(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: ChangeStatusDto,
-  ) {
-    return this.svc.changeStatus(id, dto.status, {
-      actorId: user.userId,
-      actorName: user.username,
-    });
+  changeStatus(@Param('id') id: string, @Body() dto: ChangeStatusDto) {
+    return this.svc.changeStatus(id, dto.status);
   }
 
   @ApiOperation({
@@ -159,14 +129,10 @@ export class CaseController {
   @CheckResource(IAM_ACTIONS.Update, CaseService, 'getCase', 'id')
   @UseInterceptors(FileInterceptor('file'))
   uploadAttachment(
-    @CurrentUser() user,
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.svc.addAttachment(id, file, {
-      actorId: user.userId,
-      actorName: user.username,
-    });
+    return this.svc.addAttachment(id, file);
   }
 
   @ApiOperation({

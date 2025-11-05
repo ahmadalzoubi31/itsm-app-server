@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '@modules/iam/auth/jwt.guard';
 import { AbilityGuard } from '@modules/iam/casl/guards/ability.guard';
 import { CheckAbility } from '@modules/iam/casl/decorators/check-ability.decorator';
 import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
-import { CurrentUser } from '@modules/iam/decorators/current-user.decorator';
+import { CurrentUser } from '@modules/iam/auth/decorators/current-user.decorator';
 import { SlaService } from './services/sla.service';
 import {
   CaseCreatedEvent,

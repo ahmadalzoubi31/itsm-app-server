@@ -4,7 +4,7 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
+  Put,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -53,7 +53,7 @@ export class NotifyController {
   }
 
   @ApiOperation({ summary: 'Update user notification preference' })
-  @Patch('prefs/:id')
+  @Put('prefs/:id')
   updatePref(@Param('id') id: string, @Body() dto: UpdateUserNotifyPrefDto) {
     return this.prefs.update(id, dto);
   }

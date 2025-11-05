@@ -67,15 +67,20 @@ export class ChannelsAdminService {
   }
 
   private async clearDefault(businessLineId: string) {
-    await this.ch
-      .createQueryBuilder()
-      .update(EmailChannel)
-      .set({ isDefault: false })
-      .where('businessLineId = :businessLineId AND kind = :kind', {
+    // Find all default SMTP channels for this business line
+    const defaultChannels = await this.ch.find({
+      where: {
         businessLineId,
         kind: 'smtp',
-      })
-      .execute();
+        isDefault: true,
+      },
+    });
+
+    // Update each channel individually to trigger audit subscriber
+    for (const channel of defaultChannels) {
+      channel.isDefault = false;
+      await this.ch.save(channel);
+    }
   }
 
   async testConnection(id: string) {

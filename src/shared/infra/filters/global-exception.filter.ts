@@ -104,6 +104,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       );
     }
 
+    // Check if response has already been sent
+    if (response.headersSent) {
+      this.logger.warn(
+        'Response headers already sent, cannot send error response',
+      );
+      return;
+    }
+
     const errorResponse: ErrorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
@@ -113,7 +121,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       error: status >= 500 ? error : undefined,
     };
 
-    response.status(status).json(errorResponse);
+    try {
+      response.status(status).json(errorResponse);
+    } catch (err) {
+      // If headers are sent between check and send, just log it
+      if ((err as any).code === 'ERR_HTTP_HEADERS_SENT') {
+        this.logger.warn(
+          'Headers were sent after initial check, skipping error response',
+        );
+      } else {
+        throw err;
+      }
+    }
   }
 
   private getDefaultMessage(status: number): string {

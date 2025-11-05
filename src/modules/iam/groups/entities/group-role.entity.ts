@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
-import { Role } from '../../permissions/entities/role.entity';
+import { Role } from '../../roles/entities/role.entity';
 import { Group } from './group.entity';
 
 @Entity('group_role')

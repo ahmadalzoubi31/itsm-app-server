@@ -4,7 +4,7 @@ import { MembershipService } from './membership.service';
 import { MembershipController } from './membership.controller';
 import { User } from '../users/entities/user.entity';
 import { Group } from '../groups/entities/group.entity';
-import { Membership } from '../users/entities/membership.entity';
+import { Membership } from './entities/membership.entity';
 import { UsersModule } from '../users/users.module';
 import { GroupsModule } from '../groups/groups.module';
 import { CaslModule } from '../casl/casl.module';

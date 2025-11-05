@@ -4,7 +4,7 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
+  Put,
   Post,
   Query,
   UseGuards,
@@ -17,8 +17,9 @@ import { CatalogService } from './catalog.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
+import { SubmitCatalogRequestDto } from './dto/submit-catalog-request.dto';
 import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
-import { CurrentUser } from '@modules/iam/decorators/current-user.decorator';
+import { CurrentUser } from '@modules/iam/auth/decorators/current-user.decorator';
 
 @ApiTags('Catalog')
 @ApiBearerAuth('access-token')
@@ -55,6 +56,18 @@ export class CatalogController {
     return this.svc.getTemplate(id);
   }
 
+  @ApiOperation({
+    summary: 'Submit request from template',
+    description: 'Submit a service request from a catalog template.',
+  })
+  @Post('templates/:id/submit')
+  submitFromTemplate(
+    @Param('id') id: string,
+    @Body() dto: SubmitCatalogRequestDto,
+  ) {
+    return this.svc.submitRequest(id, dto.formData);
+  }
+
   // Admin manage
   @CheckAbility(IAM_ACTIONS.Manage, 'all')
   @ApiOperation({
@@ -62,12 +75,8 @@ export class CatalogController {
     description: 'Admin: create a service.',
   })
   @Post('services')
-  createService(@CurrentUser() user, @Body() dto: CreateServiceDto) {
-    return this.svc.createService({
-      ...dto,
-      createdById: user.userId,
-      createdByName: user.username,
-    });
+  createService(@Body() dto: CreateServiceDto) {
+    return this.svc.createService(dto);
   }
 
   @CheckAbility(IAM_ACTIONS.Manage, 'all')
@@ -76,12 +85,8 @@ export class CatalogController {
     description: 'Admin: create a request template.',
   })
   @Post('templates')
-  createTemplate(@CurrentUser() user, @Body() dto: CreateTemplateDto) {
-    return this.svc.createTemplate({
-      ...dto,
-      createdById: user.userId,
-      createdByName: user.username,
-    });
+  createTemplate(@Body() dto: CreateTemplateDto) {
+    return this.svc.createTemplate(dto);
   }
 
   @CheckAbility(IAM_ACTIONS.Manage, 'all')
@@ -89,16 +94,8 @@ export class CatalogController {
     summary: 'Update template',
     description: 'Admin: update a request template.',
   })
-  @Patch('templates/:id')
-  updateTemplate(
-    @CurrentUser() user,
-    @Param('id') id: string,
-    @Body() dto: UpdateTemplateDto,
-  ) {
-    return this.svc.updateTemplate(id, {
-      ...dto,
-      updatedById: user.userId,
-      updatedByName: user.username,
-    });
+  @Put('templates/:id')
+  updateTemplate(@Param('id') id: string, @Body() dto: UpdateTemplateDto) {
+    return this.svc.updateTemplate(id, dto);
   }
 }

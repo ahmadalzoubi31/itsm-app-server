@@ -1,14 +1,10 @@
-// src/modules/iam/admin/admin.controller.ts (add Swagger on endpoints)
+// src/modules/iam/permissions/permissions.controller.ts
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PermissionsService } from './permissions.service';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { AssignPermissionToRoleDto } from './dto/assign-permission-to-role.dto';
-import { AssignRoleToGroupDto } from './dto/assign-role-to-group.dto';
-import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
-import { GrantPermissionToUserDto } from './dto/grant-permission-to-user.dto';
+import { AssignPermissionsToUserDto } from './dto/assign-permissions-to-user.dto';
 
-@ApiTags('IAM / Permission / RBAC')
+@ApiTags('IAM / Permissions')
 @ApiBearerAuth('access-token')
 @Controller('iam/permissions')
 export class PermissionsController {
@@ -24,127 +20,34 @@ export class PermissionsController {
     return this.svc.listPermissions();
   }
 
-  // ROLES
-  @ApiOperation({ summary: 'List roles', description: 'Return all roles.' })
-  @Get('roles')
-  listRoles() {
-    return this.svc.listRoles();
-  }
-
-  @ApiOperation({ summary: 'Create role', description: 'Create a new role.' })
-  @Post('roles')
-  createRole(@Body() dto: CreateRoleDto) {
-    return this.svc.createRole(dto);
-  }
-
-  @ApiOperation({ summary: 'Delete role', description: 'Delete role by ID.' })
-  @Delete('roles/:id')
-  deleteRole(@Param('id') id: string) {
-    return this.svc.deleteRole(id);
-  }
-
-  // ROLE ↔ PERMISSION
+  // USER ↔ PERMISSION (Direct assignment)
   @ApiOperation({
-    summary: 'List role permissions',
-    description: 'Return permissions assigned to a role.',
+    summary: 'Get user permissions',
+    description: 'List all permissions assigned to a user.',
   })
-  @Get('roles/:id/permissions')
-  getRolePermissions(@Param('id') id: string) {
-    return this.svc.getRolePermissions(id);
+  @Get('users/:userId')
+  getUserPermissions(@Param('userId') userId: string) {
+    return this.svc.getUserPermissions(userId);
   }
 
   @ApiOperation({
-    summary: 'Assign permission to role',
-    description: 'Upsert mapping role → permission.',
-  })
-  @Post('roles/:id/permissions')
-  assignPermissionToRole(
-    @Param('id') id: string,
-    @Body() dto: AssignPermissionToRoleDto,
-  ) {
-    return this.svc.assignPermissionToRole(id, dto.permissionId);
-  }
-
-  @ApiOperation({
-    summary: 'Revoke permission from role',
-    description: 'Remove mapping role → permission.',
-  })
-  @Delete('roles/:id/permissions/:permissionId')
-  revokePermissionFromRole(
-    @Param('id') id: string,
-    @Param('permissionId') pid: string,
-  ) {
-    return this.svc.revokePermissionFromRole(id, pid);
-  }
-
-  // GROUP ↔ ROLE
-  @ApiOperation({
-    summary: 'Assign role to group',
-    description: 'Upsert mapping group → role.',
-  })
-  @Post('groups/:groupId/roles')
-  assignRoleToGroup(
-    @Param('groupId') gid: string,
-    @Body() dto: AssignRoleToGroupDto,
-  ) {
-    return this.svc.assignRoleToGroup(gid, dto.roleId);
-  }
-
-  @ApiOperation({
-    summary: 'Revoke role from group',
-    description: 'Remove mapping group → role.',
-  })
-  @Delete('groups/:groupId/roles/:roleId')
-  revokeRoleFromGroup(
-    @Param('groupId') gid: string,
-    @Param('roleId') rid: string,
-  ) {
-    return this.svc.revokeRoleFromGroup(gid, rid);
-  }
-
-  // USER ↔ ROLE
-  @ApiOperation({
-    summary: 'Assign role to user',
-    description: 'Upsert mapping user → role.',
-  })
-  @Post('users/:userId/roles')
-  assignRoleToUser(
-    @Param('userId') uid: string,
-    @Body() dto: AssignRoleToUserDto,
-  ) {
-    return this.svc.assignRoleToUser(uid, dto.roleId);
-  }
-
-  @ApiOperation({
-    summary: 'Revoke role from user',
-    description: 'Remove mapping user → role.',
-  })
-  @Delete('users/:userId/roles/:roleId')
-  revokeRoleFromUser(
-    @Param('userId') uid: string,
-    @Param('roleId') rid: string,
-  ) {
-    return this.svc.revokeRoleFromUser(uid, rid);
-  }
-
-  // USER ↔ PERMISSION
-  @ApiOperation({
-    summary: 'Grant permission to user',
+    summary: 'Assign permissions to user',
     description: 'Upsert mapping user → permission.',
   })
-  @Post('users/:userId/permissions')
-  grantPermissionToUser(
+  @Post('users/:userId/assign')
+  assignPermissionsToUser(
     @Param('userId') uid: string,
-    @Body() dto: GrantPermissionToUserDto,
+    @Body() dto: AssignPermissionsToUserDto[],
   ) {
-    return this.svc.grantPermissionToUser(uid, dto.permissionId);
+    console.log(dto);
+    return this.svc.assignPermissionsToUser(uid, dto);
   }
 
   @ApiOperation({
     summary: 'Revoke permission from user',
-    description: 'Remove mapping user → permission.',
+    description: 'Remove a direct permission assignment from a user.',
   })
-  @Delete('users/:userId/permissions/:permissionId')
+  @Delete('users/:userId/revoke/:permissionId')
   revokePermissionFromUser(
     @Param('userId') uid: string,
     @Param('permissionId') pid: string,
