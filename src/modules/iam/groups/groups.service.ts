@@ -1,38 +1,34 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, In, Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { Group } from './entities/group.entity';
-import { CreateGroupDto } from './dto/create-group.dto';
-import { GroupRole } from './entities/group-role.entity';
+import { Membership } from './entities/membership.entity';
+import { CreateGroupDto, UpdateGroupDto } from './dto/group.dto';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/entities/user.entity';
 
-// Type definitions for better type safety
-interface GroupWithAudit extends CreateGroupDto {
-  createdById?: string;
-  createdByName?: string;
-}
-
-interface GroupUpdateWithAudit extends Partial<Group> {
-  updatedById?: string;
-  updatedByName?: string;
+// Type definitions for membership operations
+export interface MembershipResponse {
+  groupId: string;
+  userId: string;
+  removed?: boolean;
+  added?: boolean;
 }
 
 @Injectable()
 export class GroupsService {
   constructor(
     @InjectRepository(Group) private readonly groups: Repository<Group>,
-    @InjectRepository(GroupRole)
-    private readonly groupRoles: Repository<GroupRole>,
+    @InjectRepository(Membership)
+    private readonly memberships: Repository<Membership>,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
    * Creates a new group with proper validation
    */
-  async createGroup(input: GroupWithAudit): Promise<Group> {
-    const group = this.groups.create({
-      ...input,
-      createdById: input.createdById,
-      createdByName: input.createdByName,
-    });
+  async createGroup(input: CreateGroupDto): Promise<Group> {
+    const group = this.groups.create(input);
 
     const savedGroup = await this.groups.save(group);
 
@@ -45,6 +41,7 @@ export class GroupsService {
   async listGroups(options?: FindOptionsWhere<Group>): Promise<Group[]> {
     return this.groups.find({
       where: options,
+      relations: ['businessLine'],
       order: { name: 'ASC' },
     });
   }
@@ -53,7 +50,10 @@ export class GroupsService {
    * Gets a group by ID with proper error handling
    */
   async getGroup(id: string): Promise<Group> {
-    const group = await this.groups.findOne({ where: { id } });
+    const group = await this.groups.findOne({
+      where: { id },
+      relations: ['businessLine'],
+    });
     if (!group) {
       throw new NotFoundException(`Group with ID ${id} not found`);
     }
@@ -63,12 +63,12 @@ export class GroupsService {
   /**
    * Updates a group with validation
    */
-  async updateGroup(id: string, put: GroupUpdateWithAudit): Promise<Group> {
+  async updateGroup(id: string, dto: UpdateGroupDto): Promise<Group> {
     // Validate group exists and get entity
     const group = await this.getGroup(id);
 
     // Apply updates to entity
-    Object.assign(group, put);
+    Object.assign(group, dto);
 
     // Save entity (triggers audit subscriber)
     return this.groups.save(group);
@@ -81,16 +81,136 @@ export class GroupsService {
     // Validate group exists and capture data for event
     const group = await this.getGroup(id);
 
-    //Delete group roles
-    await this.groupRoles.delete({ groupId: id });
-
     // Delete group
     await this.groups.delete({ id });
 
     return { id, deleted: true };
   }
 
-  async getGroupRoles(groupIds: string[]): Promise<GroupRole[]> {
-    return this.groupRoles.find({ where: { groupId: In(groupIds) } });
+  /**
+   * Adds a user to a group with proper validation
+   */
+  async addMember(
+    groupId: string,
+    userId: string,
+  ): Promise<MembershipResponse> {
+    // Validate user and group exist
+    const [user, group] = await Promise.all([
+      this.usersService.getUser(userId),
+      this.getGroup(groupId),
+    ]);
+
+    if (!user || !group) {
+      throw new NotFoundException('User or Group not found');
+    }
+
+    // Check if membership already exists
+    const existing = await this.memberships.findOne({
+      where: { groupId, userId },
+    });
+
+    if (existing) {
+      return { groupId, userId, added: false };
+    }
+
+    const membership = this.memberships.create({ groupId, userId });
+    await this.memberships.save(membership);
+
+    return { groupId, userId, added: true };
+  }
+
+  /**
+   * Removes a user from a group with proper validation
+   */
+  async removeMember(
+    groupId: string,
+    userId: string,
+  ): Promise<MembershipResponse> {
+    // Validate user and group exist
+    const [user, group] = await Promise.all([
+      this.usersService.getUser(userId),
+      this.getGroup(groupId),
+    ]);
+
+    if (!user || !group) {
+      throw new NotFoundException('User or Group not found');
+    }
+
+    const result = await this.memberships.delete({ groupId, userId });
+
+    return {
+      groupId,
+      userId,
+      removed: result.affected ? result.affected > 0 : false,
+    };
+  }
+
+  /**
+   * Gets all members of a group
+   */
+  async getGroupMembers(groupId: string): Promise<User[]> {
+    // Validate group exists before fetching members
+    await this.getGroup(groupId);
+
+    const membershipRecords = await this.memberships.find({
+      where: { groupId },
+      relations: ['user'],
+      order: { createdAt: 'ASC' },
+    });
+
+    return membershipRecords.map((m) => m.user);
+  }
+
+  /**
+   * Adds multiple users to a group
+   */
+  async addMembers(
+    groupId: string,
+    userIds: string[],
+  ): Promise<MembershipResponse[]> {
+    const results: MembershipResponse[] = [];
+
+    for (const userId of userIds) {
+      const result = await this.addMember(groupId, userId);
+      results.push(result);
+    }
+
+    return results;
+  }
+
+  /**
+   * Removes multiple users from a group
+   */
+  async removeMembers(
+    groupId: string,
+    userIds: string[],
+  ): Promise<MembershipResponse[]> {
+    const results: MembershipResponse[] = [];
+
+    for (const userId of userIds) {
+      const result = await this.removeMember(groupId, userId);
+      results.push(result);
+    }
+
+    return results;
+  }
+
+  /**
+   * Adds users to a group (public API)
+   */
+  async addUsersToGroup(groupId: string, userIds: string[]): Promise<User[]> {
+    await this.addMembers(groupId, userIds);
+    return this.getGroupMembers(groupId);
+  }
+
+  /**
+   * Removes users from a group (public API)
+   */
+  async removeUsersFromGroup(
+    groupId: string,
+    userIds: string[],
+  ): Promise<User[]> {
+    await this.removeMembers(groupId, userIds);
+    return this.getGroupMembers(groupId);
   }
 }

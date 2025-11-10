@@ -3,13 +3,8 @@ import { SeederOptions } from 'typeorm-extension';
 import * as dotenv from 'dotenv';
 import { User } from '@modules/iam/users/entities/user.entity';
 import { Group } from '@modules/iam/groups/entities/group.entity';
-import { Membership } from '@modules/iam/membership/entities/membership.entity';
 import { Role } from '@modules/iam/roles/entities/role.entity';
-import { UserRole } from '@modules/iam/users/entities/user-role.entity';
-import { GroupRole } from '@modules/iam/groups/entities/group-role.entity';
 import { Permission } from '@modules/iam/permissions/entities/permission.entity';
-import { RolePermission } from '@modules/iam/roles/entities/role-permission.entity';
-import { UserPermission } from '@modules/iam/users/entities/user-permission.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 import { Case } from '@modules/case/entities/case.entity';
 import { CaseComment } from '@modules/case/entities/case-comment.entity';
@@ -30,6 +25,9 @@ import { Service } from '@modules/catalog/entities/service.entity';
 import { RequestTemplate } from '@modules/catalog/entities/request-template.entity';
 import { Request } from '@modules/request/entities/request.entity';
 import { Workflow } from '@modules/workflow/entities/workflow.entity';
+import { Membership } from '@modules/iam/groups/entities/membership.entity';
+import { LdapConfig } from '@modules/ldap/entities/ldap-config.entity';
+import { LdapSyncLog } from '@modules/ldap/entities/ldap-sync-log.entity';
 
 // Load environment variables
 dotenv.config();
@@ -51,10 +49,6 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
     Permission,
     RefreshToken,
     TokenBlacklist,
-    UserRole,
-    GroupRole,
-    RolePermission,
-    UserPermission,
     BusinessLine,
     CaseComment,
     CaseLink,
@@ -72,10 +66,13 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
     RequestTemplate,
     Request,
     Workflow,
+    LdapConfig,
+    LdapSyncLog,
   ],
   migrations: [__dirname + '/migrations/*.{ts,js}'],
   seeds: [__dirname + '/seeds/**/*.{ts,js}'],
   logging: process.env.DB_LOGGING === 'true',
+  synchronize: true, // TODO: Remove this in production
 };
 
 const dataSource = new DataSource(dataSourceOptions);

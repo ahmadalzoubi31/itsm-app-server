@@ -11,8 +11,6 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../users/entities/user.entity';
 import { LoginDto, RefreshTokenDto } from './dto/auth.dto';
-import { UserRole } from '../users/entities/user-role.entity';
-import { Membership } from '../membership/entities/membership.entity';
 import { Role } from '../roles/entities/role.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { TokenBlacklist } from './entities/token-blacklist.entity';
@@ -21,7 +19,7 @@ import { randomBytes } from 'crypto';
 interface TokenPayload {
   sub: string;
   username: string;
-  role?: string;
+  roles?: string[];
   groupIds?: string[];
   jti: string; // JWT ID for blacklist tracking
   iat?: number;
@@ -41,8 +39,6 @@ export class AuthService {
 
   constructor(
     @InjectRepository(User) private users: Repository<User>,
-    @InjectRepository(UserRole) private userRoles: Repository<UserRole>,
-    @InjectRepository(Membership) private memberships: Repository<Membership>,
     @InjectRepository(Role) private roles: Repository<Role>,
     @InjectRepository(RefreshToken)
     private refreshTokens: Repository<RefreshToken>,
@@ -79,28 +75,19 @@ export class AuthService {
     this.logger.debug(`Generating token pair for user: ${user.username}`);
 
     // Fetch user's primary role
-    const userRoleRecords = await this.userRoles.find({
-      where: { userId: user.id },
-      relations: ['role'],
-    });
-    const primaryRole =
-      userRoleRecords.length > 0
-        ? await this.roles.findOne({ where: { id: userRoleRecords[0].roleId } })
-        : null;
-
-    // Fetch user's group memberships
-    const membershipRecords = await this.memberships.find({
-      where: { userId: user.id },
-    });
-    const groupIds = membershipRecords.map((m) => m.groupId);
+    const userRoleRecords = await this.roles
+      .find({
+        where: { users: { id: user.id } },
+      })
+      .then((roles) => roles.map((r) => r.key));
 
     // Generate access token with JTI
     const jti = this.generateJti();
     const payload: TokenPayload = {
       sub: user.id,
       username: user.username,
-      role: primaryRole?.key || undefined,
-      groupIds: groupIds,
+      roles: userRoleRecords,
+      groupIds: [],
       jti,
     };
     const access_token = await this.jwt.signAsync(payload);
@@ -137,8 +124,8 @@ export class AuthService {
         authSource: user.authSource,
         isActive: user.isActive,
         lastLoginAt: user.lastLoginAt,
-        role: primaryRole?.key || null,
-        groupIds: groupIds,
+        roles: userRoleRecords,
+        groupIds: [],
       },
     };
   }
@@ -246,26 +233,18 @@ export class AuthService {
     await this.refreshTokens.save(matchedToken);
 
     // Generate new access token (keep same refresh token)
-    const userRoleRecords = await this.userRoles.find({
-      where: { userId: user.id },
-      relations: ['role'],
-    });
-    const primaryRole =
-      userRoleRecords.length > 0
-        ? await this.roles.findOne({ where: { id: userRoleRecords[0].roleId } })
-        : null;
-
-    const membershipRecords = await this.memberships.find({
-      where: { userId: user.id },
-    });
-    const groupIds = membershipRecords.map((m) => m.groupId);
+    const userRoleRecords = await this.roles
+      .find({
+        where: { users: { id: user.id } },
+      })
+      .then((roles) => roles.map((r) => r.key));
 
     const jti = this.generateJti();
     const payload: TokenPayload = {
       sub: user.id,
       username: user.username,
-      role: primaryRole?.key || undefined,
-      groupIds: groupIds,
+      roles: userRoleRecords,
+      groupIds: [],
       jti,
     };
     const access_token = await this.jwt.signAsync(payload);
@@ -388,8 +367,8 @@ export class AuthService {
     const user = await this.users.findOne({
       where: { id: userId },
       relations: [
-        'userRoles.role', // Add this to load the role relation
-        'userPermissions.permission', // Add this to load the permission relation
+        'roles', // Add this to load the role relation
+        'permissions', // Add this to load the permission relation
       ],
     });
 
@@ -400,14 +379,11 @@ export class AuthService {
       throw new UnauthorizedException('User not found or inactive');
     }
 
-    // Transform the response to include role keys (for programmatic access) and exclude userRoles/userPermissions
-    const { userRoles, userPermissions, ...userData } = user;
+    // Transform the response to include role keys (for programmatic access)
     const result = {
-      ...userData,
-      roles: user.userRoles?.map((ur) => ur.role?.key).filter(Boolean) || [],
-      permissions:
-        user.userPermissions?.map((up) => up.permission?.key).filter(Boolean) ||
-        [],
+      ...user,
+      roles: user.roles?.map((r) => r.key).filter(Boolean) || [],
+      permissions: user.permissions?.map((p) => p.key).filter(Boolean) || [],
     };
 
     this.logger.debug(`User profile retrieved successfully: ${user.username}`);

@@ -14,12 +14,11 @@ export class BusinessLineService {
   ) {}
 
   /**
-   * List all business lines
+   * List all business lines (both active and inactive)
    */
   async findAll(): Promise<BusinessLine[]> {
     return this.businessLineRepo.find({
-      where: { active: true },
-      order: { name: 'ASC' },
+      order: { active: 'DESC', name: 'ASC' },
     });
   }
 

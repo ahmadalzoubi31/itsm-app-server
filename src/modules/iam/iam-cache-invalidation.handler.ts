@@ -2,7 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { IamPermissionService } from './core/iam-permission.service';
-import { MembershipService } from './membership/membership.service';
+import { GroupsService } from './groups/groups.service';
 import {
   UserRoleAssigned,
   UserRoleRevoked,
@@ -20,7 +20,7 @@ export class IamCacheInvalidationHandler {
 
   constructor(
     private readonly permissionService: IamPermissionService,
-    private readonly membershipService: MembershipService,
+    private readonly groupsService: GroupsService,
   ) {}
 
   /** invalidate cache for affected user (after membership/role change) */
@@ -82,7 +82,7 @@ export class IamCacheInvalidationHandler {
       `Invalidating cache for ${payload.memberCount} members after group role assigned`,
     );
     try {
-      const members = await this.membershipService.getGroupMembers(
+      const members = await this.groupsService.getGroupMembers(
         payload.groupId,
       );
       for (const member of members) {
@@ -106,7 +106,7 @@ export class IamCacheInvalidationHandler {
       `Invalidating cache for ${payload.memberCount} members after group role revoked`,
     );
     try {
-      const members = await this.membershipService.getGroupMembers(
+      const members = await this.groupsService.getGroupMembers(
         payload.groupId,
       );
       for (const member of members) {

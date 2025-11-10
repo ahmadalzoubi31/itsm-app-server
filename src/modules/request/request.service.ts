@@ -106,12 +106,6 @@ export class RequestService {
   async listRequests(q: ListRequestsQuery, user: JwtUser) {
     const where: any = {};
 
-    // Apply role-based filter
-    const canSeeAll = ['agent', 'admin'].includes(user.role);
-    if (!canSeeAll) {
-      where.requesterId = user.userId;
-    }
-
     if (q.status) where.status = q.status;
     if (q.type) where.type = q.type;
     if (q.priority) where.priority = q.priority;

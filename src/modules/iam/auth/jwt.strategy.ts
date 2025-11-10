@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 type JwtPayload = {
   sub: string;
   username: string;
-  role?: string;
+  roles?: string[];
   groupIds?: string[];
   jti: string;
 };
@@ -57,7 +57,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       `Validating JWT payload: ${JSON.stringify({
         sub: payload.sub,
         username: payload.username,
-        role: payload.role,
+        roles: payload.roles,
         groupIds: payload.groupIds,
         jti: payload.jti,
       })}`,
@@ -96,7 +96,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = {
       userId: payload.sub,
       username: payload.username,
-      role: payload.role,
+      roles: payload.roles,
       groupIds: payload.groupIds || [],
       jti: payload.jti,
     };

@@ -13,12 +13,13 @@ import { EmailModule } from '@modules/email/email.module';
 import { NotifyModule } from '@modules/notify/notify.module';
 import { RequestModule } from '@modules/request/request.module';
 import { WorkflowModule } from '@modules/workflow/workflow.module';
+import { LdapModule } from '@modules/ldap/ldap.module';
 
 @Module({
   imports: [
     InfraModule,
     IamModule,
-    // AuditModule,
+    LdapModule,
     EmailModule,
     NotifyModule,
     BusinessLineModule,

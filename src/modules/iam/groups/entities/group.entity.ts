@@ -9,14 +9,18 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
-import { Membership } from '../../membership/entities/membership.entity';
+import { Membership } from './membership.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 
 @Entity('group')
-@Index(['key'], { unique: true })
+@Index(['type', 'businessLineId', 'name'], { unique: true })
 export class Group extends AuditableEntity {
   @PrimaryGeneratedColumn('uuid') id!: string;
-  @Column({ length: 80 }) key!: string;
+  @Column({ enum: ['help-desk', 'tier-1', 'tier-2', 'tier-3'] }) type!:
+    | 'help-desk'
+    | 'tier-1'
+    | 'tier-2'
+    | 'tier-3';
   @Column({ length: 120 }) name!: string;
   @Column({ nullable: true }) description?: string;
 
@@ -29,5 +33,6 @@ export class Group extends AuditableEntity {
   businessLine!: BusinessLine;
 
   @OneToMany(() => Membership, (m) => m.group)
+  @JoinColumn({ name: 'groupId' })
   memberships!: Membership[];
 }

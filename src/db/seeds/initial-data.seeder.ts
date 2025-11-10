@@ -4,8 +4,6 @@ import { Seeder } from 'typeorm-extension';
 import { User } from '@modules/iam/users/entities/user.entity';
 import { Permission } from '@modules/iam/permissions/entities/permission.entity';
 import { Role } from '@modules/iam/roles/entities/role.entity';
-import { RolePermission } from '@modules/iam/roles/entities/role-permission.entity';
-import { UserRole } from '@modules/iam/users/entities/user-role.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 import { Group } from '@modules/iam/groups/entities/group.entity';
 import { SlaTarget } from '@modules/sla/entities/sla-target.entity';
@@ -77,8 +75,11 @@ export default class InitialDataSeeder implements Seeder {
         passwordHash:
           '$2b$10$hsDw101O1W833/5qKuh2DueavBpTOshwiPgI.zVjrusFFkNm90JxW',
         isActive: true,
+        isLicensed: true,
         createdById: '550e8400-e29b-41d4-a716-446655440000',
         createdByName: 'system',
+        updatedById: '550e8400-e29b-41d4-a716-446655440000',
+        updatedByName: 'system',
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -86,7 +87,14 @@ export default class InitialDataSeeder implements Seeder {
       existingUser = await userRepo.save(systemUser);
       console.log('  ✓ System user created');
     } else {
-      console.log('  ⊙ System user already exists');
+      // Update existing system user to ensure it's licensed
+      if (!existingUser.isLicensed) {
+        existingUser.isLicensed = true;
+        await userRepo.save(existingUser);
+        console.log('  ✓ System user updated with license');
+      } else {
+        console.log('  ⊙ System user already exists and is licensed');
+      }
     }
 
     return existingUser;
@@ -291,6 +299,13 @@ export default class InitialDataSeeder implements Seeder {
         description: 'Manage users',
       },
       {
+        key: 'user:manage-license',
+        subject: 'User',
+        action: 'manage',
+        category: 'IAM',
+        description: 'Manage user licenses (assign/revoke licenses)',
+      },
+      {
         key: 'group:manage',
         subject: 'Group',
         action: 'manage',
@@ -476,7 +491,13 @@ export default class InitialDataSeeder implements Seeder {
       });
 
       if (!permission) {
-        permission = permissionRepo.create(permData);
+        permission = permissionRepo.create({
+          ...permData,
+          createdById: '550e8400-e29b-41d4-a716-446655440000',
+          createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
+        });
         await permissionRepo.save(permission);
         console.log(`  ✓ Created permission: ${permData.key}`);
       } else {
@@ -522,7 +543,13 @@ export default class InitialDataSeeder implements Seeder {
       });
 
       if (!role) {
-        role = roleRepo.create(roleData);
+        role = roleRepo.create({
+          ...roleData,
+          createdById: '550e8400-e29b-41d4-a716-446655440000',
+          createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
+        });
         await roleRepo.save(role);
         console.log(`  ✓ Created role: ${roleData.key}`);
       } else {
@@ -541,7 +568,7 @@ export default class InitialDataSeeder implements Seeder {
     permissions: Record<string, Permission>,
   ): Promise<void> {
     console.log('🔗 Mapping roles to permissions...');
-    const rolePermissionRepo = dataSource.getRepository(RolePermission);
+
     const roleRepo = dataSource.getRepository(Role);
 
     const mappings = [
@@ -584,42 +611,58 @@ export default class InitialDataSeeder implements Seeder {
 
     for (const mapping of mappings) {
       const role = roles[mapping.roleKey];
+
+      if (!role) {
+        console.log(`  ⚠️ Role not found: ${mapping.roleKey}`);
+        continue;
+      }
+
+      // Reload role with permissions relation to ensure permissions array exists
+      const roleWithPermissions = await roleRepo.findOne({
+        where: { id: role.id },
+        relations: ['permissions'],
+      });
+
+      if (!roleWithPermissions) {
+        console.log(`  ⚠️ Could not reload role: ${mapping.roleKey}`);
+        continue;
+      }
+
+      // Initialize permissions array if it doesn't exist
+      if (!roleWithPermissions.permissions) {
+        roleWithPermissions.permissions = [];
+      }
+
       let permissionCount = 0;
 
       for (const permKey of mapping.permissionKeys) {
         const permission = permissions[permKey];
 
-        if (role && permission) {
-          const existing = await rolePermissionRepo.findOne({
-            where: {
-              roleId: role.id,
-              permissionId: permission.id,
-            },
-          });
+        if (permission) {
+          // Check if permission is already assigned
+          const hasPermission = roleWithPermissions.permissions.some(
+            (p) => p.id === permission.id,
+          );
 
-          if (!existing) {
-            const rolePermission = rolePermissionRepo.create({
-              roleId: role.id,
-              permissionId: permission.id,
-            });
-            await rolePermissionRepo.save(rolePermission);
+          if (!hasPermission) {
+            roleWithPermissions.permissions.push(permission);
+            await roleRepo.save(roleWithPermissions);
             console.log(`  ✓ Mapped ${mapping.roleKey} → ${permKey}`);
+            permissionCount++;
           } else {
             console.log(
               `  ⊙ Mapping already exists: ${mapping.roleKey} → ${permKey}`,
             );
+            permissionCount++;
           }
-          permissionCount++;
         }
       }
 
       // Update role with permission count
-      if (role) {
-        await roleRepo.update(role.id, { permissionCount });
-        console.log(
-          `  ✓ Updated ${mapping.roleKey} with ${permissionCount} permissions`,
-        );
-      }
+      await roleRepo.update(roleWithPermissions.id, { permissionCount });
+      console.log(
+        `  ✓ Updated ${mapping.roleKey} with ${permissionCount} permissions`,
+      );
     }
   }
 
@@ -629,51 +672,69 @@ export default class InitialDataSeeder implements Seeder {
     roles: Record<string, Role>,
   ): Promise<void> {
     console.log('👤 Assigning roles to users...');
-    const userRoleRepo = dataSource.getRepository(UserRole);
+    const userRepo = dataSource.getRepository(User);
     const roleRepo = dataSource.getRepository(Role);
 
     const adminRole = roles['admin'];
 
     if (adminRole && systemUser) {
-      const existing = await userRoleRepo.findOne({
-        where: {
-          userId: systemUser.id,
-          roleId: adminRole.id,
-        },
+      // Reload user with roles relation to check existing assignments
+      const userWithRoles = await userRepo.findOne({
+        where: { id: systemUser.id },
+        relations: ['roles'],
       });
 
-      if (!existing) {
-        const userRole = userRoleRepo.create({
-          userId: systemUser.id,
-          roleId: adminRole.id,
-        });
-        await userRoleRepo.save(userRole);
+      if (!userWithRoles) {
+        console.log(`  ⚠️ Could not reload system user`);
+        return;
+      }
+
+      // Initialize roles array if it doesn't exist
+      if (!userWithRoles.roles) {
+        userWithRoles.roles = [];
+      }
+
+      // Check if admin role is already assigned
+      const hasAdminRole = userWithRoles.roles.some(
+        (r) => r.id === adminRole.id,
+      );
+
+      if (!hasAdminRole) {
+        userWithRoles.roles.push(adminRole);
+        await userRepo.save(userWithRoles);
         console.log(`  ✓ Assigned admin role to system user`);
       } else {
         console.log(`  ⊙ System user already has admin role`);
       }
 
-      // Update user count for admin role
-      const userCount = await userRoleRepo.count({
-        where: { roleId: adminRole.id },
-      });
-      await roleRepo.update(adminRole.id, { userCount });
-      console.log(`  ✓ Updated admin role with ${userCount} user(s)`);
+      // Update userCount for admin role
+      const adminUserCount = await userRepo
+        .createQueryBuilder('user')
+        .innerJoin('user.roles', 'role', 'role.id = :roleId', {
+          roleId: adminRole.id,
+        })
+        .getCount();
+
+      await roleRepo.update(adminRole.id, { userCount: adminUserCount });
+      console.log(`  ✓ Updated admin role userCount to ${adminUserCount}`);
     }
 
     // Update user counts for other roles (agent and end_user)
     // Even if they have 0 users, we should set the count
     for (const [roleKey, role] of Object.entries(roles)) {
       if (roleKey !== 'admin') {
-        const userCount = await userRoleRepo.count({
-          where: { roleId: role.id },
-        });
+        const userCount = await userRepo
+          .createQueryBuilder('user')
+          .innerJoin('user.roles', 'role', 'role.id = :roleId', {
+            roleId: role.id,
+          })
+          .getCount();
+
         await roleRepo.update(role.id, { userCount });
-        console.log(`  ✓ Updated ${roleKey} role with ${userCount} user(s)`);
+        console.log(`  ✓ Updated ${roleKey} role userCount to ${userCount}`);
       }
     }
   }
-
   private async createBusinessLines(dataSource: DataSource): Promise<void> {
     console.log('🏢 Creating business lines...');
     const businessLineRepo = dataSource.getRepository(BusinessLine);
@@ -722,7 +783,13 @@ export default class InitialDataSeeder implements Seeder {
       });
 
       if (!businessLine) {
-        businessLine = businessLineRepo.create(blData);
+        businessLine = businessLineRepo.create({
+          ...blData,
+          createdById: '550e8400-e29b-41d4-a716-446655440000',
+          createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
+        });
         await businessLineRepo.save(businessLine);
         console.log(`  ✓ Created business line: ${blData.key}`);
       } else {
@@ -748,34 +815,34 @@ export default class InitialDataSeeder implements Seeder {
 
     const groupsData = [
       {
-        key: 'IT.Tier1',
+        type: 'tier-1',
         name: 'IT Tier 1 Support',
         description:
           'First level support - handles initial requests and basic troubleshooting',
         businessLineId: itBusinessLine.id,
       },
       {
-        key: 'IT.Tier2',
+        type: 'tier-2',
         name: 'IT Tier 2 Support',
         description:
           'Second level support - handles complex issues and escalations',
         businessLineId: itBusinessLine.id,
       },
       {
-        key: 'IT.Infrastructure',
-        name: 'IT Infrastructure',
+        type: 'tier-3',
+        name: 'IT Tier 3 Support',
         description: 'Network, servers, and infrastructure management',
         businessLineId: itBusinessLine.id,
       },
       {
-        key: 'IT.Application',
-        name: 'IT Application Support',
+        type: 'help-desk',
+        name: 'IT Help Desk',
         description: 'Application support and maintenance',
         businessLineId: itBusinessLine.id,
       },
       {
-        key: 'IT.Security',
-        name: 'IT Security',
+        type: 'tier-1',
+        name: 'IT Tier 1 Security',
         description: 'Information security and compliance',
         businessLineId: itBusinessLine.id,
       },
@@ -783,21 +850,27 @@ export default class InitialDataSeeder implements Seeder {
 
     for (const groupData of groupsData) {
       let group = await groupRepo.findOne({
-        where: { key: groupData.key },
+        where: {
+          type: groupData.type as 'tier-1' | 'tier-2' | 'tier-3' | 'help-desk',
+          businessLineId: groupData.businessLineId,
+        },
       });
 
       if (!group) {
         group = groupRepo.create({
-          ...groupData,
-          createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
+          type: groupData.type as 'tier-1' | 'tier-2' | 'tier-3' | 'help-desk',
+          name: groupData.name,
+          description: groupData.description,
+          businessLineId: groupData.businessLineId,
+          createdById: '550e8400-e29b-41d4-a716-446655440000',
           createdByName: 'system',
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
         });
         await groupRepo.save(group);
-        console.log(`  ✓ Created group: ${groupData.key}`);
+        console.log(`  ✓ Created group: ${groupData.type}`);
       } else {
-        console.log(`  ⊙ Group already exists: ${groupData.key}`);
+        console.log(`  ⊙ Group already exists: ${groupData.type}`);
       }
     }
   }
@@ -930,6 +1003,8 @@ export default class InitialDataSeeder implements Seeder {
           ...slaTargetData,
           createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
           createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -1006,6 +1081,8 @@ export default class InitialDataSeeder implements Seeder {
           ...serviceData,
           createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
           createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -1107,6 +1184,8 @@ export default class InitialDataSeeder implements Seeder {
           ...workflowData,
           createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
           createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
           createdAt: new Date(),
           updatedAt: new Date(),
         });

@@ -12,15 +12,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { JwtAuthGuard } from '../auth/jwt.guard';
-import { CheckAbility } from '../casl/decorators/check-ability.decorator';
-import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
-import { User } from './entities/user.entity';
-import { AbilityGuard } from '../casl/guards/ability.guard';
-import { CheckResource } from '../casl/decorators/check-resource.decorator';
-import { ResourcePoliciesGuard } from '../casl/guards/resource-policies.guard';
 
 @ApiTags('IAM / Users')
 @ApiBearerAuth('access-token')
@@ -33,47 +26,46 @@ export class UsersController {
     this.logger.log('UsersController initialized');
   }
 
+  // -------- Users CRUD --------
   @Post()
-  @UseGuards(AbilityGuard)
-  @CheckAbility(IAM_ACTIONS.Manage, User)
-  @ApiOperation({ summary: 'Create a user' })
+  @ApiOperation({
+    summary: 'Create a user',
+    description: 'Create a new user.',
+  })
   createUser(@Body() dto: CreateUserDto) {
     return this.usersService.createUser(dto);
   }
 
   @Get()
-  @UseGuards(AbilityGuard)
-  @CheckAbility(IAM_ACTIONS.Manage, User)
-  @ApiOperation({ summary: 'List users' })
+  @ApiOperation({ summary: 'List users', description: 'Return all users.' })
   listUsers() {
-    this.logger.debug('Listing all users');
     return this.usersService.listUsers();
   }
 
   @Get(':id')
-  @UseGuards(ResourcePoliciesGuard)
-  @CheckResource(IAM_ACTIONS.Manage, UsersService, 'getUser', 'id')
   @ApiOperation({ summary: 'Get user by id' })
   getUser(@Param('id') id: string) {
-    this.logger.debug(`Getting user ${id}`);
     return this.usersService.getUser(id);
   }
 
   @Put(':id')
-  @UseGuards(ResourcePoliciesGuard, AbilityGuard)
-  @CheckResource(IAM_ACTIONS.Manage, UsersService, 'getUser', 'id')
-  @CheckAbility(IAM_ACTIONS.Manage, User)
   @ApiOperation({ summary: 'Update user' })
   updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.updateUser(id, dto);
   }
 
   @Delete(':id')
-  @UseGuards(ResourcePoliciesGuard, AbilityGuard)
-  @CheckResource(IAM_ACTIONS.Manage, UsersService, 'getUser', 'id')
-  @CheckAbility(IAM_ACTIONS.Manage, User)
   @ApiOperation({ summary: 'Soft delete user' })
   deleteUser(@Param('id') id: string) {
     return this.usersService.deleteUser(id);
+  }
+
+  @Get(':id/groups')
+  @ApiOperation({
+    summary: 'Get user groups',
+    description: 'Returns all groups that the specified user is a member of.',
+  })
+  getUserGroups(@Param('id') id: string) {
+    return this.usersService.getUserGroups(id);
   }
 }

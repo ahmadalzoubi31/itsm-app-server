@@ -75,14 +75,8 @@ export class CaseService {
     return saved;
   }
 
-  async listCases(q: ListCasesQuery, user: JwtUser) {
+  async listCases(q: ListCasesQuery) {
     const where: any = {};
-
-    // Apply role-based filter
-    const canSeeAll = ['agent', 'admin'].includes(user.role);
-    if (!canSeeAll) {
-      where.requesterId = user.userId;
-    }
 
     if (q.status) where.status = q.status;
     if (q.priority) where.priority = q.priority;

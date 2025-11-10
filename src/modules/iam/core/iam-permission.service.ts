@@ -2,10 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Permission } from '../permissions/entities/permission.entity';
-import { UserRole } from '../users/entities/user-role.entity';
-import { RolePermission } from '../roles/entities/role-permission.entity';
-import { GroupRole } from '../groups/entities/group-role.entity';
-import { UserPermission } from '../users/entities/user-permission.entity';
+import { Role } from '../roles/entities/role.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class IamPermissionService {
@@ -19,14 +17,8 @@ export class IamPermissionService {
   constructor(
     @InjectRepository(Permission)
     private readonly perms: Repository<Permission>,
-    @InjectRepository(UserRole)
-    private readonly userRoles: Repository<UserRole>,
-    @InjectRepository(RolePermission)
-    private readonly rolePerms: Repository<RolePermission>,
-    @InjectRepository(GroupRole)
-    private readonly groupRoles: Repository<GroupRole>,
-    @InjectRepository(UserPermission)
-    private readonly userPerms: Repository<UserPermission>,
+    @InjectRepository(Role)
+    private readonly roles: Repository<Role>,
   ) {}
 
   /**
@@ -52,27 +44,29 @@ export class IamPermissionService {
     this.logger.debug(`Cache miss, resolving permissions for user: ${userId}`);
 
     // 1) Get roles assigned directly to user
-    const userRoleIds = await this.userRoles
-      .find({ where: { userId } })
-      .then((roles) => roles.map((r) => r.roleId));
+    const userRoleIds = await this.roles
+      .find({
+        where: { users: { id: userId } },
+      })
+      .then((roles) => roles.map((r) => r.id));
 
     // 2) Get roles assigned to user's groups
-    const groupRoleIds = await this.groupRoles
-      .find({ where: { groupId: In(groupIds) } })
-      .then((roles) => roles.map((r) => r.roleId));
+    // const groupRoleIds = await this.groupRoles
+    //   .find({ where: { groupId: In(groupIds) } })
+    //   .then((roles) => roles.map((r) => r.roleId));
 
     // Merge all unique role IDs
-    const allRoleIds = [...new Set([...userRoleIds, ...groupRoleIds])];
+    const allRoleIds = [...new Set([...userRoleIds])];
 
     // 3) Get permissions from all roles
-    const rolePermIds = await this.rolePerms
-      .find({ where: { roleId: In(allRoleIds) } })
-      .then((permissions) => permissions.map((p) => p.permissionId));
+    const rolePermIds = await this.perms
+      .find({ where: { roles: { id: In(allRoleIds) } } })
+      .then((permissions) => permissions.map((p) => p.id));
 
     // 4) Get direct user permissions (not through roles)
-    const userPermIds = await this.userPerms
-      .find({ where: { userId } })
-      .then((permissions) => permissions.map((p) => p.permissionId));
+    const userPermIds = await this.perms
+      .find({ where: { users: { id: userId } } })
+      .then((permissions) => permissions.map((p) => p.id));
 
     // Merge all unique permission IDs
     const allPermIds = [...new Set([...rolePermIds, ...userPermIds])];

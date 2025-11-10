@@ -9,7 +9,6 @@ import { JwtUser } from '@shared/types/jwt-user.type';
 import { Injectable } from '@nestjs/common';
 import { Case } from '@modules/case/entities/case.entity';
 import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
-import { Permission } from '../permissions/entities/permission.entity';
 import { IamPermissionService } from '../core/iam-permission.service';
 
 type Subjects = InferSubjects<typeof Case> | 'all';
@@ -118,8 +117,8 @@ export class CaslAbilityFactory {
           return user.userId;
         case 'username':
           return user.username;
-        case 'role':
-          return user.role;
+        case 'roles':
+          return user.roles;
         case 'groupIds':
           return user.groupIds || [];
         default:

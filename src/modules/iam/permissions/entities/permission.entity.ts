@@ -1,6 +1,16 @@
 // src/modules/iam/entities/permission.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  OneToMany,
+  ManyToMany,
+  JoinColumn,
+} from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
+import { User } from '@modules/iam/users/entities/user.entity';
+import { Role } from '@modules/iam/roles/entities/role.entity';
 
 @Entity('permission')
 @Index(['key'], { unique: true })
@@ -19,4 +29,10 @@ export class Permission extends AuditableEntity {
 
   @Column({ nullable: true })
   description?: string;
+
+  @ManyToMany(() => User, (user) => user.permissions)
+  users!: User[];
+
+  @ManyToMany(() => Role, (role) => role.permissions)
+  roles!: Role[];
 }

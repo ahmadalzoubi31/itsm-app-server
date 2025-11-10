@@ -8,13 +8,10 @@ import {
   Body,
   Param,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@modules/iam/auth/jwt.guard';
-import { AbilityGuard } from '@modules/iam/casl/guards/ability.guard';
-import { CheckAbility } from '@modules/iam/casl/decorators/check-ability.decorator';
-import { CurrentUser } from '@modules/iam/auth/decorators/current-user.decorator';
-import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
 import { BusinessLineService } from './business-line.service';
 import { CreateBusinessLineDto } from './dto/create-business-line.dto';
 import { UpdateBusinessLineDto } from './dto/update-business-line.dto';
@@ -22,9 +19,13 @@ import { UpdateBusinessLineDto } from './dto/update-business-line.dto';
 @ApiTags('Business Line')
 @ApiBearerAuth('access-token')
 @Controller('business-lines')
-@UseGuards(JwtAuthGuard, AbilityGuard)
+@UseGuards(JwtAuthGuard)
 export class BusinessLineController {
-  constructor(private readonly businessLineService: BusinessLineService) {}
+  private readonly logger = new Logger(BusinessLineController.name);
+
+  constructor(private readonly businessLineService: BusinessLineService) {
+    this.logger.log('BusinessLineController initialized');
+  }
 
   @ApiOperation({
     summary: 'List all business lines',
@@ -44,7 +45,6 @@ export class BusinessLineController {
     return this.businessLineService.findOne(id);
   }
 
-  @CheckAbility(IAM_ACTIONS.Manage, 'all')
   @ApiOperation({
     summary: 'Create business line',
     description: 'Admin: Create a new business line',
@@ -54,7 +54,6 @@ export class BusinessLineController {
     return this.businessLineService.create(dto);
   }
 
-  @CheckAbility(IAM_ACTIONS.Manage, 'all')
   @ApiOperation({
     summary: 'Update business line',
     description: 'Admin: Update an existing business line',
@@ -64,7 +63,6 @@ export class BusinessLineController {
     return this.businessLineService.update(id, dto);
   }
 
-  @CheckAbility(IAM_ACTIONS.Manage, 'all')
   @ApiOperation({
     summary: 'Deactivate business line',
     description: 'Admin: Soft delete a business line',

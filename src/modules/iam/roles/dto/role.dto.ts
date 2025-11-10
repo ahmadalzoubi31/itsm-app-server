@@ -27,3 +27,19 @@ export class CreateRoleDto {
   description?: string;
 }
 
+export class UpdateRoleDto {
+  @ApiPropertyOptional({ example: 'Agent', description: 'Display name.' })
+  @IsOptional()
+  @IsString()
+  @Length(2, 100)
+  name?: string;
+
+  @ApiPropertyOptional({
+    example: 'Work assigned cases',
+    description: 'Optional description.',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  description?: string;
+}

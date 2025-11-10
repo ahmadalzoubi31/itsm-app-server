@@ -22,7 +22,8 @@
     "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d src/db/data-source.ts",
     "migration:create": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create src/db/migrations/",
     "seed": "ts-node -r tsconfig-paths/register src/db/seeds/run-seeder.ts",
-    "seed:sql": "ts-node -r tsconfig-paths/register src/db/scripts/seed-initial-data.ts"
+    "seed:sql": "ts-node -r tsconfig-paths/register src/db/scripts/seed-initial-data.ts",
+    "migration:reorder": "ts-node -r tsconfig-paths/register src/db/scripts/reorder-migration-file.ts "
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.844.0",

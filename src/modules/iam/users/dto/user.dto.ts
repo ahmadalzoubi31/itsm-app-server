@@ -80,6 +80,14 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsBoolean()
   isActive!: boolean;
+
+  @ApiProperty({
+    description: 'Whether the user account is licensed',
+    example: true,
+  })
+  @IsNotEmpty()
+  @IsBoolean()
+  isLicensed!: boolean;
 }
 
 export class UpdateUserDto {
@@ -124,4 +132,12 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Whether the user account is licensed',
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isLicensed?: boolean;
 }
