@@ -8,13 +8,15 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  OneToMany,
 } from 'typeorm';
+import { ApprovalRequest } from '@modules/approval/entities/approval-request.entity';
 import { RequestStatus } from '@shared/constants';
 import { CasePriority } from '@shared/constants';
 import { RequestType } from '@shared/constants';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 import { Service } from '@modules/catalog/entities/service.entity';
-import { RequestTemplate } from '@modules/catalog/entities/request-template.entity';
+import { RequestCard } from '@modules/catalog/entities/request-card.entity';
 import { Case } from '@modules/case/entities/case.entity';
 
 @Entity('request')
@@ -45,8 +47,8 @@ export class Request extends AuditableEntity {
   @JoinColumn({ name: 'requesterId' })
   requester?: User | null;
 
-  @Column({ type: 'uuid' })
-  requesterId!: string;
+  @Column({ type: 'uuid', nullable: true })
+  requesterId?: string;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'assigneeId' })
@@ -81,14 +83,14 @@ export class Request extends AuditableEntity {
   @JoinColumn({ name: 'affectedServiceId' })
   affectedService?: Service | null;
 
-  // Request Template Origin (from catalog)
+  // Service Card Origin (from catalog)
   @Index()
   @Column({ type: 'uuid', nullable: true })
-  requestTemplateId?: string;
+  requestCardId?: string;
 
-  @ManyToOne(() => RequestTemplate, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'requestTemplateId' })
-  requestTemplate?: RequestTemplate | null;
+  @ManyToOne(() => RequestCard, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'requestCardId' })
+  requestCard?: RequestCard | null;
 
   // Linked Case (after routing)
   @Index()
@@ -98,6 +100,10 @@ export class Request extends AuditableEntity {
   @ManyToOne(() => Case, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'linkedCaseId' })
   linkedCase?: Case | null;
+
+  // Approval Requests (for approval workflow)
+  @OneToMany(() => ApprovalRequest, (approval) => approval.request)
+  approvalRequests?: ApprovalRequest[];
 
   // Additional metadata for routing and tracking
   @Column({ type: 'jsonb', nullable: true })

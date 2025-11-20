@@ -58,6 +58,7 @@ export class RequestCreatedEvent {
       priority: string;
       requesterId: string;
       createdAt: string;
+      requestCardId?: string;
     },
   ) {}
 }

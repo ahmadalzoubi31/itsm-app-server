@@ -22,12 +22,18 @@ import { EmailRoutingRule } from '@modules/email/entities/email-routing-rule.ent
 import { NotificationTemplate } from '@modules/email/entities/notification-template.entity';
 import { AuditEvent } from '@modules/audit/entities/audit-event.entity';
 import { Service } from '@modules/catalog/entities/service.entity';
-import { RequestTemplate } from '@modules/catalog/entities/request-template.entity';
+import { RequestCard } from '@modules/catalog/entities/request-card.entity';
 import { Request } from '@modules/request/entities/request.entity';
+import { RequestComment } from '@modules/request/entities/request-comment.entity';
+import { RequestAttachment } from '@modules/request/entities/request-attachment.entity';
 import { Workflow } from '@modules/workflow/entities/workflow.entity';
 import { Membership } from '@modules/iam/groups/entities/membership.entity';
 import { LdapConfig } from '@modules/ldap/entities/ldap-config.entity';
 import { LdapSyncLog } from '@modules/ldap/entities/ldap-sync-log.entity';
+import { StagedUser } from '@modules/ldap/entities/staged-user.entity';
+import { ApprovalRequest } from '@modules/approval/entities/approval-request.entity';
+import { ApprovalSteps } from '@modules/approval/entities/approval-step.entity';
+import { UserTablePreference } from '@modules/user-preferences/entities/user-table-preference.entity';
 
 // Load environment variables
 dotenv.config();
@@ -63,16 +69,22 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
     // UserNotifyPref,
     AuditEvent,
     Service,
-    RequestTemplate,
+    RequestCard,
     Request,
+    RequestComment,
+    RequestAttachment,
     Workflow,
     LdapConfig,
     LdapSyncLog,
+    StagedUser,
+    ApprovalRequest,
+    ApprovalSteps,
+    UserTablePreference,
   ],
   migrations: [__dirname + '/migrations/*.{ts,js}'],
   seeds: [__dirname + '/seeds/**/*.{ts,js}'],
   logging: process.env.DB_LOGGING === 'true',
-  synchronize: true, // TODO: Remove this in production
+  synchronize: process.env.DB_SYNCHRONIZE === 'true',
 };
 
 const dataSource = new DataSource(dataSourceOptions);

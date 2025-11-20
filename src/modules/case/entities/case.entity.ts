@@ -13,7 +13,7 @@ import { CaseStatus } from '@shared/constants';
 import { CasePriority } from '@shared/constants';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 import { Service } from '@modules/catalog/entities/service.entity';
-import { RequestTemplate } from '@modules/catalog/entities/request-template.entity';
+import { RequestCard } from '@modules/catalog/entities/request-card.entity';
 
 @Entity('case')
 @Index(['number'], { unique: true })
@@ -78,12 +78,12 @@ export class Case extends AuditableEntity {
   @JoinColumn({ name: 'affectedServiceId' })
   affectedService?: Service | null;
 
-  // Request Template Origin (for service requests from catalog)
+  // Service Card Origin (for service requests from catalog)
   @Index()
   @Column({ type: 'uuid', nullable: true })
-  requestTemplateId?: string;
+  requestCardId?: string;
 
-  @ManyToOne(() => RequestTemplate, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'requestTemplateId' })
-  requestTemplate?: RequestTemplate | null;
+  @ManyToOne(() => RequestCard, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'requestCardId' })
+  requestCard?: RequestCard | null;
 }

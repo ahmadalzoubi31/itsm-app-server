@@ -8,6 +8,7 @@ import {
   MaxLength,
   IsIn,
   IsBoolean,
+  IsObject,
 } from 'class-validator';
 import { IsStrongPassword } from '@shared/utils/password.validator';
 
@@ -42,14 +43,14 @@ export class CreateUserDto {
   @MaxLength(150)
   displayName!: string;
 
-  @ApiProperty({
-    description: 'Authentication source',
+  @ApiPropertyOptional({
+    description: 'Authentication source (auto-set by system: local for manual creation, ldap if externalId provided)',
     example: 'local',
     enum: ['local', 'ldap'],
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsIn(['local', 'ldap'])
-  authSource!: 'local' | 'ldap';
+  authSource?: 'local' | 'ldap';
 
   @ApiPropertyOptional({
     description: 'External ID (for LDAP users)',
@@ -88,6 +89,20 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsBoolean()
   isLicensed!: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Additional user metadata (LDAP attributes, custom fields)',
+    example: {
+      firstName: 'John',
+      lastName: 'Doe',
+      phone: '+1-555-0100',
+      department: 'IT Support',
+      title: 'Senior Engineer',
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
 }
 
 export class UpdateUserDto {
@@ -140,4 +155,17 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   isLicensed?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Additional user metadata (LDAP attributes, custom fields)',
+    example: {
+      firstName: 'John',
+      lastName: 'Doe',
+      phone: '+1-555-0100',
+      department: 'IT Support',
+    },
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
 }

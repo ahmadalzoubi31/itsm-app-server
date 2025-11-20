@@ -228,8 +228,6 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  @UseGuards(JwtAuthGuard, AbilityGuard)
-  @CheckAbility(IAM_ACTIONS.Manage, 'all')
   @ApiOperation({
     summary: 'Reset user password (Admin only)',
     description:

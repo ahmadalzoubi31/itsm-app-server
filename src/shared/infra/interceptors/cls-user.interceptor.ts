@@ -22,12 +22,12 @@ export class ClsUserInterceptor implements NestInterceptor {
     // Store user in CLS if it exists
     if (request.user) {
       this.cls.set('user', request.user);
-      this.logger.log(`logged in user "${request.user.username}" set in CLS`);
+      // this.logger.log(`logged in user "${request.user.username}" set in CLS`);
 
       // const retrievedUser = this.cls.get('user');
       // this.logger.log(`retrieved user from CLS: ${retrievedUser?.username}`);
     } else {
-      this.logger.log('no logged in user found in request');
+      // this.logger.log('no logged in user found in request');
     }
 
     return next.handle();

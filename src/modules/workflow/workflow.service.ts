@@ -61,7 +61,7 @@ export class WorkflowService {
    * Find the appropriate workflow for routing a request
    * This will evaluate active workflows based on business line and conditions
    */
-  async findWorkflowForRouting(params: {
+  async getWorkflowForRouting(params: {
     businessLineId: string;
     requestType?: string;
     metadata?: any;

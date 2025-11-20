@@ -37,11 +37,11 @@ export class IamPermissionService {
     const cached = this.cache.get(key);
 
     if (cached && cached.expires > Date.now()) {
-      this.logger.debug(`Cache hit for user: ${userId}`);
+      // this.logger.debug(`Cache hit for user: ${userId}`);
       return cached.data;
     }
 
-    this.logger.debug(`Cache miss, resolving permissions for user: ${userId}`);
+    //this.logger.debug(`Cache miss, resolving permissions for user: ${userId}`);
 
     // 1) Get roles assigned directly to user
     const userRoleIds = await this.roles

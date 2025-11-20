@@ -6,17 +6,25 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
+import { RequestCard } from './request-card.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 
 @Entity('service')
 @Index(['key'], { unique: true })
 export class Service extends AuditableEntity {
   @PrimaryGeneratedColumn('uuid') id!: string;
-  @Column() key!: string; // e.g., "it-helpdesk"
-  @Column() name!: string;
-  @Column({ nullable: true }) description?: string;
+
+  @Column()
+  key!: string; // e.g., "it-helpdesk"
+
+  @Column()
+  name!: string;
+
+  @Column({ nullable: true })
+  description?: string;
 
   // Business Line (ITIL organizational context) - REQUIRED
   @Index()
@@ -25,4 +33,7 @@ export class Service extends AuditableEntity {
   @ManyToOne(() => BusinessLine, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'businessLineId' })
   businessLine!: BusinessLine;
+
+  @OneToMany(() => RequestCard, (requestCard) => requestCard.service)
+  requestCards!: RequestCard[];
 }

@@ -22,7 +22,7 @@ export class RolesService {
   // -------- Roles CRUD --------
   async listRoles(): Promise<Role[]> {
     return this.roles.find({
-      where: { key: Not('end_user') },
+      // where: { key: Not('end_user') },
       relations: ['permissions'],
       order: { name: 'ASC' },
     });

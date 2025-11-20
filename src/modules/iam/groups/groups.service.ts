@@ -41,7 +41,7 @@ export class GroupsService {
   async listGroups(options?: FindOptionsWhere<Group>): Promise<Group[]> {
     return this.groups.find({
       where: options,
-      relations: ['businessLine'],
+      relations: ['businessLine', 'memberships'],
       order: { name: 'ASC' },
     });
   }

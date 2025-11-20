@@ -14,6 +14,7 @@ import { NotifyModule } from '@modules/notify/notify.module';
 import { RequestModule } from '@modules/request/request.module';
 import { WorkflowModule } from '@modules/workflow/workflow.module';
 import { LdapModule } from '@modules/ldap/ldap.module';
+import { UserPreferencesModule } from '@modules/user-preferences/user-preferences.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { LdapModule } from '@modules/ldap/ldap.module';
     SlaModule,
     WorkflowModule,
     RequestModule,
+    UserPreferencesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

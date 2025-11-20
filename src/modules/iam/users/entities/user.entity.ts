@@ -44,6 +44,30 @@ export class User extends AuditableEntity {
   @Column({ default: false })
   isLicensed!: boolean;
 
+  @Column({ type: 'jsonb', nullable: true })
+  metadata?: {
+    // LDAP synced attributes
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    mobile?: string;
+    department?: string;
+    title?: string;
+    company?: string;
+    manager?: string;
+    employeeId?: string;
+    employeeType?: string;
+    location?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    description?: string;
+    userPrincipalName?: string;
+
+    // Any custom attributes from LDAP
+    [key: string]: any;
+  };
+
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable({
     name: 'user_role',

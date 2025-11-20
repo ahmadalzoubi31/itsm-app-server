@@ -5,6 +5,8 @@ import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { Group } from '../groups/entities/group.entity';
 import { Membership } from '../groups/entities/membership.entity';
+import { Role } from '../roles/entities/role.entity';
+import { Request } from '@modules/request/entities/request.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -14,6 +16,10 @@ export class UsersService {
     private readonly users: Repository<User>,
     @InjectRepository(Membership)
     private readonly memberships: Repository<Membership>,
+    @InjectRepository(Role)
+    private readonly roles: Repository<Role>,
+    @InjectRepository(Request)
+    private readonly requests: Repository<Request>,
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<User> {
@@ -23,6 +29,20 @@ export class UsersService {
     if (dto.password) {
       user.passwordHash = await bcrypt.hash(dto.password, 10);
     }
+
+    // Auto-set authSource: if externalId is provided, it's LDAP; otherwise, it's local (manual creation)
+    if (!user.authSource) {
+      user.authSource = dto.externalId ? 'ldap' : 'local';
+    }
+
+    // Assign end_user role to new users
+    const endUserRole = await this.roles.findOne({
+      where: { key: 'end_user' },
+    });
+    if (endUserRole) {
+      user.roles = [endUserRole];
+    }
+
     return await this.users.save(user);
   }
 
@@ -55,6 +75,13 @@ export class UsersService {
     return user;
   }
 
+  async getUserByUsername(username: string): Promise<User | null> {
+    const user = await this.users.findOne({
+      where: { username: username.toLowerCase().trim() },
+    });
+    return user;
+  }
+
   async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
     const user = await this.getUser(id);
     if (dto.password) {
@@ -69,6 +96,16 @@ export class UsersService {
 
   async deleteUser(id: string): Promise<{ id: string; deleted: boolean }> {
     const user = await this.getUser(id);
+
+    // Manually set requesterId to NULL in related requests before deleting
+    // This avoids TypeORM validation issues during cascade
+    await this.requests
+      .createQueryBuilder()
+      .update(Request)
+      .set({ requesterId: undefined })
+      .where('requesterId = :id', { id })
+      .execute();
+
     await this.users.delete({ id });
     return { id, deleted: true };
   }

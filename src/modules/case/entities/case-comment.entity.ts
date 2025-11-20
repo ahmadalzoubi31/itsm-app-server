@@ -23,6 +23,9 @@ export class CaseComment extends AuditableEntity {
 
   @Column('text') body!: string;
 
+  @Column({ type: 'boolean', default: true })
+  isPrivate!: boolean; // true = private (visible to all with case access), false = shared (visible to requester)
+
   // @CreateDateColumn() createdAt!: Date;
   // (No updatedAt; comments are append-only in v1)
 }

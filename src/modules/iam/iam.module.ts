@@ -19,6 +19,6 @@ import { GroupsModule } from './groups/groups.module';
   ],
   controllers: [],
   providers: [IamCacheInvalidationHandler, IamService],
-  exports: [IamCoreModule, IamService],
+  exports: [IamCoreModule, IamService, UsersModule, GroupsModule],
 })
 export class IamModule {}

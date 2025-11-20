@@ -59,10 +59,10 @@ export class CreateCaseDto {
 
   @ApiProperty({
     required: false,
-    description: 'Request template ID (for catalog requests)',
+    description: 'Service card ID (for catalog requests)',
     example: '550e8400-e29b-41d4-a716-446655440020',
   })
   @IsOptional()
   @IsUUID()
-  requestTemplateId?: string;
+  requestCardId?: string;
 }

@@ -82,6 +82,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         status = HttpStatus.BAD_REQUEST;
         message = 'Invalid data provided';
         error = 'Bad Request';
+      } else {
+        status = HttpStatus.BAD_REQUEST;
+        message = exception.message;
+        error = 'Bad Request';
       }
     }
     // Handle validation errors

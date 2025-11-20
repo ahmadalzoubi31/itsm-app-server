@@ -9,6 +9,7 @@ import { Group } from '@modules/iam/groups/entities/group.entity';
 import { SlaTarget } from '@modules/sla/entities/sla-target.entity';
 import { ReferenceModule } from '@shared/constants/reference-module.constants';
 import { Service } from '@modules/catalog/entities/service.entity';
+import { RequestCard } from '@modules/catalog/entities/request-card.entity';
 import {
   Workflow,
   WorkflowTargetType,
@@ -53,6 +54,9 @@ export default class InitialDataSeeder implements Seeder {
 
     // 12. Create workflows for routing requests
     await this.createWorkflows(dataSource);
+
+    // 13. Create service cards for services
+    await this.createRequestCards(dataSource);
 
     console.log('✅ Initial data seeding completed successfully!');
   }
@@ -377,24 +381,24 @@ export default class InitialDataSeeder implements Seeder {
       },
       // ==================== Catalog Permissions ====================
       {
-        key: 'catalog:read',
-        subject: 'Catalog',
+        key: 'service:read',
+        subject: 'Service',
         action: 'read',
-        category: 'Catalog',
-        description: 'Browse service catalog',
+        category: 'Service',
+        description: 'Browse services',
       },
       {
-        key: 'catalog:submit',
-        subject: 'Catalog',
+        key: 'service:submit',
+        subject: 'Service',
         action: 'create',
-        category: 'Catalog',
-        description: 'Submit requests from catalog templates',
+        category: 'Service',
+        description: 'Submit requests from service templates',
       },
       {
-        key: 'catalog:manage',
-        subject: 'Catalog',
+        key: 'service:manage',
+        subject: 'Service',
         action: 'manage',
-        category: 'Catalog',
+        category: 'Service',
         description: 'Manage services and templates',
       },
       // ==================== Business Line Permissions ====================
@@ -589,8 +593,6 @@ export default class InitialDataSeeder implements Seeder {
           'request:read:assigned',
           'request:read:group',
           'request:update:assigned',
-          // Catalog - browse only
-          'catalog:read',
         ],
       },
       // End User - Request a service request and view it just
@@ -601,8 +603,8 @@ export default class InitialDataSeeder implements Seeder {
           'request:create',
           'request:read:own',
           // Browse and submit from catalog
-          'catalog:read',
-          'catalog:submit',
+          'service:read',
+          'service:submit',
           // View business lines (needed for catalog)
           'business-line:read',
         ],
@@ -1195,5 +1197,556 @@ export default class InitialDataSeeder implements Seeder {
         console.log(`  ⊙ Workflow already exists: ${workflowData.name}`);
       }
     }
+  }
+
+  private async createRequestCards(dataSource: DataSource): Promise<void> {
+    console.log('📋 Creating request cards for services...');
+    const requestCardRepo = dataSource.getRepository(RequestCard);
+    const serviceRepo = dataSource.getRepository(Service);
+    const groupRepo = dataSource.getRepository(Group);
+    const businessLineRepo = dataSource.getRepository(BusinessLine);
+
+    // Get IT business line
+    const itBusinessLine = await businessLineRepo.findOne({
+      where: { key: 'it' },
+    });
+
+    if (!itBusinessLine) {
+      console.log(
+        '  ⚠️ IT business line not found, skipping template creation',
+      );
+      return;
+    }
+
+    // Get default assignment group (IT Tier 1 Support)
+    const defaultGroup = await groupRepo.findOne({
+      where: {
+        type: 'tier-1',
+        businessLineId: itBusinessLine.id,
+      },
+    });
+
+    if (!defaultGroup) {
+      console.log(
+        '  ⚠️ Default assignment group not found, skipping template creation',
+      );
+      return;
+    }
+
+    // Define templates for each service
+    const templatesData = [
+      // IT Helpdesk Templates
+      {
+        serviceKey: 'it-helpdesk',
+        key: 'password-reset',
+        name: 'Password Reset Request',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            username: {
+              type: 'string',
+              title: 'Username',
+              description: 'Your username or email address',
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+              description: 'How urgent is this request?',
+            },
+            additionalInfo: {
+              type: 'string',
+              title: 'Additional Information',
+              description: 'Any additional details about your request',
+              maxLength: 500,
+            },
+          },
+          required: ['username', 'urgency'],
+        },
+        defaults: {
+          urgency: 'Medium',
+        },
+        active: true,
+      },
+      {
+        serviceKey: 'it-helpdesk',
+        key: 'technical-support',
+        name: 'General Technical Support',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            issueType: {
+              type: 'string',
+              title: 'Issue Type',
+              enum: [
+                'Email Issues',
+                'Application Not Working',
+                'Printer Problems',
+                'Slow Performance',
+                'Other',
+              ],
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+            description: {
+              type: 'string',
+              title: 'Problem Description',
+              description: 'Describe the issue you are experiencing',
+              maxLength: 1000,
+            },
+            affectedUsers: {
+              type: 'string',
+              title: 'Affected Users',
+              description:
+                'How many users are affected? (e.g., "Just me", "5 users", "Entire department")',
+            },
+          },
+          required: ['issueType', 'urgency', 'description'],
+        },
+        defaults: {
+          urgency: 'Medium',
+        },
+        active: true,
+      },
+      // IT Account Management Templates
+      {
+        serviceKey: 'it-account-management',
+        key: 'new-user-account',
+        name: 'New User Account Request',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            firstName: {
+              type: 'string',
+              title: 'First Name',
+            },
+            lastName: {
+              type: 'string',
+              title: 'Last Name',
+            },
+            email: {
+              type: 'string',
+              title: 'Email Address',
+              format: 'email',
+            },
+            department: {
+              type: 'string',
+              title: 'Department',
+            },
+            jobTitle: {
+              type: 'string',
+              title: 'Job Title',
+            },
+            startDate: {
+              type: 'string',
+              title: 'Start Date',
+              format: 'date',
+            },
+            manager: {
+              type: 'string',
+              title: 'Manager Name',
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+          },
+          required: [
+            'firstName',
+            'lastName',
+            'email',
+            'department',
+            'startDate',
+            'urgency',
+          ],
+        },
+        defaults: {
+          urgency: 'Medium',
+        },
+        active: true,
+      },
+      {
+        serviceKey: 'it-account-management',
+        key: 'access-request',
+        name: 'System Access Request',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            systemName: {
+              type: 'string',
+              title: 'System/Application Name',
+              description: 'Which system do you need access to?',
+            },
+            accessLevel: {
+              type: 'string',
+              title: 'Access Level',
+              enum: [
+                'Read Only',
+                'Standard User',
+                'Power User',
+                'Administrator',
+              ],
+            },
+            businessJustification: {
+              type: 'string',
+              title: 'Business Justification',
+              description: 'Why do you need this access?',
+              maxLength: 500,
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+          },
+          required: [
+            'systemName',
+            'accessLevel',
+            'businessJustification',
+            'urgency',
+          ],
+        },
+        defaults: {
+          urgency: 'Medium',
+          accessLevel: 'Standard User',
+        },
+        active: true,
+      },
+      // IT Software Request Templates
+      {
+        serviceKey: 'it-software-request',
+        key: 'software-installation',
+        name: 'Software Installation Request',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            softwareName: {
+              type: 'string',
+              title: 'Software Name',
+              description: 'Name of the software you need',
+            },
+            version: {
+              type: 'string',
+              title: 'Version (if specific)',
+            },
+            businessJustification: {
+              type: 'string',
+              title: 'Business Justification',
+              description: 'Why do you need this software?',
+              maxLength: 500,
+            },
+            licenseRequired: {
+              type: 'string',
+              title: 'License Required?',
+              enum: ['Yes', 'No', 'Not Sure'],
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+          },
+          required: ['softwareName', 'businessJustification', 'urgency'],
+        },
+        defaults: {
+          urgency: 'Medium',
+          licenseRequired: 'Not Sure',
+        },
+        active: true,
+      },
+      // IT Hardware Request Templates
+      {
+        serviceKey: 'it-hardware-request',
+        key: 'new-laptop',
+        name: 'New Laptop Request',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            laptopType: {
+              type: 'string',
+              title: 'Laptop Type',
+              enum: [
+                'Standard Business Laptop',
+                'High Performance Laptop',
+                'Developer Workstation',
+              ],
+            },
+            operatingSystem: {
+              type: 'string',
+              title: 'Operating System',
+              enum: ['Windows 11', 'macOS', 'Linux'],
+            },
+            businessJustification: {
+              type: 'string',
+              title: 'Business Justification',
+              description: 'Why do you need a new laptop?',
+              maxLength: 500,
+            },
+            requiredByDate: {
+              type: 'string',
+              title: 'Required By Date',
+              format: 'date',
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+          },
+          required: [
+            'laptopType',
+            'operatingSystem',
+            'businessJustification',
+            'urgency',
+          ],
+        },
+        defaults: {
+          urgency: 'Medium',
+          operatingSystem: 'Windows 11',
+          laptopType: 'Standard Business Laptop',
+        },
+        active: true,
+      },
+      {
+        serviceKey: 'it-hardware-request',
+        key: 'peripheral-equipment',
+        name: 'Peripheral Equipment Request',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            equipmentType: {
+              type: 'string',
+              title: 'Equipment Type',
+              enum: [
+                'Monitor',
+                'Keyboard',
+                'Mouse',
+                'Headset',
+                'Webcam',
+                'Docking Station',
+                'Other',
+              ],
+            },
+            quantity: {
+              type: 'number',
+              title: 'Quantity',
+              minimum: 1,
+              maximum: 10,
+            },
+            businessJustification: {
+              type: 'string',
+              title: 'Business Justification',
+              maxLength: 500,
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+          },
+          required: [
+            'equipmentType',
+            'quantity',
+            'businessJustification',
+            'urgency',
+          ],
+        },
+        defaults: {
+          urgency: 'Medium',
+          quantity: 1,
+        },
+        active: true,
+      },
+      // IT Network Access Templates
+      {
+        serviceKey: 'it-network-access',
+        key: 'vpn-access',
+        name: 'VPN Access Request',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            deviceType: {
+              type: 'string',
+              title: 'Device Type',
+              enum: ['Company Laptop', 'Personal Computer', 'Mobile Device'],
+            },
+            businessJustification: {
+              type: 'string',
+              title: 'Business Justification',
+              description: 'Why do you need VPN access?',
+              maxLength: 500,
+            },
+            duration: {
+              type: 'string',
+              title: 'Access Duration',
+              enum: ['Temporary (< 1 month)', 'Ongoing', 'Project-based'],
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+          },
+          required: [
+            'deviceType',
+            'businessJustification',
+            'duration',
+            'urgency',
+          ],
+        },
+        defaults: {
+          urgency: 'Medium',
+          duration: 'Ongoing',
+        },
+        active: true,
+      },
+      {
+        serviceKey: 'it-network-access',
+        key: 'wifi-access',
+        name: 'Guest WiFi Access Request',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            guestName: {
+              type: 'string',
+              title: 'Guest Name',
+            },
+            guestEmail: {
+              type: 'string',
+              title: 'Guest Email',
+              format: 'email',
+            },
+            accessDate: {
+              type: 'string',
+              title: 'Access Date',
+              format: 'date',
+            },
+            duration: {
+              type: 'string',
+              title: 'Duration',
+              enum: ['1 Day', '1 Week', '2 Weeks', '1 Month'],
+            },
+            urgency: {
+              type: 'string',
+              title: 'Urgency',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+          },
+          required: [
+            'guestName',
+            'guestEmail',
+            'accessDate',
+            'duration',
+            'urgency',
+          ],
+        },
+        defaults: {
+          urgency: 'Medium',
+          duration: '1 Day',
+        },
+        active: true,
+      },
+      // IT Security Templates
+      {
+        serviceKey: 'it-security',
+        key: 'security-incident',
+        name: 'Security Incident Report',
+        jsonSchema: {
+          type: 'object',
+          properties: {
+            incidentType: {
+              type: 'string',
+              title: 'Incident Type',
+              enum: [
+                'Suspicious Email',
+                'Malware/Virus',
+                'Data Breach',
+                'Lost/Stolen Device',
+                'Unauthorized Access',
+                'Other',
+              ],
+            },
+            severity: {
+              type: 'string',
+              title: 'Severity',
+              enum: ['Low', 'Medium', 'High', 'Critical'],
+            },
+            description: {
+              type: 'string',
+              title: 'Incident Description',
+              description: 'Describe what happened in detail',
+              maxLength: 1000,
+            },
+            whenDiscovered: {
+              type: 'string',
+              title: 'When was this discovered?',
+            },
+            affectedSystems: {
+              type: 'string',
+              title: 'Affected Systems',
+              description: 'Which systems or data are affected?',
+            },
+          },
+          required: [
+            'incidentType',
+            'severity',
+            'description',
+            'whenDiscovered',
+          ],
+        },
+        defaults: {
+          severity: 'High',
+        },
+        active: true,
+      },
+    ];
+
+    for (const templateData of templatesData) {
+      // Find the service
+      const service = await serviceRepo.findOne({
+        where: { key: templateData.serviceKey },
+      });
+
+      if (!service) {
+        console.log(
+          `  ⚠️ Service not found: ${templateData.serviceKey}, skipping request card`,
+        );
+        continue;
+      }
+
+      // Check if request card already exists
+      let requestCard = await requestCardRepo.findOne({
+        where: { key: templateData.key },
+      });
+
+      if (!requestCard) {
+        requestCard = requestCardRepo.create({
+          serviceId: service.id,
+          key: templateData.key,
+          name: templateData.name,
+          jsonSchema: templateData.jsonSchema,
+          defaults: templateData.defaults,
+          defaultAssignmentGroupId: defaultGroup.id,
+          businessLineId: itBusinessLine.id,
+          active: templateData.active,
+          createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
+          createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+        await requestCardRepo.save(requestCard);
+        console.log(`  ✓ Created request card: ${templateData.name}`);
+      } else {
+        console.log(`  ⊙ Request card already exists: ${templateData.name}`);
+      }
+    }
+
+    console.log(`  ✅ Request cards creation completed`);
   }
 }

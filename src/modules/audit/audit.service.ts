@@ -31,4 +31,16 @@ export class AuditService {
     // keep payloads small; do not store secrets/PII
     return this.repo.save(this.repo.create(e));
   }
+
+  async findByAggregate(aggregateType: string, aggregateId: string) {
+    return this.repo.find({
+      where: {
+        aggregateType,
+        aggregateId,
+      },
+      order: {
+        happenedAt: 'DESC',
+      },
+    });
+  }
 }

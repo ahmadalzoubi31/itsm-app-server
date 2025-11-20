@@ -53,15 +53,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(req: any, payload: JwtPayload) {
     // Safely log payload without circular references
-    this.logger.debug(
-      `Validating JWT payload: ${JSON.stringify({
-        sub: payload.sub,
-        username: payload.username,
-        roles: payload.roles,
-        groupIds: payload.groupIds,
-        jti: payload.jti,
-      })}`,
-    );
+    // this.logger.debug(
+    //   `Validating JWT payload: ${JSON.stringify({
+    //     sub: payload.sub,
+    //     username: payload.username,
+    //     roles: payload.roles,
+    //     groupIds: payload.groupIds,
+    //     jti: payload.jti,
+    //   })}`,
+    // );
 
     // Check payload structure - log what we actually received
     if (!payload) {

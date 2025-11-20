@@ -15,6 +15,12 @@ import { JwtAuthGuard } from '@modules/iam/auth/jwt.guard';
 import { BusinessLineService } from './business-line.service';
 import { CreateBusinessLineDto } from './dto/create-business-line.dto';
 import { UpdateBusinessLineDto } from './dto/update-business-line.dto';
+import { BusinessLine } from './entities/business-line.entity';
+import { AbilityGuard } from '@modules/iam/casl/guards/ability.guard';
+import { ResourcePoliciesGuard } from '@modules/iam/casl/guards/resource-policies.guard';
+import { CheckAbility } from '@modules/iam/casl/decorators/check-ability.decorator';
+import { CheckResource } from '@modules/iam/casl/decorators/check-resource.decorator';
+import { IAM_ACTIONS } from '@shared/constants/iam-actions.constant';
 
 @ApiTags('Business Line')
 @ApiBearerAuth('access-token')
@@ -32,6 +38,8 @@ export class BusinessLineController {
     description: 'Get all active business lines (HR, IT, Finance, etc.)',
   })
   @Get()
+  @UseGuards(AbilityGuard)
+  @CheckAbility(IAM_ACTIONS.Read, BusinessLine)
   findAll() {
     return this.businessLineService.findAll();
   }
@@ -41,6 +49,8 @@ export class BusinessLineController {
     description: 'Retrieve a specific business line',
   })
   @Get(':id')
+  @UseGuards(ResourcePoliciesGuard)
+  @CheckResource(IAM_ACTIONS.Read, BusinessLineService, 'findOne')
   findOne(@Param('id') id: string) {
     return this.businessLineService.findOne(id);
   }
@@ -50,6 +60,8 @@ export class BusinessLineController {
     description: 'Admin: Create a new business line',
   })
   @Post()
+  @UseGuards(AbilityGuard)
+  @CheckAbility(IAM_ACTIONS.Create, BusinessLine)
   create(@Body() dto: CreateBusinessLineDto) {
     return this.businessLineService.create(dto);
   }
@@ -59,6 +71,8 @@ export class BusinessLineController {
     description: 'Admin: Update an existing business line',
   })
   @Put(':id')
+  @UseGuards(ResourcePoliciesGuard)
+  @CheckResource(IAM_ACTIONS.Update, BusinessLineService, 'findOne')
   update(@Param('id') id: string, @Body() dto: UpdateBusinessLineDto) {
     return this.businessLineService.update(id, dto);
   }
@@ -68,6 +82,8 @@ export class BusinessLineController {
     description: 'Admin: Soft delete a business line',
   })
   @Delete(':id')
+  @UseGuards(ResourcePoliciesGuard)
+  @CheckResource(IAM_ACTIONS.Delete, BusinessLineService, 'findOne')
   deactivate(@Param('id') id: string) {
     return this.businessLineService.deactivate(id);
   }

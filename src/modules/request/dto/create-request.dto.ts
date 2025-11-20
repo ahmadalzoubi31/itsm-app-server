@@ -54,12 +54,12 @@ export class CreateRequestDto {
 
   @ApiProperty({
     required: false,
-    description: 'Request template ID (from catalog)',
+    description: 'Service card ID (from catalog)',
     example: '550e8400-e29b-41d4-a716-446655440020',
   })
   @IsOptional()
   @IsUUID()
-  requestTemplateId?: string;
+  requestCardId?: string;
 
   @ApiProperty({
     required: false,
@@ -67,4 +67,27 @@ export class CreateRequestDto {
   })
   @IsOptional()
   metadata?: any;
+
+  @ApiProperty({
+    description: 'Requester user ID',
+    example: '550e8400-e29b-41d4-a716-446655440001',
+  })
+  @IsUUID()
+  requesterId!: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Created by user ID (for audit trail)',
+  })
+  @IsOptional()
+  @IsUUID()
+  createdById?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Created by user name (for audit trail)',
+  })
+  @IsOptional()
+  @IsString()
+  createdByName?: string;
 }

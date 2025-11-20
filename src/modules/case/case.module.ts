@@ -8,12 +8,17 @@ import { CaseService } from './case.service';
 import { CaseController } from './case.controller';
 import { BusinessLineModule } from '@modules/business-line/business-line.module';
 import { CaslModule } from '@modules/iam/casl/casl.module';
+import { AuditModule } from '@modules/audit/audit.module';
+import { SlaModule } from '@modules/sla/sla.module';
+import { SlaTimer } from '@modules/sla/entities/sla-timer.entity';
 
 @Module({
   imports: [
     BusinessLineModule,
     CaslModule,
-    TypeOrmModule.forFeature([Case, CaseComment, CaseLink, CaseAttachment]),
+    AuditModule,
+    SlaModule,
+    TypeOrmModule.forFeature([Case, CaseComment, CaseLink, CaseAttachment, SlaTimer]),
   ],
   controllers: [CaseController],
   providers: [CaseService],

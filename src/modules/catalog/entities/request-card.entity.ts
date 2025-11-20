@@ -1,4 +1,4 @@
-// src/modules/catalog/entities/request-template.entity.ts
+// src/modules/catalog/entities/request-card.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,27 +6,38 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { AuditableEntity } from '@shared/utils/auditable.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 import { Group } from '@modules/iam/groups/entities/group.entity';
 
 import { Workflow } from '@modules/workflow/entities/workflow.entity';
+import { Service } from './service.entity';
+import { ApprovalSteps } from '@modules/approval/entities/approval-step.entity';
 
-@Entity('request_template')
+@Entity('request_card')
 @Index(['key'], { unique: true })
-export class RequestTemplate extends AuditableEntity {
+export class RequestCard extends AuditableEntity {
   @PrimaryGeneratedColumn('uuid') id!: string;
 
-  @Index() @Column({ type: 'uuid' }) serviceId!: string; // FK → service.id
+  @Column()
+  key!: string; // e.g., "new-laptop"
 
-  @Column() key!: string; // e.g., "new-laptop"
-  @Column() name!: string;
-  @Column({ type: 'jsonb' }) jsonSchema!: any; // AJV schema
-  @Column({ type: 'jsonb', nullable: true }) uiSchema?: any;
-  @Column({ type: 'jsonb', nullable: true }) defaults?: any;
+  @Column()
+  name!: string;
 
-  @Column({ default: true }) active!: boolean;
+  @Column({ type: 'jsonb' })
+  jsonSchema!: any; // AJV schema
+
+  @Column({ type: 'jsonb', nullable: true })
+  uiSchema?: any;
+
+  @Column({ type: 'jsonb', nullable: true })
+  defaults?: any;
+
+  @Column({ default: true })
+  active!: boolean;
 
   // Optional: default assignment group (enforces ITIL rule at creation)
   @Column({ type: 'uuid' })
@@ -51,4 +62,12 @@ export class RequestTemplate extends AuditableEntity {
   @ManyToOne(() => Workflow, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'workflowId', referencedColumnName: 'id' })
   workflow?: Workflow | null;
+
+  @Index() @Column({ type: 'uuid' }) serviceId!: string; // FK → service.id
+  @ManyToOne(() => Service, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'serviceId', referencedColumnName: 'id' })
+  service!: Service;
+
+  @OneToMany(() => ApprovalSteps, (approvalSteps) => approvalSteps.requestCard)
+  approvalSteps?: ApprovalSteps[];
 }

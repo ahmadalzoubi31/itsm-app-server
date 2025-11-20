@@ -1,5 +1,6 @@
 export enum RequestStatus {
   SUBMITTED = 'Submitted',
+  WAITING_APPROVAL = 'WaitingApproval',
   ASSIGNED = 'Assigned',
   IN_PROGRESS = 'InProgress',
   RESOLVED = 'Resolved',
@@ -8,6 +9,7 @@ export enum RequestStatus {
 
 export const REQUEST_STATUS_OPTIONS = [
   { value: RequestStatus.SUBMITTED, label: 'Submitted' },
+  { value: RequestStatus.WAITING_APPROVAL, label: 'Waiting Approval' },
   { value: RequestStatus.ASSIGNED, label: 'Assigned' },
   { value: RequestStatus.IN_PROGRESS, label: 'In Progress' },
   { value: RequestStatus.RESOLVED, label: 'Resolved' },
