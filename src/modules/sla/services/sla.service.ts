@@ -102,7 +102,9 @@ export class SlaService {
    * Process SLA events dynamically based on rules
    */
   async processSlaEvent(event: string, eventData: any, caseId: string) {
-    this.logger.log(`Processing SLA event: ${event} for case ${caseId}`);
+    this.logger.log(
+      `Processing SLA event: ${event} for case ${caseId}, event data: ${JSON.stringify(eventData)}`,
+    );
 
     // Get all active targets for this case's business line
     const where: any = { isActive: true };
@@ -118,6 +120,10 @@ export class SlaService {
       );
       return;
     }
+
+    this.logger.log(
+      `Found ${targets.length} SLA targets for case ${caseId}, processing...`,
+    );
 
     for (const target of targets) {
       await this.processTargetForEvent(target, event, eventData, caseId);
@@ -147,7 +153,15 @@ export class SlaService {
       return;
     }
 
-    // Process stop triggers
+    // If timer is already in terminal state, don't process further
+    if (timer.status === 'Met' || timer.status === 'Stopped' || timer.status === 'Breached') {
+      this.logger.debug(
+        `Timer already in terminal state (${timer.status}) for case ${caseId}, target ${target.key} - skipping event ${event}`,
+      );
+      return;
+    }
+
+    // Process stop triggers - should work on both Running and Paused timers
     const stopTriggers = this.rulesEngine.findMatchingTriggers(
       target.rules,
       event,
@@ -155,7 +169,10 @@ export class SlaService {
       'stop',
     );
 
-    if (stopTriggers.length > 0 && timer.status === 'Running') {
+    if (stopTriggers.length > 0 && (timer.status === 'Running' || timer.status === 'Paused')) {
+      this.logger.log(
+        `Stop trigger matched for case ${caseId}, target ${target.key}, event ${event} - stopping timer`,
+      );
       await this.stopTimer(timer, 'Met');
       return;
     }
@@ -169,6 +186,9 @@ export class SlaService {
     );
 
     if (pauseTriggers.length > 0 && timer.status === 'Running') {
+      this.logger.log(
+        `Pause trigger matched for case ${caseId}, target ${target.key}, event ${event} - pausing timer`,
+      );
       await this.pauseTimer(timer);
       return;
     }
@@ -182,11 +202,17 @@ export class SlaService {
     );
 
     if (resumeTriggers.length > 0 && timer.status === 'Paused') {
+      this.logger.log(
+        `Resume trigger matched for case ${caseId}, target ${target.key}, event ${event} - resuming timer`,
+      );
       await this.resumeTimer(timer);
       return;
     }
 
     // no conditions met, so do nothing
+    this.logger.debug(
+      `No triggers matched for case ${caseId}, target ${target.key}, event ${event}`,
+    );
     return;
   }
 

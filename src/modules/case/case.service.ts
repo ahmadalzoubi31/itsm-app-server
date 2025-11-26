@@ -48,6 +48,8 @@ export class CaseService {
     'assignee',
     'assignmentGroup',
     'requester',
+    'category',
+    'subcategory'
   ];
   private readonly UPLOADS_DIR = join(process.cwd(), 'var', 'uploads');
 

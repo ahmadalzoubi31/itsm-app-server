@@ -22,13 +22,22 @@ export class SlaRulesEngineService {
 
     // If no conditions, trigger is activated
     if (!trigger.conditions || trigger.conditions.length === 0) {
+      this.logger.debug(`Trigger matched (no conditions required) for event ${event}`);
       return true;
     }
 
     // Evaluate all conditions (AND logic)
-    return trigger.conditions.every((condition) =>
+    const conditionsMatch = trigger.conditions.every((condition) =>
       this.evaluateCondition(condition, eventData),
     );
+
+    if (!conditionsMatch) {
+      this.logger.debug(
+        `Trigger conditions did not match for event ${event}, trigger: ${JSON.stringify(trigger)}`,
+      );
+    }
+
+    return conditionsMatch;
   }
 
   /**
@@ -36,29 +45,41 @@ export class SlaRulesEngineService {
    */
   private evaluateCondition(condition: SlaCondition, eventData: any): boolean {
     const fieldValue = this.getFieldValue(eventData, condition.field);
+    let result = false;
 
     switch (condition.operator) {
       case 'equals':
-        return fieldValue === condition.value;
+        result = fieldValue === condition.value;
+        break;
       case 'not_equals':
-        return fieldValue !== condition.value;
+        result = fieldValue !== condition.value;
+        break;
       case 'in':
-        return (
-          Array.isArray(condition.value) && condition.value.includes(fieldValue)
-        );
+        result =
+          Array.isArray(condition.value) && condition.value.includes(fieldValue);
+        break;
       case 'not_in':
-        return (
+        result =
           Array.isArray(condition.value) &&
-          !condition.value.includes(fieldValue)
-        );
+          !condition.value.includes(fieldValue);
+        break;
       case 'contains':
-        return String(fieldValue)
+        result = String(fieldValue)
           .toLowerCase()
           .includes(String(condition.value).toLowerCase());
+        break;
       default:
         this.logger.warn(`Unknown operator: ${condition.operator}`);
         return false;
     }
+
+    if (!result) {
+      this.logger.debug(
+        `Condition failed: field ${condition.field} (${fieldValue}) ${condition.operator} ${condition.value}`,
+      );
+    }
+
+    return result;
   }
 
   /**
@@ -105,8 +126,16 @@ export class SlaRulesEngineService {
         break;
     }
 
-    return triggers.filter((trigger) =>
+    const matching = triggers.filter((trigger) =>
       this.evaluateTrigger(trigger, event, eventData),
     );
+
+    if (matching.length > 0) {
+      this.logger.debug(
+        `Found ${matching.length} matching ${action} triggers for event ${event}`,
+      );
+    }
+
+    return matching;
   }
 }
