@@ -14,15 +14,11 @@ import { CasePriority } from '@shared/constants';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
 import { Service } from '@modules/catalog/entities/service.entity';
 import { RequestCard } from '@modules/catalog/entities/request-card.entity';
+import { CaseCategory } from '@modules/case-category/entities/case-category.entity';
+import { CaseSubcategory } from '@modules/case-subcategory/entities/case-subcategory.entity';
 
 @Entity('case')
 @Index(['number'], { unique: true })
-// @Index(['status'])
-// @Index(['priority'])
-// @Index(['requesterId'])
-// @Index(['assigneeId'])
-// @Index(['assignmentGroupId'])
-// @Index(['createdAt'])
 export class Case extends AuditableEntity {
   @PrimaryGeneratedColumn('uuid') id!: string;
 
@@ -37,6 +33,24 @@ export class Case extends AuditableEntity {
 
   @Column({ type: 'varchar', length: 20, default: CasePriority.MEDIUM })
   priority!: CasePriority;
+
+  // Case Category - REQUIRED
+  @Index()
+  @Column({ type: 'uuid' })
+  categoryId!: string;
+
+  @ManyToOne(() => CaseCategory, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'categoryId' })
+  category!: CaseCategory;
+
+  // Case Subcategory - REQUIRED
+  @Index()
+  @Column({ type: 'uuid' })
+  subcategoryId!: string;
+
+  @ManyToOne(() => CaseSubcategory, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'subcategoryId' })
+  subcategory!: CaseSubcategory;
 
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'requesterId' })

@@ -30,13 +30,13 @@ export class EmailIngestWorker {
   }
 
   private async tick() {
-    // this.log.debug('Starting polling cycle for inbound channels');
+    this.log.debug('Starting polling cycle for inbound channels');
     const inbound = await this.chRepo.find({
       where: { kind: In(['imap', 'pop3'] as any), enabled: true } as any,
     });
-    // this.log.debug(`Found ${inbound.length} enabled inbound channels to poll`);
+    this.log.debug(`Found ${inbound.length} enabled inbound channels to poll`);
     for (const ch of inbound) await this.pollChannel(ch);
-    // this.log.debug('Completed polling cycle');
+    this.log.debug('Completed polling cycle');
   }
 
   private async pollChannel(ch: EmailChannel) {

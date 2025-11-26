@@ -11,6 +11,8 @@ import {
 import { AuditableEntity } from '@shared/utils/auditable.entity';
 import { RequestCard } from './request-card.entity';
 import { BusinessLine } from '@modules/business-line/entities/business-line.entity';
+import { CaseSubcategory } from '@modules/case-subcategory/entities/case-subcategory.entity';
+import { CaseCategory } from '@modules/case-category/entities/case-category.entity';
 
 @Entity('service')
 @Index(['key'], { unique: true })
@@ -33,6 +35,24 @@ export class Service extends AuditableEntity {
   @ManyToOne(() => BusinessLine, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'businessLineId' })
   businessLine!: BusinessLine;
+
+  // Case Category - REQUIRED
+  @Index()
+  @Column({ type: 'uuid' })
+  categoryId!: string;
+
+  @ManyToOne(() => CaseCategory, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'categoryId' })
+  category!: CaseCategory;
+
+  // Case Subcategory - REQUIRED
+  @Index()
+  @Column({ type: 'uuid' })
+  subcategoryId!: string;
+
+  @ManyToOne(() => CaseSubcategory, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'subcategoryId' })
+  subcategory!: CaseSubcategory;
 
   @OneToMany(() => RequestCard, (requestCard) => requestCard.service)
   requestCards!: RequestCard[];

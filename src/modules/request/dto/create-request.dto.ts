@@ -90,4 +90,24 @@ export class CreateRequestDto {
   @IsOptional()
   @IsString()
   createdByName?: string;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Case category ID (auto-populated from service if not provided)',
+    example: '550e8400-e29b-41d4-a716-446655440002',
+  })
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Case subcategory ID (auto-populated from service if not provided)',
+    example: '550e8400-e29b-41d4-a716-446655440003',
+  })
+  @IsOptional()
+  @IsUUID()
+  subcategoryId?: string;
 }

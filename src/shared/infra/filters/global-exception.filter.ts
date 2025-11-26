@@ -39,10 +39,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let error: string | undefined = 'Internal Server Error';
 
     // Handle NestJS HTTP exceptions
-    // this.logger.error({
-    //   status: exception.status,
-    //   response: exception.response,
-    // });
+    this.logger.error({
+      status: exception.status,
+      response: exception.response,
+    });
     if (exception.status) {
       status = exception.status;
       message = exception.response.message || this.getDefaultMessage(status);

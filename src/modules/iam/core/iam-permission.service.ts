@@ -37,11 +37,11 @@ export class IamPermissionService {
     const cached = this.cache.get(key);
 
     if (cached && cached.expires > Date.now()) {
-      // this.logger.debug(`Cache hit for user: ${userId}`);
+      this.logger.debug(`Cache hit for user: ${userId}`);
       return cached.data;
     }
 
-    //this.logger.debug(`Cache miss, resolving permissions for user: ${userId}`);
+    this.logger.debug(`Cache miss, resolving permissions for user: ${userId}`);
 
     // 1) Get roles assigned directly to user
     const userRoleIds = await this.roles
@@ -59,9 +59,12 @@ export class IamPermissionService {
     const allRoleIds = [...new Set([...userRoleIds])];
 
     // 3) Get permissions from all roles
-    const rolePermIds = await this.perms
-      .find({ where: { roles: { id: In(allRoleIds) } } })
-      .then((permissions) => permissions.map((p) => p.id));
+    let rolePermIds: string[] = [];
+    if (allRoleIds.length > 0) {
+      rolePermIds = await this.perms
+        .find({ where: { roles: { id: In(allRoleIds) } } })
+        .then((permissions) => permissions.map((p) => p.id));
+    }
 
     // 4) Get direct user permissions (not through roles)
     const userPermIds = await this.perms
@@ -70,6 +73,14 @@ export class IamPermissionService {
 
     // Merge all unique permission IDs
     const allPermIds = [...new Set([...rolePermIds, ...userPermIds])];
+
+    if (allPermIds.length === 0) {
+      this.cache.set(key, {
+        data: [],
+        expires: Date.now() + this.ttlMs,
+      });
+      return [];
+    }
 
     // Fetch actual permission entities
     const permissions = await this.perms.find({

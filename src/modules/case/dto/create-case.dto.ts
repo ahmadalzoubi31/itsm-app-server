@@ -49,6 +49,22 @@ export class CreateCaseDto {
   businessLineId!: string;
 
   @ApiProperty({
+    required: true,
+    description: 'Case category id',
+    example: '550e8400-e29b-41d4-a716-446655440002',
+  })
+  @IsUUID()
+  categoryId!: string;
+
+  @ApiProperty({
+    required: true,
+    description: 'Case subcategory id',
+    example: '550e8400-e29b-41d4-a716-446655440003',
+  })
+  @IsUUID()
+  subcategoryId!: string;
+
+  @ApiProperty({
     required: false,
     description: 'Affected service ID (for cases)',
     example: '550e8400-e29b-41d4-a716-446655440010',

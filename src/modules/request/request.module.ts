@@ -14,6 +14,8 @@ import { RequestAttachment } from './entities/request-attachment.entity';
 import { CaseStatusSyncListener } from './listeners/case-status-sync.listener';
 import { RequestApprovedListener } from './listeners/request-approved.listener';
 import { CaslModule } from '@modules/iam/casl/casl.module';
+import { CaseCategoryModule } from '@modules/case-category/case-category.module';
+import { CaseSubcategoryModule } from '@modules/case-subcategory/case-subcategory.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { CaslModule } from '@modules/iam/casl/casl.module';
     WorkflowModule,
     forwardRef(() => ApprovalModule),
     CaslModule,
+    CaseCategoryModule,
+    CaseSubcategoryModule,
     TypeOrmModule.forFeature([
       Request,
       RequestCard,

@@ -13,6 +13,7 @@ import { ClsModule } from 'nestjs-cls';
 import { ClsUserInterceptor } from './interceptors/cls-user.interceptor';
 import { AuditSubscriber } from './subscribers/audit.subscriber';
 import { DataSource } from 'typeorm';
+import { RecordSubscriber } from './subscribers/record.subscriber';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { DataSource } from 'typeorm';
       useClass: ClsUserInterceptor,
     },
     AuditSubscriber,
+    RecordSubscriber,
   ],
 })
 export class InfraModule implements OnModuleInit {
@@ -75,12 +77,14 @@ export class InfraModule implements OnModuleInit {
   constructor(
     private readonly dataSource: DataSource,
     private readonly auditSubscriber: AuditSubscriber,
+    private readonly recordSubscriber: RecordSubscriber,
   ) {}
 
   onModuleInit() {
     // Register the audit subscriber with TypeORM connection
     if (this.dataSource.subscribers) {
       this.dataSource.subscribers.push(this.auditSubscriber);
+      this.dataSource.subscribers.push(this.recordSubscriber);
       this.logger.log('AuditSubscriber registered with TypeORM DataSource');
     }
   }

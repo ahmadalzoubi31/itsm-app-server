@@ -7,6 +7,8 @@ import { RequestStatus } from '@shared/constants';
 import { CaseService } from '@modules/case/case.service';
 import { WorkflowService } from '@modules/workflow/workflow.service';
 import { CreateCaseDto } from '@modules/case/dto/create-case.dto';
+import { CaseCategoryService } from '@modules/case-category/case-category.service';
+import { CaseSubcategoryService } from '@modules/case-subcategory/case-subcategory.service';
 
 /**
  * Listener that routes approved requests to cases
@@ -20,6 +22,8 @@ export class RequestApprovedListener {
     private readonly requests: Repository<Request>,
     private readonly caseSvc: CaseService,
     private readonly workflowSvc: WorkflowService,
+    private readonly caseCategorySvc: CaseCategoryService,
+    private readonly caseSubcategorySvc: CaseSubcategoryService,
   ) {
     this.logger.log('RequestApprovedListener initialized');
   }
@@ -80,6 +84,32 @@ export class RequestApprovedListener {
   private async routeRequest(request: Request, workflow: any): Promise<any> {
     const targetType = workflow?.targetType || 'Case';
 
+    // Get default category and subcategory for service requests
+    // Try to find "service-request" category, otherwise get first active category
+    let category = await this.caseCategorySvc.findByKey('service-request');
+    if (!category) {
+      const categories = await this.caseCategorySvc.findAll();
+      category = categories.find((c) => c.active) || categories[0];
+    }
+
+    if (!category) {
+      throw new Error(
+        'No case category found. Please create at least one case category.',
+      );
+    }
+
+    // Get first active subcategory for the category
+    const subcategories = await this.caseSubcategorySvc.findByCategoryId(
+      category.id,
+    );
+    const subcategory = subcategories.find((s) => s.active) || subcategories[0];
+
+    if (!subcategory) {
+      throw new Error(
+        `No case subcategory found for category ${category.name}. Please create at least one subcategory.`,
+      );
+    }
+
     // Build case data from request
     const caseData: CreateCaseDto = {
       title: request.title,
@@ -88,6 +118,8 @@ export class RequestApprovedListener {
       requesterId: request.requesterId || '',
       assignmentGroupId: request.assignmentGroupId as string,
       businessLineId: request.businessLineId,
+      categoryId: category.id,
+      subcategoryId: subcategory.id,
     };
 
     // Determine assignment group from workflow

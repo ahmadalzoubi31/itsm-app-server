@@ -10,12 +10,21 @@ import { SlaTarget } from '@modules/sla/entities/sla-target.entity';
 import { ReferenceModule } from '@shared/constants/reference-module.constants';
 import { Service } from '@modules/catalog/entities/service.entity';
 import { RequestCard } from '@modules/catalog/entities/request-card.entity';
+import { CaseCategory } from '@modules/case-category/entities/case-category.entity';
+import { CaseSubcategory } from '@modules/case-subcategory/entities/case-subcategory.entity';
 import {
   Workflow,
   WorkflowTargetType,
 } from '@modules/workflow/entities/workflow.entity';
 
 export default class InitialDataSeeder implements Seeder {
+  // Counter for recordId generation
+  private recordIdCounter = 1;
+
+  private getNextRecordId(): string {
+    return String(this.recordIdCounter++).padStart(10, '0');
+  }
+
   public async run(dataSource: DataSource): Promise<void> {
     console.log('🌱 Starting initial data seeding...');
 
@@ -40,22 +49,31 @@ export default class InitialDataSeeder implements Seeder {
     // 7. Create business lines
     await this.createBusinessLines(dataSource);
 
-    // 8. Create groups for IT business line
+    // 8. Create case categories
+    const categories = await this.createCategories(dataSource);
+
+    // 9. Create case subcategories
+    const subcategories = await this.createSubcategories(
+      dataSource,
+      categories,
+    );
+
+    // 10. Create groups for IT business line
     await this.createGroups(dataSource);
 
-    // 9. Create SLA targets for IT business line
+    // 11. Create SLA targets for IT business line
     await this.createSlaTargets(dataSource);
 
-    // 10. Create services for IT business line
-    await this.createServices(dataSource);
+    // 12. Create services for IT business line
+    await this.createServices(dataSource, categories, subcategories);
 
-    // 11. Create request number sequence
+    // 13. Create request number sequence
     await this.createRequestNumberSequence(dataSource);
 
-    // 12. Create workflows for routing requests
+    // 14. Create workflows for routing requests
     await this.createWorkflows(dataSource);
 
-    // 13. Create service cards for services
+    // 15. Create service cards for services
     await this.createRequestCards(dataSource);
 
     console.log('✅ Initial data seeding completed successfully!');
@@ -72,6 +90,7 @@ export default class InitialDataSeeder implements Seeder {
     if (!existingUser) {
       const systemUser = userRepo.create({
         id: '550e8400-e29b-41d4-a716-446655440000',
+        recordId: this.getNextRecordId(),
         username: 'system',
         displayName: 'System Administrator',
         email: 'system@itsm.local',
@@ -497,6 +516,7 @@ export default class InitialDataSeeder implements Seeder {
       if (!permission) {
         permission = permissionRepo.create({
           ...permData,
+          recordId: this.getNextRecordId(),
           createdById: '550e8400-e29b-41d4-a716-446655440000',
           createdByName: 'system',
           updatedById: '550e8400-e29b-41d4-a716-446655440000',
@@ -549,6 +569,7 @@ export default class InitialDataSeeder implements Seeder {
       if (!role) {
         role = roleRepo.create({
           ...roleData,
+          recordId: this.getNextRecordId(),
           createdById: '550e8400-e29b-41d4-a716-446655440000',
           createdByName: 'system',
           updatedById: '550e8400-e29b-41d4-a716-446655440000',
@@ -787,6 +808,7 @@ export default class InitialDataSeeder implements Seeder {
       if (!businessLine) {
         businessLine = businessLineRepo.create({
           ...blData,
+          recordId: this.getNextRecordId(),
           createdById: '550e8400-e29b-41d4-a716-446655440000',
           createdByName: 'system',
           updatedById: '550e8400-e29b-41d4-a716-446655440000',
@@ -798,6 +820,228 @@ export default class InitialDataSeeder implements Seeder {
         console.log(`  ⊙ Business line already exists: ${blData.key}`);
       }
     }
+  }
+
+  private async createCategories(
+    dataSource: DataSource,
+  ): Promise<Record<string, CaseCategory>> {
+    console.log('📁 Creating case categories...');
+    const categoryRepo = dataSource.getRepository(CaseCategory);
+
+    const categoriesData = [
+      {
+        key: 'incident',
+        name: 'Incident',
+        description:
+          'Unplanned interruption or reduction in quality of service',
+        active: true,
+      },
+      {
+        key: 'service-request',
+        name: 'Service Request',
+        description: 'Request for a standard service or information',
+        active: true,
+      },
+      {
+        key: 'change-request',
+        name: 'Change Request',
+        description: 'Request to add, modify, or remove something',
+        active: true,
+      },
+      {
+        key: 'problem',
+        name: 'Problem',
+        description: 'Root cause of one or more incidents',
+        active: true,
+      },
+    ];
+
+    const categories: Record<string, CaseCategory> = {};
+
+    for (const categoryData of categoriesData) {
+      let category = await categoryRepo.findOne({
+        where: { key: categoryData.key },
+      });
+
+      if (!category) {
+        category = categoryRepo.create({
+          ...categoryData,
+          recordId: this.getNextRecordId(),
+          createdById: '550e8400-e29b-41d4-a716-446655440000',
+          createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
+        });
+        await categoryRepo.save(category);
+        console.log(`  ✓ Created category: ${categoryData.key}`);
+      } else {
+        console.log(`  ⊙ Category already exists: ${categoryData.key}`);
+      }
+
+      categories[categoryData.key] = category;
+    }
+
+    return categories;
+  }
+
+  private async createSubcategories(
+    dataSource: DataSource,
+    categories: Record<string, CaseCategory>,
+  ): Promise<Record<string, CaseSubcategory>> {
+    console.log('📂 Creating case subcategories...');
+    const subcategoryRepo = dataSource.getRepository(CaseSubcategory);
+
+    const subcategoriesData = [
+      // Incident subcategories
+      {
+        key: 'hardware',
+        name: 'Hardware',
+        description: 'Hardware-related incidents',
+        categoryKey: 'incident',
+        active: true,
+      },
+      {
+        key: 'software',
+        name: 'Software',
+        description: 'Software-related incidents',
+        categoryKey: 'incident',
+        active: true,
+      },
+      {
+        key: 'network',
+        name: 'Network',
+        description: 'Network connectivity incidents',
+        categoryKey: 'incident',
+        active: true,
+      },
+      {
+        key: 'security',
+        name: 'Security',
+        description: 'Security-related incidents',
+        categoryKey: 'incident',
+        active: true,
+      },
+      {
+        key: 'performance',
+        name: 'Performance',
+        description: 'Performance and slowness issues',
+        categoryKey: 'incident',
+        active: true,
+      },
+      // Service Request subcategories
+      {
+        key: 'account-access',
+        name: 'Account & Access',
+        description: 'User account and access requests',
+        categoryKey: 'service-request',
+        active: true,
+      },
+      {
+        key: 'software-license',
+        name: 'Software & License',
+        description: 'Software installation and license requests',
+        categoryKey: 'service-request',
+        active: true,
+      },
+      {
+        key: 'hardware-equipment',
+        name: 'Hardware & Equipment',
+        description: 'Hardware and equipment requests',
+        categoryKey: 'service-request',
+        active: true,
+      },
+      {
+        key: 'information',
+        name: 'Information',
+        description: 'Information and consultation requests',
+        categoryKey: 'service-request',
+        active: true,
+      },
+      // Change Request subcategories
+      {
+        key: 'infrastructure',
+        name: 'Infrastructure',
+        description: 'Infrastructure changes',
+        categoryKey: 'change-request',
+        active: true,
+      },
+      {
+        key: 'application',
+        name: 'Application',
+        description: 'Application changes',
+        categoryKey: 'change-request',
+        active: true,
+      },
+      {
+        key: 'configuration',
+        name: 'Configuration',
+        description: 'Configuration changes',
+        categoryKey: 'change-request',
+        active: true,
+      },
+      // Problem subcategories
+      {
+        key: 'recurring-incident',
+        name: 'Recurring Incident',
+        description: 'Investigation of recurring incidents',
+        categoryKey: 'problem',
+        active: true,
+      },
+      {
+        key: 'root-cause-analysis',
+        name: 'Root Cause Analysis',
+        description: 'Root cause analysis and investigation',
+        categoryKey: 'problem',
+        active: true,
+      },
+    ];
+
+    const subcategories: Record<string, CaseSubcategory> = {};
+
+    for (const subcategoryData of subcategoriesData) {
+      const category = categories[subcategoryData.categoryKey];
+
+      if (!category) {
+        console.log(
+          `  ⚠️ Category not found: ${subcategoryData.categoryKey}, skipping subcategory: ${subcategoryData.key}`,
+        );
+        continue;
+      }
+
+      let subcategory = await subcategoryRepo.findOne({
+        where: {
+          key: subcategoryData.key,
+          categoryId: category.id,
+        },
+      });
+
+      if (!subcategory) {
+        subcategory = subcategoryRepo.create({
+          key: subcategoryData.key,
+          name: subcategoryData.name,
+          description: subcategoryData.description,
+          active: subcategoryData.active,
+          categoryId: category.id,
+          recordId: this.getNextRecordId(),
+          createdById: '550e8400-e29b-41d4-a716-446655440000',
+          createdByName: 'system',
+          updatedById: '550e8400-e29b-41d4-a716-446655440000',
+          updatedByName: 'system',
+        });
+        await subcategoryRepo.save(subcategory);
+        console.log(
+          `  ✓ Created subcategory: ${subcategoryData.key} (${subcategoryData.categoryKey})`,
+        );
+      } else {
+        console.log(
+          `  ⊙ Subcategory already exists: ${subcategoryData.key} (${subcategoryData.categoryKey})`,
+        );
+      }
+
+      subcategories[subcategoryData.key] = subcategory;
+    }
+
+    return subcategories;
   }
 
   private async createGroups(dataSource: DataSource): Promise<void> {
@@ -864,6 +1108,7 @@ export default class InitialDataSeeder implements Seeder {
           name: groupData.name,
           description: groupData.description,
           businessLineId: groupData.businessLineId,
+          recordId: this.getNextRecordId(),
           createdById: '550e8400-e29b-41d4-a716-446655440000',
           createdByName: 'system',
           updatedById: '550e8400-e29b-41d4-a716-446655440000',
@@ -1003,6 +1248,7 @@ export default class InitialDataSeeder implements Seeder {
       if (!slaTarget) {
         slaTarget = slaTargetRepo.create({
           ...slaTargetData,
+          recordId: this.getNextRecordId(),
           createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
           createdByName: 'system',
           updatedById: '550e8400-e29b-41d4-a716-446655440000',
@@ -1018,7 +1264,11 @@ export default class InitialDataSeeder implements Seeder {
     }
   }
 
-  private async createServices(dataSource: DataSource): Promise<void> {
+  private async createServices(
+    dataSource: DataSource,
+    categories: Record<string, CaseCategory>,
+    subcategories: Record<string, CaseSubcategory>,
+  ): Promise<void> {
     console.log('🛎️ Creating services for IT business line...');
     const serviceRepo = dataSource.getRepository(Service);
     const businessLineRepo = dataSource.getRepository(BusinessLine);
@@ -1033,12 +1283,25 @@ export default class InitialDataSeeder implements Seeder {
       return;
     }
 
+    // Get category and subcategory references
+    const serviceRequestCategory = categories['service-request'];
+    const incidentCategory = categories['incident'];
+
+    if (!serviceRequestCategory || !incidentCategory) {
+      console.log(
+        '  ⚠️ Required categories not found, skipping service creation',
+      );
+      return;
+    }
+
     const servicesData = [
       {
         key: 'it-helpdesk',
         name: 'IT Helpdesk',
         description: 'General IT support and helpdesk services',
         businessLineId: itBusinessLine.id,
+        categoryId: incidentCategory.id,
+        subcategoryId: subcategories['software']?.id,
       },
       {
         key: 'it-account-management',
@@ -1046,34 +1309,52 @@ export default class InitialDataSeeder implements Seeder {
         description:
           'User account creation, modification, and access management',
         businessLineId: itBusinessLine.id,
+        categoryId: serviceRequestCategory.id,
+        subcategoryId: subcategories['account-access']?.id,
       },
       {
         key: 'it-software-request',
         name: 'IT Software Request',
         description: 'Request software installation or licenses',
         businessLineId: itBusinessLine.id,
+        categoryId: serviceRequestCategory.id,
+        subcategoryId: subcategories['software-license']?.id,
       },
       {
         key: 'it-hardware-request',
         name: 'IT Hardware Request',
         description: 'Request hardware devices like laptops, monitors, etc.',
         businessLineId: itBusinessLine.id,
+        categoryId: serviceRequestCategory.id,
+        subcategoryId: subcategories['hardware-equipment']?.id,
       },
       {
         key: 'it-network-access',
         name: 'IT Network Access',
         description: 'WiFi access, VPN setup, and network configuration',
         businessLineId: itBusinessLine.id,
+        categoryId: serviceRequestCategory.id,
+        subcategoryId: subcategories['account-access']?.id,
       },
       {
         key: 'it-security',
         name: 'IT Security Services',
         description: 'Security incident reporting and access reviews',
         businessLineId: itBusinessLine.id,
+        categoryId: incidentCategory.id,
+        subcategoryId: subcategories['security']?.id,
       },
     ];
 
     for (const serviceData of servicesData) {
+      // Validate that category and subcategory are present
+      if (!serviceData.categoryId || !serviceData.subcategoryId) {
+        console.log(
+          `  ⚠️ Missing category or subcategory for service: ${serviceData.key}, skipping`,
+        );
+        continue;
+      }
+
       let service = await serviceRepo.findOne({
         where: { key: serviceData.key },
       });
@@ -1081,6 +1362,7 @@ export default class InitialDataSeeder implements Seeder {
       if (!service) {
         service = serviceRepo.create({
           ...serviceData,
+          recordId: this.getNextRecordId(),
           createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
           createdByName: 'system',
           updatedById: '550e8400-e29b-41d4-a716-446655440000',
@@ -1184,6 +1466,7 @@ export default class InitialDataSeeder implements Seeder {
       if (!workflow) {
         workflow = workflowRepo.create({
           ...workflowData,
+          recordId: this.getNextRecordId(),
           createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
           createdByName: 'system',
           updatedById: '550e8400-e29b-41d4-a716-446655440000',
@@ -1733,6 +2016,7 @@ export default class InitialDataSeeder implements Seeder {
           defaultAssignmentGroupId: defaultGroup.id,
           businessLineId: itBusinessLine.id,
           active: templateData.active,
+          recordId: this.getNextRecordId(),
           createdById: '550e8400-e29b-41d4-a716-446655440000', // system user
           createdByName: 'system',
           updatedById: '550e8400-e29b-41d4-a716-446655440000',

@@ -15,6 +15,8 @@ import { RequestModule } from '@modules/request/request.module';
 import { WorkflowModule } from '@modules/workflow/workflow.module';
 import { LdapModule } from '@modules/ldap/ldap.module';
 import { UserPreferencesModule } from '@modules/user-preferences/user-preferences.module';
+import { CaseCategoryModule } from '@modules/case-category/case-category.module';
+import { CaseSubcategoryModule } from '@modules/case-subcategory/case-subcategory.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { UserPreferencesModule } from '@modules/user-preferences/user-preference
     EmailModule,
     NotifyModule,
     BusinessLineModule,
+    CaseCategoryModule,
+    CaseSubcategoryModule,
     CaseModule,
     CatalogModule,
     SlaModule,

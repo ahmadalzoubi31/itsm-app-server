@@ -18,6 +18,8 @@ import { BusinessLine } from '@modules/business-line/entities/business-line.enti
 import { Service } from '@modules/catalog/entities/service.entity';
 import { RequestCard } from '@modules/catalog/entities/request-card.entity';
 import { Case } from '@modules/case/entities/case.entity';
+import { CaseCategory } from '@modules/case-category/entities/case-category.entity';
+import { CaseSubcategory } from '@modules/case-subcategory/entities/case-subcategory.entity';
 
 @Entity('request')
 @Index(['number'], { unique: true })
@@ -115,4 +117,22 @@ export class Request extends AuditableEntity {
 
   @Column({ type: 'timestamp', nullable: true })
   resolvedAt?: Date;
+
+  // Case Category - REQUIRED
+  @Index()
+  @Column({ type: 'uuid' })
+  categoryId!: string;
+
+  @ManyToOne(() => CaseCategory, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'categoryId' })
+  category!: CaseCategory;
+
+  // Case Subcategory - REQUIRED
+  @Index()
+  @Column({ type: 'uuid' })
+  subcategoryId!: string;
+
+  @ManyToOne(() => CaseSubcategory, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'subcategoryId' })
+  subcategory!: CaseSubcategory;
 }

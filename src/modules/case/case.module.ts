@@ -11,6 +11,10 @@ import { CaslModule } from '@modules/iam/casl/casl.module';
 import { AuditModule } from '@modules/audit/audit.module';
 import { SlaModule } from '@modules/sla/sla.module';
 import { SlaTimer } from '@modules/sla/entities/sla-timer.entity';
+import { CaseCategoryModule } from '@modules/case-category/case-category.module';
+import { CaseSubcategoryModule } from '@modules/case-subcategory/case-subcategory.module';
+import { CaseCategory } from '@modules/case-category/entities/case-category.entity';
+import { CaseSubcategory } from '@modules/case-subcategory/entities/case-subcategory.entity';
 
 @Module({
   imports: [
@@ -18,7 +22,17 @@ import { SlaTimer } from '@modules/sla/entities/sla-timer.entity';
     CaslModule,
     AuditModule,
     SlaModule,
-    TypeOrmModule.forFeature([Case, CaseComment, CaseLink, CaseAttachment, SlaTimer]),
+    CaseCategoryModule,
+    CaseSubcategoryModule,
+    TypeOrmModule.forFeature([
+      Case,
+      CaseComment,
+      CaseLink,
+      CaseAttachment,
+      SlaTimer,
+      CaseCategory,
+      CaseSubcategory,
+    ]),
   ],
   controllers: [CaseController],
   providers: [CaseService],

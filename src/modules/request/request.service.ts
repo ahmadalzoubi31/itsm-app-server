@@ -23,6 +23,8 @@ import { RequestStatus, RequestType } from '@shared/constants';
 import { BusinessLineService } from '@modules/business-line/business-line.service';
 import { CaseService } from '@modules/case/case.service';
 import { WorkflowService } from '@modules/workflow/workflow.service';
+import { CaseCategoryService } from '@modules/case-category/case-category.service';
+import { CaseSubcategoryService } from '@modules/case-subcategory/case-subcategory.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   RequestCreatedEvent,
@@ -55,6 +57,8 @@ export class RequestService {
     private readonly businessLineSvc: BusinessLineService,
     private readonly caseSvc: CaseService,
     private readonly workflowSvc: WorkflowService,
+    private readonly caseCategorySvc: CaseCategoryService,
+    private readonly caseSubcategorySvc: CaseSubcategoryService,
   ) {
     this.logger.log('RequestService initialized');
   }
@@ -67,16 +71,37 @@ export class RequestService {
     // Validate business line exists
     const businessLine = await this.businessLineSvc.findOne(dto.businessLineId);
 
-    // Validate service card exists if provided
+    // Validate service card exists if provided and auto-populate category/subcategory
     let requestCard: RequestCard | null = null;
     if (dto.requestCardId) {
       requestCard = await this.requestCards.findOne({
         where: { id: dto.requestCardId, active: true },
-        relations: ['defaultAssignmentGroup'],
+        relations: ['defaultAssignmentGroup', 'service'],
       });
       if (!requestCard) {
         throw new NotFoundException('Service card not found or inactive');
       }
+
+      // Auto-populate category and subcategory from service if not provided
+      if (!dto.categoryId && requestCard.service) {
+        dto.categoryId = requestCard.service.categoryId;
+        this.logger.log(
+          `Auto-populated categoryId from service: ${dto.categoryId}`,
+        );
+      }
+      if (!dto.subcategoryId && requestCard.service) {
+        dto.subcategoryId = requestCard.service.subcategoryId;
+        this.logger.log(
+          `Auto-populated subcategoryId from service: ${dto.subcategoryId}`,
+        );
+      }
+    }
+
+    // Validate that category and subcategory are provided (either from DTO or auto-populated)
+    if (!dto.categoryId || !dto.subcategoryId) {
+      throw new BadRequestException(
+        'Category and subcategory are required. They should be auto-populated from the service or provided explicitly.',
+      );
     }
 
     // Generate request number
@@ -427,6 +452,13 @@ export class RequestService {
       return null;
     }
 
+    // Validate that request has category and subcategory
+    if (!request.categoryId || !request.subcategoryId) {
+      throw new Error(
+        `Request ${request.number} is missing category or subcategory. Cannot route to case.`,
+      );
+    }
+
     const caseDto = {
       title: request.title,
       description: request.description,
@@ -434,6 +466,8 @@ export class RequestService {
       requesterId: request.requesterId,
       assignmentGroupId: request.assignmentGroupId,
       businessLineId: request.businessLineId,
+      categoryId: request.categoryId,
+      subcategoryId: request.subcategoryId,
       affectedServiceId: request.affectedServiceId,
       requestCardId: request.requestCardId,
       createdById: request.createdById,

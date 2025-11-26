@@ -34,6 +34,8 @@ import { StagedUser } from '@modules/ldap/entities/staged-user.entity';
 import { ApprovalRequest } from '@modules/approval/entities/approval-request.entity';
 import { ApprovalSteps } from '@modules/approval/entities/approval-step.entity';
 import { UserTablePreference } from '@modules/user-preferences/entities/user-table-preference.entity';
+import { CaseCategory } from '@modules/case-category/entities/case-category.entity';
+import { CaseSubcategory } from '@modules/case-subcategory/entities/case-subcategory.entity';
 
 // Load environment variables
 dotenv.config();
@@ -80,6 +82,8 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
     ApprovalRequest,
     ApprovalSteps,
     UserTablePreference,
+    CaseCategory,
+    CaseSubcategory,
   ],
   migrations: [__dirname + '/migrations/*.{ts,js}'],
   seeds: [__dirname + '/seeds/**/*.{ts,js}'],

@@ -37,5 +37,15 @@ export class UpdateCaseDto {
   @ApiPropertyOptional({ description: 'Assignment group id' })
   @IsOptional()
   @IsUUID()
-  assignmentGroupId!: string;
+  assignmentGroupId?: string;
+
+  @ApiPropertyOptional({ description: 'Case category id' })
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @ApiPropertyOptional({ description: 'Case subcategory id' })
+  @IsOptional()
+  @IsUUID()
+  subcategoryId?: string;
 }

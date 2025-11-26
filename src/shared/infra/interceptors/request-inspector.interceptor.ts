@@ -93,25 +93,15 @@ export class RequestInspectorInterceptor implements NestInterceptor {
 
   private logRequest(data: RequestInspectionData): void {
     const logMessage = `🔍 REQUEST INSPECTOR - ${data.method} ${data.endpoint}`;
-    const logContext = {
-      endpoint: data.endpoint,
-      method: data.method,
-      url: data.url,
-      userAgent: data.userAgent,
-      ipAddress: data.ipAddress,
-      userId: data.userId,
-      username: data.username,
-      role: data.role,
-      queryParams: data.queryParams,
-      timestamp: data.timestamp.toISOString(),
-    };
 
     this.logger.log(logMessage);
-    // this.logger.log(logMessage, logContext);
 
     // Log request body for non-GET requests (be careful with sensitive data)
     if (data.method !== 'GET' && data.requestBody) {
       this.logger.debug(`Request Body: ${JSON.stringify(data.requestBody)}`);
+    }
+    if (data.method !== 'GET' && !data.requestBody) {
+      this.logger.debug(`Request Body: No body`);
     }
   }
 
@@ -124,28 +114,14 @@ export class RequestInspectorInterceptor implements NestInterceptor {
     responseData: any,
   ): void {
     const logMessage = `✅ RESPONSE INSPECTOR - ${data.method} ${data.endpoint} - ${data.statusCode} (${data.duration}ms)`;
-    const logContext = {
-      endpoint: data.endpoint,
-      method: data.method,
-      statusCode: data.statusCode,
-      duration: data.duration,
-      responseSize: data.responseSize,
-      userId: data.userId,
-      username: data.username,
-      role: data.role,
-      ipAddress: data.ipAddress,
-    };
 
     // Log success responses
     if (data.statusCode >= 200 && data.statusCode < 300) {
       this.logger.log(logMessage);
-      // this.logger.log(logMessage, logContext);
     } else if (data.statusCode >= 300 && data.statusCode < 400) {
       this.logger.warn(logMessage);
-      // this.logger.warn(logMessage, logContext);
     } else {
       this.logger.error(logMessage);
-      // this.logger.error(logMessage, logContext);
     }
 
     // Log response data for debugging (be careful with sensitive data)
@@ -170,21 +146,8 @@ export class RequestInspectorInterceptor implements NestInterceptor {
     error: any,
   ): void {
     const logMessage = `❌ ERROR INSPECTOR - ${data.method} ${data.endpoint} - ${data.statusCode} (${data.duration}ms)`;
-    const logContext = {
-      endpoint: data.endpoint,
-      method: data.method,
-      statusCode: data.statusCode,
-      duration: data.duration,
-      error: data.error,
-      userId: data.userId,
-      username: data.username,
-      role: data.role,
-      ipAddress: data.ipAddress,
-      stack: error.stack,
-    };
 
     this.logger.error(logMessage);
-    // this.logger.error(logMessage, logContext);
   }
 
   private sanitizeRequestBody(body: any): any {

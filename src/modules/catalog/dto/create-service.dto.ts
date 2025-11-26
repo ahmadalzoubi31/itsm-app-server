@@ -22,4 +22,20 @@ export class CreateServiceDto {
   })
   @IsUUID()
   businessLineId!: string;
+
+  @ApiProperty({
+    required: true,
+    description: 'Case category ID',
+    example: '550e8400-e29b-41d4-a716-446655440002',
+  })
+  @IsUUID()
+  categoryId!: string;
+
+  @ApiProperty({
+    required: true,
+    description: 'Case subcategory ID',
+    example: '550e8400-e29b-41d4-a716-446655440003',
+  })
+  @IsUUID()
+  subcategoryId!: string;
 }

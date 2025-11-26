@@ -61,15 +61,24 @@ export class RolesService {
     if (!user) {
       throw new BadRequestException(`User ${userId} not found`);
     }
+
+    // Handle empty array case (remove all roles)
+    if (dto.roleIds.length === 0) {
+      user.roles = [];
+      await this.users.save(user, { reload: true });
+      return { ok: true };
+    }
+
+    // Fetch the roles to assign
     const roles = await this.roles.find({
       where: { id: In(dto.roleIds) },
     });
     if (roles.length !== dto.roleIds.length) {
       throw new BadRequestException(`Some roles not found`);
     }
-    const existingRoleIds = new Set(user.roles.map((r) => r.id));
-    const newRoles = roles.filter((r) => !existingRoleIds.has(r.id));
-    user.roles.push(...newRoles);
+
+    // Replace the entire role list (not just add new ones)
+    user.roles = roles;
     await this.users.save(user, { reload: true });
     return { ok: true };
   }
