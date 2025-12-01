@@ -29,6 +29,7 @@ import { ApprovalStepsType } from '@modules/approval/entities/approval-step.enti
 const ajv = addFormats(
   new Ajv({ allErrors: true, removeAdditional: 'failing' }),
 );
+ajv.addKeyword('conditionalLogic');
 
 @Injectable()
 export class CatalogService {
@@ -229,7 +230,30 @@ export class CatalogService {
       }
 
       // 2. Validate form data against jsonSchema
-      const validate = ajv.compile(requestCard.jsonSchema);
+      // Clone schema to avoid mutating the cached entity
+      const schema = JSON.parse(JSON.stringify(requestCard.jsonSchema));
+
+      // Filter out required fields that are hidden by conditional logic
+      if (schema.properties && schema.required) {
+        const hiddenFields = Object.keys(schema.properties).filter((key) => {
+          const property = schema.properties[key];
+          if (property.conditionalLogic) {
+            return !this.evaluateConditionalLogic(
+              property.conditionalLogic,
+              formData,
+            );
+          }
+          return false;
+        });
+
+        if (hiddenFields.length > 0) {
+          schema.required = schema.required.filter(
+            (field: string) => !hiddenFields.includes(field),
+          );
+        }
+      }
+
+      const validate = ajv.compile(schema);
       const valid = validate(formData);
 
       if (!valid) {
@@ -504,5 +528,70 @@ export class CatalogService {
       label: item[displayField] || String(item[valueField]),
       value: item[valueField],
     }));
+  }
+
+  /**
+   * Evaluate a single condition
+   */
+  private evaluateCondition(
+    condition: any,
+    formData: Record<string, any>,
+  ): boolean {
+    const fieldValue = formData[condition.field];
+
+    switch (condition.operator) {
+      case 'equals':
+        return fieldValue === condition.value;
+      case 'notEquals':
+        return fieldValue !== condition.value;
+      case 'contains':
+        if (Array.isArray(fieldValue)) {
+          return fieldValue.includes(condition.value);
+        }
+        if (typeof fieldValue === 'string') {
+          return fieldValue.includes(String(condition.value));
+        }
+        return false;
+      case 'isEmpty':
+        return (
+          fieldValue === undefined ||
+          fieldValue === null ||
+          fieldValue === '' ||
+          (Array.isArray(fieldValue) && fieldValue.length === 0)
+        );
+      case 'isNotEmpty':
+        return (
+          fieldValue !== undefined &&
+          fieldValue !== null &&
+          fieldValue !== '' &&
+          !(Array.isArray(fieldValue) && fieldValue.length === 0)
+        );
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * Evaluate all conditions for a field
+   */
+  private evaluateConditionalLogic(
+    conditionalLogic: any,
+    formData: Record<string, any>,
+  ): boolean {
+    if (
+      !conditionalLogic ||
+      !conditionalLogic.conditions ||
+      conditionalLogic.conditions.length === 0
+    ) {
+      return true; // No conditions means always visible
+    }
+
+    const results = conditionalLogic.conditions.map((condition: any) =>
+      this.evaluateCondition(condition, formData),
+    );
+
+    return conditionalLogic.logicOperator === 'AND'
+      ? results.every((r: boolean) => r)
+      : results.some((r: boolean) => r);
   }
 }

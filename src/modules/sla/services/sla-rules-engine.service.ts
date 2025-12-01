@@ -22,7 +22,9 @@ export class SlaRulesEngineService {
 
     // If no conditions, trigger is activated
     if (!trigger.conditions || trigger.conditions.length === 0) {
-      this.logger.debug(`Trigger matched (no conditions required) for event ${event}`);
+      this.logger.debug(
+        `Trigger matched (no conditions required) for event ${event}`,
+      );
       return true;
     }
 
@@ -56,7 +58,8 @@ export class SlaRulesEngineService {
         break;
       case 'in':
         result =
-          Array.isArray(condition.value) && condition.value.includes(fieldValue);
+          Array.isArray(condition.value) &&
+          condition.value.includes(fieldValue);
         break;
       case 'not_in':
         result =
@@ -86,18 +89,90 @@ export class SlaRulesEngineService {
    * Gets field value from event data using dot notation
    */
   private getFieldValue(data: any, field: string): any {
-    const parts = field.split('.');
+    if (!field) return undefined;
+
+    // Support bracket notation: a[0] -> a.0 ; ['key'] or ["key"] -> .key
+    const normalized = String(field)
+      .replace(/\[(?:'|")([^\]]+?)(?:'|")\]/g, '.$1')
+      .replace(/\[(\d+)\]/g, '.$1');
+
+    const parts = normalized.split('.').filter((p) => p.length);
     let value = data;
 
-    for (const part of parts) {
-      if (value && typeof value === 'object' && part in value) {
-        value = value[part];
-      } else {
-        return undefined;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (value === null || value === undefined) return undefined;
+
+      // direct property or array index
+      if (
+        (typeof value === 'object' &&
+          Object.prototype.hasOwnProperty.call(value, part)) ||
+        (Array.isArray(value) && !Number.isNaN(Number(part)))
+      ) {
+        value = value[part as any];
+        continue;
       }
+
+      // if single-segment and not found, try common wrappers like after/before/data/payload
+      if (parts.length === 1 && i === 0 && typeof value === 'object') {
+        if (
+          value.after &&
+          typeof value.after === 'object' &&
+          Object.prototype.hasOwnProperty.call(value.after, part)
+        ) {
+          return value.after[part];
+        }
+        if (
+          value.before &&
+          typeof value.before === 'object' &&
+          Object.prototype.hasOwnProperty.call(value.before, part)
+        ) {
+          return value.before[part];
+        }
+        if (
+          value.data &&
+          typeof value.data === 'object' &&
+          Object.prototype.hasOwnProperty.call(value.data, part)
+        ) {
+          return value.data[part];
+        }
+        if (
+          value.payload &&
+          typeof value.payload === 'object' &&
+          Object.prototype.hasOwnProperty.call(value.payload, part)
+        ) {
+          return value.payload[part];
+        }
+
+        // fallback: shallow recursive search (depth-limited)
+        return this.findKeyRecursive(value, part, 3);
+      }
+
+      return undefined;
     }
 
     return value;
+  }
+
+  private findKeyRecursive(obj: any, key: string, depth: number): any {
+    if (depth < 0 || obj === null || obj === undefined) return undefined;
+    if (typeof obj !== 'object') return undefined;
+
+    if (Object.prototype.hasOwnProperty.call(obj, key)) return obj[key];
+
+    for (const k of Object.keys(obj)) {
+      try {
+        const val = obj[k];
+        if (typeof val === 'object') {
+          const found = this.findKeyRecursive(val, key, depth - 1);
+          if (found !== undefined) return found;
+        }
+      } catch (_e) {
+        // ignore access errors
+      }
+    }
+
+    return undefined;
   }
 
   /**

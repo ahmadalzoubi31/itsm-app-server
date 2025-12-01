@@ -154,7 +154,11 @@ export class SlaService {
     }
 
     // If timer is already in terminal state, don't process further
-    if (timer.status === 'Met' || timer.status === 'Stopped' || timer.status === 'Breached') {
+    if (
+      timer.status === 'Met' ||
+      timer.status === 'Stopped' ||
+      timer.status === 'Breached'
+    ) {
       this.logger.debug(
         `Timer already in terminal state (${timer.status}) for case ${caseId}, target ${target.key} - skipping event ${event}`,
       );
@@ -169,7 +173,10 @@ export class SlaService {
       'stop',
     );
 
-    if (stopTriggers.length > 0 && (timer.status === 'Running' || timer.status === 'Paused')) {
+    if (
+      stopTriggers.length > 0 &&
+      (timer.status === 'Running' || timer.status === 'Paused')
+    ) {
       this.logger.log(
         `Stop trigger matched for case ${caseId}, target ${target.key}, event ${event} - stopping timer`,
       );
@@ -272,17 +279,17 @@ export class SlaService {
   /**
    * Legacy method for backward compatibility
    */
-  async stopOnStatus(caseRow: { id: string; status: string }) {
-    await this.processSlaEvent(
-      'case.status.changed',
-      {
-        status: caseRow.status,
-        from: 'unknown',
-        to: caseRow.status,
-      },
-      caseRow.id,
-    );
-  }
+  // async stopOnStatus(caseRow: { id: string; status: string }) {
+  //   await this.processSlaEvent(
+  //     'case.status.changed',
+  //     {
+  //       status: caseRow.status,
+  //       from: 'unknown',
+  //       to: caseRow.status,
+  //     },
+  //     caseRow.id,
+  //   );
+  // }
 
   async createTarget(
     dto: CreateSlaTargetDto & { createdById: string; createdByName: string },
