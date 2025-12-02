@@ -34,6 +34,6 @@ RUN pnpm install --prod
 COPY --from=builder /app/dist ./dist
 
 # Run database migrations before start
-CMD ["sh", "-c", "pnpm migration:run && node dist/main.js"]
+CMD ["sh", "-c", "node -r tsconfig-paths/register dist/db/data-source.js migration:run && node dist/main.js"]
 
 EXPOSE 3000
