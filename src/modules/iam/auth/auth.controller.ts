@@ -57,11 +57,10 @@ export class AuthController {
       7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
     const cookieOptions: any = {
-      httpOnly: true, // ✅ Prevent JavaScript access (XSS protection)
-      secure: isProduction, // ✅ HTTPS only in production
-      sameSite: 'strict' as const, // ✅ CSRF protection
-      path: '/',
-      domain: '.webpexo.com'
+      httpOnly: true,
+      secure: false, // ❗ local dev: NO https
+      sameSite: 'lax', // good for same-site (localhost)
+      path: '/', // send on all routes
     };
 
     if (domain) {
@@ -91,7 +90,7 @@ export class AuthController {
       secure: isProduction,
       sameSite: 'strict' as const,
       path: '/',
-      domain: '.webpexo.com'
+      domain: '.webpexo.com',
     };
 
     if (domain) {

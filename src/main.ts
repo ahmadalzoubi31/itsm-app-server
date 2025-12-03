@@ -84,12 +84,18 @@ async function bootstrap() {
     logger.debug('Global API prefix configured');
 
     // Enable CORS with credentials for cookie support
+    // app.enableCors({
+    //   origin:
+    //     new ConfigService().get<string>('NODE_ENV') === 'production'
+    //       ? 'https://itsm.webpexo.com'
+    //       : 'http://localhost:8080',
+    //   credentials: true, // ✅ CRITICAL: Allow cookies to be sent across domains
+    // });
     app.enableCors({
-      origin:
-        new ConfigService().get<string>('NODE_ENV') === 'production'
-          ? 'https://itsm.webpexo.com'
-          : 'http://localhost:8080',
-      credentials: true, // ✅ CRITICAL: Allow cookies to be sent across domains
+      origin: 'http://localhost:8080', // your frontend
+      credentials: true, // allow cookies
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      allowedHeaders: 'Content-Type, Authorization',
     });
     logger.debug('CORS configured');
 
