@@ -61,6 +61,7 @@ export class AuthController {
       secure: isProduction, // ✅ HTTPS only in production
       sameSite: 'strict' as const, // ✅ CSRF protection
       path: '/',
+      domain: '.webpexo.com'
     };
 
     if (domain) {
@@ -90,6 +91,7 @@ export class AuthController {
       secure: isProduction,
       sameSite: 'strict' as const,
       path: '/',
+      domain: '.webpexo.com'
     };
 
     if (domain) {
