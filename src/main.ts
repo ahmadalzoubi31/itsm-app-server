@@ -107,7 +107,7 @@ async function bootstrap() {
     logger.log(`Starting server on port ${port}...`);
     await app.listen(port);
 
-    logger.log(`🚀 Application is running on: http://localhost:${port}`);
+    // logger.log(`🚀 Application is running on: http://localhost:${port}`);
     logger.debug(`Environment: ${new ConfigService().get<string>('NODE_ENV')}`);
     logger.log('Application bootstrap completed successfully');
   } catch (error) {
