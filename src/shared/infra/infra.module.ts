@@ -80,7 +80,24 @@ export class InfraModule implements OnModuleInit {
     private readonly recordSubscriber: RecordSubscriber,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
+    // Verify database connection is initialized
+    if (!this.dataSource.isInitialized) {
+      this.logger.error('Database connection failed to initialize');
+      throw new Error('Database connection initialization failed');
+    }
+
+    // Test the connection
+    try {
+      await this.dataSource.query('SELECT 1');
+      this.logger.log(
+        'Database connection verified during module initialization',
+      );
+    } catch (error) {
+      this.logger.error('Database connection test failed', error.stack);
+      throw new Error(`Database connection test failed: ${error.message}`);
+    }
+
     // Register the audit subscriber with TypeORM connection
     if (this.dataSource.subscribers) {
       this.dataSource.subscribers.push(this.auditSubscriber);
