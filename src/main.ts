@@ -84,12 +84,18 @@ async function bootstrap() {
     logger.debug('Global API prefix configured');
 
     // Enable CORS with credentials for cookie support
+    // app.enableCors({
+    //   origin:
+    //     new ConfigService().get<string>('NODE_ENV') === 'production'
+    //       ? 'https://itsm.webpexo.com'
+    //       : 'http://localhost:8080',
+    //   credentials: true, // ✅ CRITICAL: Allow cookies to be sent across domains
+    // });
     app.enableCors({
-      origin:
-        new ConfigService().get<string>('NODE_ENV') === 'production'
-          ? 'https://itsm.webpexo.com'
-          : 'http://localhost:8080',
-      credentials: true, // ✅ CRITICAL: Allow cookies to be sent across domains
+      origin: 'http://localhost:8080', // your frontend
+      credentials: true, // allow cookies
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      allowedHeaders: 'Content-Type, Authorization',
     });
     logger.debug('CORS configured');
 
@@ -107,7 +113,7 @@ async function bootstrap() {
     logger.log(`Starting server on port ${port}...`);
     await app.listen(port);
 
-    logger.log(`🚀 Application is running on: http://localhost:${port}`);
+    // logger.log(`🚀 Application is running on: http://localhost:${port}`);
     logger.debug(`Environment: ${new ConfigService().get<string>('NODE_ENV')}`);
     logger.log('Application bootstrap completed successfully');
   } catch (error) {

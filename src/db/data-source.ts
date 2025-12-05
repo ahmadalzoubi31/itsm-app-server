@@ -18,7 +18,6 @@ import { EmailChannel } from '@modules/email/entities/email-channel.entity';
 import { EmailInboundState } from '@modules/email/entities/email-inbound-state.entity';
 import { EmailMessage } from '@modules/email/entities/email-message.entity';
 import { EmailRoutingRule } from '@modules/email/entities/email-routing-rule.entity';
-// import { UserNotifyPref } from '@modules/notify/entities/user-notify-pref.entity';
 import { NotificationTemplate } from '@modules/email/entities/notification-template.entity';
 import { AuditEvent } from '@modules/audit/entities/audit-event.entity';
 import { Service } from '@modules/catalog/entities/service.entity';
