@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { getCookieOptions, COOKIE_NAMES } from './cookie.config';
 import {
   LoginDto,
   RefreshTokenDto,
@@ -44,61 +45,19 @@ export class AuthController {
     accessToken: string,
     refreshToken: string,
   ) {
-    const isProduction = this.config.get<string>('NODE_ENV') === 'production';
-    const domain = this.config.get<string>('COOKIE_DOMAIN');
-
-    // Access token cookie (short-lived: 15 minutes)
-    const accessTokenMaxAge =
-      this.config.get<number>('JWT_EXPIRES_IN') || 15 * 60 * 1000; // 15 minutes in milliseconds
-
-    // Refresh token cookie (long-lived: 7 days)
-    const refreshTokenMaxAge =
-      this.config.get<number>('REFRESH_JWT_EXPIRES_IN') ||
-      7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-
-    const cookieOptions: any = {
-      httpOnly: true,
-      secure: false, // ❗ local dev: NO https
-      sameSite: 'lax', // good for same-site (localhost)
-      path: '/', // send on all routes
-    };
-
-    if (domain) {
-      cookieOptions.domain = domain;
-    }
-
-    res.cookie('accessToken', accessToken, {
-      ...cookieOptions,
-      maxAge: accessTokenMaxAge,
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      ...cookieOptions,
-      maxAge: refreshTokenMaxAge,
-    });
+    const accessOptions = getCookieOptions(this.config, 'access');
+    const refreshOptions = getCookieOptions(this.config, 'refresh');
+    res.cookie(COOKIE_NAMES.ACCESS_TOKEN, accessToken, accessOptions);
+    res.cookie(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, refreshOptions);
   }
 
   /**
    * Clear token cookies
    */
   private clearTokenCookies(res: Response) {
-    const isProduction = this.config.get<string>('NODE_ENV') === 'production';
-    const domain = this.config.get<string>('COOKIE_DOMAIN');
-
-    const cookieOptions: any = {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict' as const,
-      path: '/',
-      domain: '.webpexo.com',
-    };
-
-    if (domain) {
-      cookieOptions.domain = domain;
-    }
-
-    res.clearCookie('accessToken', cookieOptions);
-    res.clearCookie('refreshToken', cookieOptions);
+    const clearOptions = getCookieOptions(this.config, 'clear');
+    res.clearCookie(COOKIE_NAMES.ACCESS_TOKEN, clearOptions);
+    res.clearCookie(COOKIE_NAMES.REFRESH_TOKEN, clearOptions);
   }
 
   @Post('login')
@@ -141,21 +100,8 @@ export class AuthController {
     const result = await this.auth.refreshAccessToken(dto, context);
 
     // Set new access token cookie (refresh token remains the same)
-    const isProduction = this.config.get<string>('NODE_ENV') === 'production';
-    const domain = this.config.get<string>('COOKIE_DOMAIN');
-    const cookieOptions: any = {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict' as const,
-      path: '/',
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    };
-
-    if (domain) {
-      cookieOptions.domain = domain;
-    }
-
-    res.cookie('accessToken', result.access_token, cookieOptions);
+    const accessOptions = getCookieOptions(this.config, 'access');
+    res.cookie(COOKIE_NAMES.ACCESS_TOKEN, result.access_token, accessOptions);
 
     // Return success response (refreshAccessToken only returns new access token)
     return res.json({

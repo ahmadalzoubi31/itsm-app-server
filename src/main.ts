@@ -84,15 +84,11 @@ async function bootstrap() {
     logger.debug('Global API prefix configured');
 
     // Enable CORS with credentials for cookie support
-    // app.enableCors({
-    //   origin:
-    //     new ConfigService().get<string>('NODE_ENV') === 'production'
-    //       ? 'https://itsm.webpexo.com'
-    //       : 'http://localhost:8080',
-    //   credentials: true, // ✅ CRITICAL: Allow cookies to be sent across domains
-    // });
     app.enableCors({
-      origin: 'http://localhost:8080', // your frontend
+      origin:
+        new ConfigService().get<string>('NODE_ENV') === 'production'
+          ? 'https://esm.webpexo.com'
+          : 'http://localhost:8080',
       credentials: true, // allow cookies
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       allowedHeaders: 'Content-Type, Authorization',
@@ -111,7 +107,7 @@ async function bootstrap() {
     }
 
     logger.log(`Starting server on port ${port}...`);
-    await app.listen(port);
+    await app.listen(process.env.PORT || 3030, '127.0.0.1');
 
     // logger.log(`🚀 Application is running on: http://localhost:${port}`);
     logger.debug(`Environment: ${new ConfigService().get<string>('NODE_ENV')}`);
