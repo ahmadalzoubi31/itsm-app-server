@@ -10,7 +10,7 @@ export function setupSwagger(app: INestApplication) {
   // Determine server URL based on environment
   const serverUrl =
     nodeEnv === 'production'
-      ? 'https://itsm.webpexo.com/'
+      ? 'https://esm.webpexo.com/'
       : `http://localhost:${port}/`;
 
   const config = new DocumentBuilder()
