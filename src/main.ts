@@ -96,10 +96,8 @@ async function bootstrap() {
     logger.debug('CORS configured');
 
     // Swagger (add this right before app.listen)
-    if (new ConfigService().get<string>('NODE_ENV') !== 'production') {
-      setupSwagger(app); // 👈 enables Swagger at /docs
-      logger.debug('Swagger documentation configured');
-    }
+    setupSwagger(app); // 👈 enables Swagger at /docs
+    logger.debug('Swagger documentation configured');
 
     const port = new ConfigService().get<number>('PORT');
     if (!port) {
@@ -107,9 +105,9 @@ async function bootstrap() {
     }
 
     logger.log(`Starting server on port ${port}...`);
-    await app.listen(process.env.PORT || 3030, '127.0.0.1');
+    await app.listen(port, '127.0.0.1');
 
-    // logger.log(`🚀 Application is running on: http://localhost:${port}`);
+    logger.log(`🚀 Application is running on: http://localhost:${port}`);
     logger.debug(`Environment: ${new ConfigService().get<string>('NODE_ENV')}`);
     logger.log('Application bootstrap completed successfully');
   } catch (error) {
