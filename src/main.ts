@@ -35,6 +35,7 @@ async function bootstrap() {
     logger.log('NestJS application created successfully');
 
     // Middleware
+    app.use(cookieParser());
     app.use(
       helmet({
         crossOriginEmbedderPolicy: false,
